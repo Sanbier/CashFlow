@@ -267,8 +267,9 @@ const App: React.FC = () => {
       return { filteredIncomes: filter(incomes, 'income'), filteredExpenses: filter(expenses, 'expense') }; 
     }, [incomes, expenses, startDate, endDate, searchTerm, filterCategory]);
 
-    const sumIncomeMonth: number = (incomes || []).filter(i => { const d = new Date(i.date); return d >= startDate && d <= endDate; }).reduce((a: number, c: Income) => a + c.amount, 0);
-    const sumExpenseMonth: number = (expenses || []).filter(i => { const d = new Date(i.date); return d >= startDate && d <= endDate; }).reduce((a: number, c: Expense) => a + c.amount, 0);
+    // Added useMemo for robust monthly income and expense calculation
+    const sumIncomeMonth: number = useMemo(() => (incomes || []).filter(i => { const d = new Date(i.date); return d >= startDate && d <= endDate; }).reduce((a: number, c: Income) => a + c.amount, 0), [incomes, startDate, endDate]);
+    const sumExpenseMonth: number = useMemo(() => (expenses || []).filter(i => { const d = new Date(i.date); return d >= startDate && d <= endDate; }).reduce((a: number, c: Expense) => a + c.amount, 0), [expenses, startDate, endDate]);
     const balance: number = sumIncomeMonth - sumExpenseMonth;
     const isOverBudget: boolean = sumIncomeMonth > 0 && (sumExpenseMonth / sumIncomeMonth) > 0.9;
 
@@ -344,7 +345,6 @@ const App: React.FC = () => {
         setShowDebtForm(false); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote('');
     };
 
-    // Fix: Added missing handleDeleteDebt function
     const handleDeleteDebt = (id: number) => {
         if (confirm('Xóa khoản nợ này?')) {
             const newDebts = debts.filter(d => d.id !== id);
@@ -356,7 +356,8 @@ const App: React.FC = () => {
     const handleBackup = () => { const data = { incomes, expenses, fixedTemplate, categories, debts, fixedTracking }; const blob = new Blob([JSON.stringify(data)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `Sothuchi_Backup.json`; a.click(); };
     const handleRestore = (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = (event: any) => { try { const data = JSON.parse(event.target.result); if (data.incomes && data.expenses) { saveData(data.incomes, data.expenses, data.fixedTemplate || [], data.categories || DEFAULT_CATEGORIES, data.debts || [], data.fixedTracking || {}); alert('Thành công!'); } } catch (err) { alert('Lỗi file!'); } }; reader.readAsText(file); };
 
-    const totalSavings = Object.values(useMemo(() => { const res: Record<string, number> = {}; SAVING_CATEGORIES.forEach(c => res[c] = 0); expenses.forEach(e => { if (SAVING_CATEGORIES.includes(e.category)) res[e.category] = (res[e.category] || 0) + e.amount; }); return res; }, [expenses])).reduce((a,b) => a+b, 0);
+    // Fix Error: Operator '+' cannot be applied to types 'unknown' and 'unknown' by properly memoizing the reduction of expense amounts
+    const totalSavings = useMemo(() => expenses.reduce((a: number, e: Expense) => SAVING_CATEGORIES.includes(e.category) ? a + e.amount : a, 0), [expenses]);
 
     return (
         <div className="min-h-screen pb-24 md:pb-0 relative font-sans overflow-x-hidden">
@@ -364,13 +365,6 @@ const App: React.FC = () => {
                 {isOverBudget && <div className="bg-red-50 text-red-600 px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 animate-pulse-red border-b border-red-100"><AlertTriangle size={16} /> CẢNH BÁO: Đã chi tiêu quá 90% thu nhập!</div>}
                 
                 <div className={`bg-gradient-to-r ${isConnected ? 'from-blue-800 to-indigo-900' : 'from-slate-700 to-gray-800'} p-6 pb-6 text-white rounded-b-3xl shadow-lg transition-colors duration-500 relative`}>
-                    {isConnected && (
-                        <div className="absolute top-4 right-4 flex items-center gap-1 bg-white/10 px-2 py-1 rounded-full backdrop-blur-md">
-                            <Cloud size={10} className="text-green-300"/>
-                            <span className="text-[10px] font-bold text-green-100">Đang đồng bộ</span>
-                        </div>
-                    )}
-
                     <div className="flex items-center justify-between mb-4">
                         <button onClick={()=>setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 15))} className="p-2 text-white/70 hover:text-white btn-effect transition-all"><ChevronLeft size={24}/></button>
                         <div className="text-center">
@@ -385,21 +379,31 @@ const App: React.FC = () => {
                         <div className="bg-red-500/20 backdrop-blur-sm p-4 rounded-2xl border border-red-500/30"><div className="flex items-center gap-1.5 text-red-300 text-xs font-bold uppercase mb-1"><TrendingDown size={14}/> Tổng chi</div><div className="font-bold text-lg text-red-50">{formatCurrency(sumExpenseMonth)} đ</div></div>
                     </div>
 
-                    <div className="mt-4 flex justify-center">
+                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
                         {!isConnected ? (
                             <button onClick={()=>setShowCloudForm(true)} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-white transition-all backdrop-blur-md btn-effect">
                                 <CloudOff size={14}/> <span>Kết nối Đám mây</span>
                             </button>
                         ) : (
-                            <div className="flex items-center gap-3 bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-500/30 backdrop-blur-md">
-                                <div className="text-[10px] text-blue-200">Gia đình: <span className="font-bold text-white">{familyCode}</span></div>
-                                <button onClick={handleDisconnect} className="text-[10px] text-red-300 hover:text-red-100 font-bold border-l border-white/10 pl-3">Đăng xuất</button>
-                            </div>
+                            <>
+                                <div className="flex items-center gap-3 bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-500/30 backdrop-blur-md">
+                                    <div className="text-[10px] text-blue-200">Gia đình: <span className="font-bold text-white">{familyCode}</span></div>
+                                    <button onClick={handleDisconnect} className="text-[10px] text-red-300 hover:text-red-100 font-bold border-l border-white/10 pl-3 transition-colors">Đăng xuất</button>
+                                </div>
+                                {isSyncing && (
+                                    <div className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-md border border-white/10 shadow-sm animate-fadeIn">
+                                        <div className="relative flex h-2 w-2">
+                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-green-100">Đang đồng bộ</span>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
 
-                {/* MODAL KẾT NỐI CLOUD - CHẾ ĐỘ SÁNG & CĂN GIỮA */}
                 {showCloudForm && (
                     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 animate-fadeIn backdrop-blur-sm">
                         <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl relative">
@@ -466,10 +470,8 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="p-4 pb-32 safe-pb">
-                    {/* Các tab Add, Debt, Report, Savings, History, Settings giữ nguyên logic xử lý dữ liệu */}
                     {activeTab === 'add' && (
                         <div className="space-y-6 animate-fadeIn mt-2">
-                            {/* Form thu nhập */}
                             <div className="bg-white border border-green-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div><div className="flex items-center gap-2 text-green-700 font-bold mb-3"><TrendingUp size={18}/> 1. Thu Nhập</div>
                                 <div className="space-y-3 pl-2">
@@ -482,7 +484,6 @@ const App: React.FC = () => {
                                 </div>
                             </div>
                             
-                            {/* Form chi tiêu */}
                             <div className="bg-white border border-red-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
                                 <div className="flex items-center justify-between mb-3">
@@ -508,7 +509,6 @@ const App: React.FC = () => {
                     
                     {activeTab === 'debt' && (
                         <div className="space-y-6 animate-fadeIn mt-2">
-                            {/* Giao diện sổ nợ (Giữ nguyên logic của bạn) */}
                             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 text-center">
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="font-bold text-gray-800 flex items-center gap-2"><Users className="text-blue-600" size={20}/> Quản Lý Vay/Mượn</h3>
@@ -559,7 +559,6 @@ const App: React.FC = () => {
                                 <h3 className="font-bold text-gray-800 mb-6 flex items-center gap-2 border-b pb-2"><PieChart className="text-slate-600" size={20}/> Tỷ lệ chi tiêu</h3>
                                 {filteredExpenses.length === 0 ? <div className="text-center py-10 text-gray-400 text-sm">Chưa có dữ liệu.</div> : 
                                     <div className="space-y-5">
-                                        {/* Fix: Explicitly type the reduction and ensure numeric operations for sorting and percentage calculation */}
                                         {Object.entries(filteredExpenses.reduce((a: Record<string, number>, c: Expense) => {
                                             a[c.category] = (a[c.category] || 0) + c.amount;
                                             return a;
@@ -635,11 +634,11 @@ const App: React.FC = () => {
                     )}
                 </div>
 
-                {/* Widget Tổng số dư nổi */}
                 <div onClick={()=>setShowReloadConfirm(true)} className={`fixed bottom-8 right-4 z-50 flex flex-col items-center gap-1 cursor-pointer transition-all duration-300`}>
                     <div className={`shadow-2xl rounded-full px-5 py-3 flex items-center gap-3 border-2 border-white transform hover:scale-105 btn-effect transition-all ${balance>=0?'bg-gradient-to-r from-blue-600 to-cyan-500':'bg-gradient-to-r from-red-600 to-orange-500'}`}>
                         <div className="bg-white/20 p-1.5 rounded-full"><Wallet size={20} className="text-white"/></div>
-                        <div className="flex flex-col items-start"><span className="text-white font-extrabold text-lg leading-none">{formatCurrency(balance)} đ</span></div>
+                        {/* Fix Error: Argument of type 'unknown' is not assignable to parameter of type 'number' by explicitly casting balance */}
+                        <div className="flex flex-col items-start"><span className="text-white font-extrabold text-lg leading-none">{formatCurrency(balance as number)} đ</span></div>
                     </div>
                 </div>
 
