@@ -61,6 +61,7 @@ const App: React.FC = () => {
         return `${year}-${month}-${day}`;
     };
 
+    // States
     const [incomes, setIncomes] = useState<Income[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [fixedTemplate, setFixedTemplate] = useState<FixedTemplateItem[]>([]);
@@ -117,30 +118,36 @@ const App: React.FC = () => {
     const [autoCreateTransaction, setAutoCreateTransaction] = useState(true);
 
     const dbRef = useRef<any>(null);
+    const isFirstRun = useRef(true);
 
+    // Initial Data Loading & Snapshot Listener
     useEffect(() => {
-        const initData = () => {
+        const initLocal = () => {
             const localIncomes = JSON.parse(localStorage.getItem('family_incomes') || '[]');
             const localExpenses = JSON.parse(localStorage.getItem('family_expenses') || '[]');
             const localFixed = JSON.parse(localStorage.getItem('family_fixed_template') || '[]');
             const localFixedTracking = JSON.parse(localStorage.getItem('family_fixed_tracking') || '{}');
             let localCats = JSON.parse(localStorage.getItem('family_categories') || 'null');
-            if (!localCats) {
-                localCats = Array.from(new Set([...DEFAULT_CATEGORIES]));
-            }
+            if (!localCats) localCats = [...DEFAULT_CATEGORIES];
             const localDebts = JSON.parse(localStorage.getItem('family_debts') || '[]');
-            const migratedDebts = localDebts.map((d: any) => ({...d, type: d.type || 'payable'}));
-            setIncomes(localIncomes); setExpenses(localExpenses); setFixedTemplate(localFixed); setCategories(localCats); setDebts(migratedDebts); setFixedTracking(localFixedTracking);
-        }
+            
+            setIncomes(localIncomes); 
+            setExpenses(localExpenses); 
+            setFixedTemplate(localFixed); 
+            setCategories(localCats); 
+            setDebts(localDebts); 
+            setFixedTracking(localFixedTracking);
+        };
 
         if (firebaseConfigStr && familyCode) {
             try {
                 const config = JSON.parse(firebaseConfigStr);
-                if (!firebase.apps.length) { firebase.initializeApp(config); }
+                if (!firebase.apps.length) firebase.initializeApp(config);
                 const db = firebase.firestore();
                 dbRef.current = db;
                 setIsConnected(true);
                 setIsSyncing(true);
+
                 const unsubscribe = db.collection('families').doc(familyCode).onSnapshot((doc: any) => {
                     if (doc.exists) { 
                         const data = doc.data(); 
@@ -148,25 +155,38 @@ const App: React.FC = () => {
                         setExpenses(data.expenses || []); 
                         setFixedTemplate(data.fixedTemplate || []);
                         setCategories(data.categories || DEFAULT_CATEGORIES);
-                        const loadedDebts = data.debts || [];
-                        setDebts(loadedDebts.map((d: any) => ({...d, type: d.type || 'payable'})));
+                        setDebts(data.debts || []);
                         setFixedTracking(data.fixedTracking || {});
                     } else { 
-                        initData();
+                        // If doc doesn't exist, create it with local data
                         const initialCats = JSON.parse(localStorage.getItem('family_categories') || JSON.stringify(DEFAULT_CATEGORIES));
                         db.collection('families').doc(familyCode).set({ 
                             incomes: [], expenses: [], fixedTemplate: [], 
                             categories: initialCats, debts: [], fixedTracking: {}
                         }); 
+                        initLocal();
                     }
                     setIsSyncing(false);
-                }, (error: any) => { console.error(error); setIsConnected(false); });
+                    isFirstRun.current = false;
+                }, (error: any) => { 
+                    console.error(error); 
+                    setIsConnected(false); 
+                    initLocal(); 
+                });
                 return () => unsubscribe();
-            } catch (e) { console.error(e); setIsConnected(false); initData(); }
-        } else { initData(); }
+            } catch (e) { 
+                console.error(e); 
+                setIsConnected(false); 
+                initLocal(); 
+            }
+        } else { 
+            initLocal(); 
+        }
     }, [firebaseConfigStr, familyCode]);
 
+    // Single source of truth for saving - explicitly called after actions
     const saveData = (newIncomes: Income[], newExpenses: Expense[], newFixed = fixedTemplate, newCats = categories, newDebts = debts, newTracking = fixedTracking) => {
+        // Linked removal logic: ensure fixed templates and tracking only exist for existing categories
         const catSet = new Set(newCats);
         const syncedFixed = newFixed.filter(f => catSet.has(f.category));
         const syncedTracking = { ...newTracking };
@@ -174,6 +194,7 @@ const App: React.FC = () => {
             syncedTracking[monthKey] = syncedTracking[monthKey].filter(c => catSet.has(c));
         });
 
+        // Update local state
         setIncomes(newIncomes); 
         setExpenses(newExpenses); 
         setFixedTemplate(syncedFixed); 
@@ -181,6 +202,7 @@ const App: React.FC = () => {
         setDebts(newDebts); 
         setFixedTracking(syncedTracking);
 
+        // Save to LocalStorage
         localStorage.setItem('family_incomes', JSON.stringify(newIncomes));
         localStorage.setItem('family_expenses', JSON.stringify(newExpenses));
         localStorage.setItem('family_fixed_template', JSON.stringify(syncedFixed));
@@ -188,15 +210,27 @@ const App: React.FC = () => {
         localStorage.setItem('family_debts', JSON.stringify(newDebts));
         localStorage.setItem('family_fixed_tracking', JSON.stringify(syncedTracking));
         
+        // Save to Firebase
         if (isConnected && dbRef.current && familyCode) {
             setIsSyncing(true);
             dbRef.current.collection('families').doc(familyCode).set({ 
-                incomes: newIncomes, expenses: newExpenses, fixedTemplate: syncedFixed, 
-                categories: newCats, debts: newDebts, fixedTracking: syncedTracking
-            }).then(() => setIsSyncing(false)).catch(() => setIsSyncing(false));
+                incomes: newIncomes, 
+                expenses: newExpenses, 
+                fixedTemplate: syncedFixed, 
+                categories: newCats, 
+                debts: newDebts, 
+                fixedTracking: syncedTracking
+            }).then(() => {
+                setIsSyncing(false);
+                console.log("Firebase sync successful");
+            }).catch((err: any) => {
+                setIsSyncing(false);
+                console.error("Firebase sync failed:", err);
+            });
         }
     };
 
+    // Formatting & Calculations
     const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN').format(amount);
     const formatDate = (date: string) => { if(!date) return ''; const d = new Date(date); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; };
     
@@ -231,6 +265,7 @@ const App: React.FC = () => {
     const handleAmountInput = (val: string, setter: (v: string) => void) => { const raw = val.replace(/\D/g,''); setter(raw === '' ? '' : Number(raw).toLocaleString('vi-VN')); };
     const getCombinedDate = (dateInput: string) => { const d = new Date(dateInput); const now = new Date(); d.setHours(now.getHours(), now.getMinutes(), now.getSeconds()); return d.toISOString(); };
 
+    // Handlers
     const handleAddIncome = () => {
         const amt = parseAmount(incomeAmount); if(!incomeSource || amt <= 0) return;
         const newItem: Income = { id: editingId || Date.now(), source: incomeSource, amount: amt, date: getCombinedDate(incomeDate), note: incomeNote };
@@ -267,7 +302,6 @@ const App: React.FC = () => {
 
     const resetForm = () => { setIncomeSource(''); setIncomeAmount(''); setIncomeNote(''); setExpenseCategory(''); setExpenseAmount(''); setExpenseNote(''); setEditingId(null); setEditingType(null); setSelectedDebtorId(''); };
 
-    // Lấy tổng chi tiêu của một danh mục trong tháng hiện hành
     const getMonthlyPaidForCategory = (cat: string) => {
         return filteredExpenses.filter(e => e.category === cat)
             .reduce((sum, item) => sum + item.amount, 0);
@@ -395,6 +429,14 @@ const App: React.FC = () => {
         reader.readAsText(file);
     };
 
+    // Savings Calculation
+    const savingsSummary = useMemo(() => {
+        return SAVING_CATEGORIES.map(cat => {
+            const total = expenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0);
+            return { category: cat, total };
+        });
+    }, [expenses]);
+
     return (
         <div className="min-h-screen pb-24 md:pb-0 relative font-sans overflow-x-hidden">
             <div className="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative">
@@ -430,7 +472,7 @@ const App: React.FC = () => {
                             <div className="flex items-center gap-3 bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-500/30 backdrop-blur-md">
                                 <div className="text-[10px] text-blue-200">Mã: <span className="font-bold text-white">{familyCode}</span></div>
                                 <button onClick={()=>{if(confirm('Ngắt?')){localStorage.removeItem('fb_config'); window.location.reload();}}} className="text-[10px] text-red-300 font-bold border-l border-white/10 pl-3">Ngắt</button>
-                                {isSyncing && <div className="text-[10px] text-green-300 animate-pulse ml-2 font-bold uppercase tracking-tighter">● Đồng bộ</div>}
+                                {isSyncing && <div className="text-[10px] text-green-300 animate-pulse ml-2 font-bold uppercase tracking-tighter">● Đang lưu...</div>}
                             </div>
                         )}
                     </div>
@@ -494,7 +536,6 @@ const App: React.FC = () => {
                                         )}
                                     </div>
                                     
-                                    {/* Gợi ý chi tiêu theo danh mục được chọn (Hộp gợi ý động) */}
                                     {expenseCategory && !isCategoryManageMode && (
                                         <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl animate-fadeIn flex items-center justify-between">
                                             <div className="flex items-center gap-2">
@@ -553,6 +594,7 @@ const App: React.FC = () => {
                                                 </div>
                                             </div>
                                         ))}
+                                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-10 text-gray-400 text-xs italic">Chưa có sổ nợ nào trong danh sách này</div>}
                                     </div>
                                 </>
                              ) : (
@@ -593,6 +635,35 @@ const App: React.FC = () => {
                                         );
                                     })}
                                     {filteredExpenses.length === 0 && <div className="text-center py-8 text-gray-400 text-xs font-medium">Chưa có dữ liệu chi tiêu trong tháng này</div>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'savings' && (
+                        <div className="space-y-6 animate-fadeIn mt-2">
+                            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 space-y-6">
+                                <div className="flex items-center gap-3 border-b border-gray-50 pb-4">
+                                    <div className="bg-yellow-100 p-2.5 rounded-2xl text-yellow-600 shadow-sm"><PiggyBank size={24}/></div>
+                                    <h3 className="font-bold text-gray-800 text-lg">Heo Đất Tích Lũy</h3>
+                                </div>
+                                <div className="space-y-4">
+                                    {savingsSummary.map(item => (
+                                        <div key={item.category} className="bg-gray-50 p-4 rounded-2xl border border-gray-100 shadow-sm group hover:bg-white hover:border-yellow-200 transition-all">
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-1">{item.category}</span>
+                                                    <span className="text-lg font-black text-gray-800">{formatCurrency(item.total)} VNĐ</span>
+                                                </div>
+                                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-yellow-500 border border-gray-100 group-hover:scale-110 transition-transform"><Plus size={20}/></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {savingsSummary.reduce((a,b)=>a+b.total, 0) === 0 && <div className="text-center py-10 text-gray-400 text-xs font-medium bg-slate-50 rounded-2xl border border-dashed border-gray-200">Bạn chưa bắt đầu khoản tiết kiệm nào</div>}
+                                </div>
+                                <div className="bg-gradient-to-br from-yellow-500 to-orange-500 p-5 rounded-2xl text-white shadow-lg">
+                                    <div className="text-xs font-bold opacity-80 uppercase tracking-tighter mb-1">Tổng cộng tích lũy</div>
+                                    <div className="text-2xl font-black">{formatCurrency(savingsSummary.reduce((a,b)=>a+b.total, 0))} VNĐ</div>
                                 </div>
                             </div>
                         </div>
