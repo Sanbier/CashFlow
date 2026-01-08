@@ -118,6 +118,23 @@ const App: React.FC = () => {
     const dbRef = useRef<any>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Helper function to sync state to localStorage
+    const syncToLocalStorage = (
+        inc: Income[], 
+        exp: Expense[], 
+        fixT: FixedTemplateItem[], 
+        cats: string[], 
+        dbt: Debt[], 
+        fixTr: Record<string, string[]>
+    ) => {
+        localStorage.setItem('family_incomes', JSON.stringify(inc));
+        localStorage.setItem('family_expenses', JSON.stringify(exp));
+        localStorage.setItem('family_fixed_template', JSON.stringify(fixT));
+        localStorage.setItem('family_categories', JSON.stringify(cats));
+        localStorage.setItem('family_debts', JSON.stringify(dbt));
+        localStorage.setItem('family_fixed_tracking', JSON.stringify(fixTr));
+    };
+
     useEffect(() => {
         const initData = () => {
             const localIncomes = JSON.parse(localStorage.getItem('family_incomes') || '[]');
@@ -143,33 +160,54 @@ const App: React.FC = () => {
             setFixedTracking(localFixedTracking);
         }
 
+        // Always load local data first (Optimistic UI)
+        initData();
+
         if (firebaseConfigStr && familyCode) {
             try {
                 const config = JSON.parse(firebaseConfigStr);
                 if (!firebase.apps.length) { firebase.initializeApp(config); }
                 const db = firebase.firestore();
+
+                // Enable Offline Persistence
+                db.enablePersistence({ synchronizeTabs: true }).catch((err: any) => {
+                    console.log("Persistence warning:", err.code);
+                });
+
                 dbRef.current = db;
                 setIsConnected(true);
                 setIsSyncing(true);
                 const unsubscribe = db.collection('families').doc(familyCode).onSnapshot((doc: any) => {
                     if (doc.exists) { 
                         const data = doc.data(); 
-                        setIncomes(data.incomes || []); 
-                        setExpenses(data.expenses || []); 
-                        setFixedTemplate(data.fixedTemplate || []);
+                        const newIncomes = data.incomes || [];
+                        const newExpenses = data.expenses || [];
+                        const newFixedTemplate = data.fixedTemplate || [];
+                        let newCategories: string[] = [];
+                        
                         if (data.categories && Array.isArray(data.categories)) {
-                            setCategories(data.categories);
+                            newCategories = data.categories;
                         } else {
                             const oldCustom = data.customCategories || [];
-                            const merged: any = [...new Set([...DEFAULT_CATEGORIES, ...oldCustom])];
-                            setCategories(merged);
+                            newCategories = [...new Set([...DEFAULT_CATEGORIES, ...oldCustom])] as string[];
                         }
+                        
                         const loadedDebts = data.debts || [];
-                        const migratedDebts = loadedDebts.map((d: any) => ({...d, type: d.type || 'payable'}));
-                        setDebts(migratedDebts);
-                        setFixedTracking(data.fixedTracking || {});
+                        const newDebts = loadedDebts.map((d: any) => ({...d, type: d.type || 'payable'}));
+                        const newFixedTracking = data.fixedTracking || {};
+
+                        // Update State
+                        setIncomes(newIncomes); 
+                        setExpenses(newExpenses); 
+                        setFixedTemplate(newFixedTemplate);
+                        setCategories(newCategories);
+                        setDebts(newDebts);
+                        setFixedTracking(newFixedTracking);
+
+                        // Critical: Update LocalStorage with Cloud Data immediately
+                        syncToLocalStorage(newIncomes, newExpenses, newFixedTemplate, newCategories, newDebts, newFixedTracking);
                     } else { 
-                        initData();
+                        // If doc doesn't exist yet, we initialize it with current local data
                         const initialCats = JSON.parse(localStorage.getItem('family_categories') || JSON.stringify(DEFAULT_CATEGORIES));
                         db.collection('families').doc(familyCode).set({ 
                             incomes: [], expenses: [], fixedTemplate: [], 
@@ -179,21 +217,14 @@ const App: React.FC = () => {
                     setIsSyncing(false);
                 }, (error: any) => { console.error(error); setIsConnected(false); });
                 return () => unsubscribe();
-            } catch (e) { console.error(e); setIsConnected(false); initData(); }
-        } else {
-            initData();
+            } catch (e) { console.error(e); setIsConnected(false); }
         }
     }, [firebaseConfigStr, familyCode]);
 
     const saveData = (newIncomes: Income[], newExpenses: Expense[], newFixed = fixedTemplate, newCats = categories, newDebts = debts, newTracking = fixedTracking) => {
         setIncomes(newIncomes); setExpenses(newExpenses); setFixedTemplate(newFixed); setCategories(newCats); setDebts(newDebts); setFixedTracking(newTracking);
         
-        localStorage.setItem('family_incomes', JSON.stringify(newIncomes));
-        localStorage.setItem('family_expenses', JSON.stringify(newExpenses));
-        localStorage.setItem('family_fixed_template', JSON.stringify(newFixed));
-        localStorage.setItem('family_categories', JSON.stringify(newCats));
-        localStorage.setItem('family_debts', JSON.stringify(newDebts));
-        localStorage.setItem('family_fixed_tracking', JSON.stringify(newTracking));
+        syncToLocalStorage(newIncomes, newExpenses, newFixed, newCats, newDebts, newTracking);
 
         if (isConnected && dbRef.current && familyCode) {
             setIsSyncing(true);
