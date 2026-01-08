@@ -97,6 +97,13 @@ const App: React.FC = () => {
     const [tempFixedList, setTempFixedList] = useState<Record<string, number>>({});
     const [fixedPaymentInputs, setFixedPaymentInputs] = useState<Record<string, string>>({});
 
+    // Saving States
+    const [showSavingForm, setShowSavingForm] = useState(false);
+    const [savingAmount, setSavingAmount] = useState('');
+    const [savingCategory, setSavingCategory] = useState(SAVING_CATEGORIES[0]);
+    const [savingNote, setSavingNote] = useState('');
+    const [savingDate, setSavingDate] = useState(getLocalToday());
+
     // Firebase Sync States
     const [firebaseConfigStr, setFirebaseConfigStr] = useState(() => localStorage.getItem('fb_config') || '');
     const [familyCode, setFamilyCode] = useState(() => (localStorage.getItem('fb_family_code') || '').trim().toUpperCase());
@@ -314,6 +321,21 @@ const App: React.FC = () => {
         saveData(incomes, newExpenses, fixedTemplate, categories, updatedDebts); resetForm();
     };
 
+    const handleAddSavings = () => {
+        const amt = parseAmount(savingAmount);
+        if (!savingCategory || amt <= 0) { alert('Vui lòng nhập số tiền và chọn mục tiết kiệm.'); return; }
+        const newItem: Expense = {
+            id: Date.now(),
+            category: savingCategory,
+            amount: amt,
+            date: getCombinedDate(savingDate),
+            note: savingNote
+        };
+        // Tiết kiệm thực chất là một khoản chi (Expenses) trong hệ thống
+        saveData(incomes, [newItem, ...expenses], fixedTemplate, categories, debts);
+        setSavingAmount(''); setSavingNote(''); setShowSavingForm(false);
+    };
+
     const resetForm = () => { setIncomeSource(''); setIncomeAmount(''); setIncomeNote(''); setExpenseCategory(''); setExpenseAmount(''); setExpenseNote(''); setEditingId(null); setEditingType(null); setSelectedDebtorId(''); };
 
     const getMonthlyPaidForCategory = (cat: string) => filteredExpenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0);
@@ -406,7 +428,13 @@ const App: React.FC = () => {
         XLSX.writeFile(wb, `BaoCao_${viewDate.getMonth()+1}.xlsx`);
     };
 
-    const savingsSummary = useMemo(() => SAVING_CATEGORIES.map(cat => ({ category: cat, total: expenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0) })), [expenses]);
+    // Calculate total savings from ALL TIME (not just current view month)
+    const savingsSummary = useMemo(() => SAVING_CATEGORIES.map(cat => ({ 
+        category: cat, 
+        total: expenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0) 
+    })), [expenses]);
+    
+    const totalAccumulatedSavings = useMemo(() => savingsSummary.reduce((acc, curr) => acc + curr.total, 0), [savingsSummary]);
 
     return (
         <div className="min-h-screen pb-24 md:pb-0 relative font-sans overflow-x-hidden">
@@ -556,6 +584,34 @@ const App: React.FC = () => {
                                             <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-white text-orange-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Mình nợ</button>
                                             <button onClick={()=>setActiveDebtTab('receivable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='receivable' ? 'bg-white text-blue-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Họ nợ</button>
                                         </div>
+                                        
+                                        {/* STATS SUMMARY for Active Debt Tab */}
+                                        {(() => {
+                                            const currentDebts = debts.filter(d => d.type === activeDebtTab);
+                                            const sumTotal = currentDebts.reduce((acc, d) => acc + d.total, 0);
+                                            const sumPaid = currentDebts.reduce((acc, d) => acc + d.paid, 0);
+                                            const sumRemaining = sumTotal - sumPaid;
+                                            const isPayable = activeDebtTab === 'payable';
+
+                                            return (
+                                                <div className={`mb-4 p-4 rounded-2xl text-white shadow-lg bg-gradient-to-r ${isPayable ? 'from-orange-400 to-red-500 shadow-orange-200' : 'from-blue-400 to-indigo-500 shadow-blue-200'}`}>
+                                                    <div className="flex justify-between items-end mb-2">
+                                                        <div>
+                                                            <div className="text-[10px] font-black uppercase opacity-80 mb-1">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
+                                                            <div className="text-2xl font-black">{formatCurrency(sumTotal)} đ</div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <div className="text-[10px] font-black uppercase opacity-80 mb-1">Còn lại</div>
+                                                            <div className="text-lg font-black">{formatCurrency(sumRemaining)} đ</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="bg-white/20 p-2 rounded-xl flex justify-between items-center backdrop-blur-sm">
+                                                        <span className="text-[10px] font-black uppercase">{isPayable ? 'Đã trả được' : 'Đã thu hồi'}</span>
+                                                        <span className="text-sm font-black">{formatCurrency(sumPaid)} đ</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                     <div className="space-y-3">
                                         {debts.filter(d => d.type === activeDebtTab).map(item => (
@@ -624,6 +680,32 @@ const App: React.FC = () => {
                                         );
                                     })}
                                     {filteredExpenses.length === 0 && <div className="text-center py-12 text-gray-400 text-[10px] font-black uppercase tracking-widest">Không có dữ liệu</div>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {activeTab === 'savings' && (
+                        <div className="space-y-6 animate-fadeIn mt-2">
+                            {/* Heo Đất - Hiển thị tích lũy trọn đời (không reset theo tháng) */}
+                            <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100">
+                                <div className="flex justify-between items-center mb-6 border-b border-gray-50 pb-4">
+                                    <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-sm tracking-widest"><PiggyBank size={18} className="text-rose-500"/> Heo Đất Tiết Kiệm</h3>
+                                    <button onClick={()=>setShowSavingForm(true)} className="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-rose-200">Nạp Heo</button>
+                                </div>
+                                
+                                <div className="text-center mb-8">
+                                    <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Tổng tích lũy</div>
+                                    <div className="text-3xl font-black text-rose-600">{formatCurrency(totalAccumulatedSavings)} đ</div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {savingsSummary.map((item) => (
+                                        <div key={item.category} className="bg-rose-50 p-4 rounded-2xl border border-rose-100 flex justify-between items-center">
+                                            <span className="text-[11px] font-black text-gray-600 uppercase tracking-tight">{item.category}</span>
+                                            <span className="font-black text-rose-600 text-sm">{formatCurrency(item.total)} đ</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
@@ -716,6 +798,38 @@ const App: React.FC = () => {
                 </div>
 
                 {/* MODALS */}
+                {showSavingForm && (
+                    <div className="fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-6 backdrop-blur-md animate-fadeIn">
+                        <div className="bg-white rounded-[32px] w-full max-w-sm p-6 shadow-2xl relative border border-gray-100">
+                            <button onClick={()=>setShowSavingForm(false)} className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-400"><X size={20}/></button>
+                            <h3 className="font-black text-rose-600 text-lg mb-6 uppercase tracking-tighter flex items-center gap-2"><PiggyBank size={24}/> Nạp Heo Đất</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Chọn Hũ:</label>
+                                    <select value={savingCategory} onChange={e=>setSavingCategory(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-black outline-none">
+                                        {SAVING_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                    </select>
+                                </div>
+                                <div className="flex gap-3">
+                                    <div className="flex-1">
+                                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Số tiền:</label>
+                                        <input type="text" value={savingAmount} onChange={e=>handleAmountInput(e.target.value, setSavingAmount)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-lg text-rose-600 outline-none" placeholder="0 đ"/>
+                                    </div>
+                                    <div className="flex-1">
+                                         <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ngày:</label>
+                                         <CustomDatePicker value={savingDate} onChange={e=>setSavingDate(e.target.value)} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ghi chú:</label>
+                                    <input type="text" value={savingNote} onChange={e=>setSavingNote(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm font-medium outline-none" placeholder="Ví dụ: Tiền thưởng tết..."/>
+                                </div>
+                                <button onClick={handleAddSavings} className="w-full py-4 bg-rose-500 text-white font-black rounded-2xl shadow-lg shadow-rose-200 uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-2">Xác Nhận Nạp</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {showCloudForm && (
                     <div className="fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-6 backdrop-blur-md animate-fadeIn">
                         <div className="bg-white rounded-[48px] w-full max-w-sm p-8 shadow-2xl text-left border border-white/20 relative">
