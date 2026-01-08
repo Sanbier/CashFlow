@@ -118,17 +118,16 @@ const App: React.FC = () => {
     const [autoCreateTransaction, setAutoCreateTransaction] = useState(true);
 
     const dbRef = useRef<any>(null);
-    const isFirstRun = useRef(true);
 
-    // Initial Data Loading & Snapshot Listener
+    // Initial Data Loading & Persistence Logic
     useEffect(() => {
-        const initLocal = () => {
+        // Function to load from local and set states
+        const loadLocal = () => {
             const localIncomes = JSON.parse(localStorage.getItem('family_incomes') || '[]');
             const localExpenses = JSON.parse(localStorage.getItem('family_expenses') || '[]');
             const localFixed = JSON.parse(localStorage.getItem('family_fixed_template') || '[]');
             const localFixedTracking = JSON.parse(localStorage.getItem('family_fixed_tracking') || '{}');
-            let localCats = JSON.parse(localStorage.getItem('family_categories') || 'null');
-            if (!localCats) localCats = [...DEFAULT_CATEGORIES];
+            const localCats = JSON.parse(localStorage.getItem('family_categories') || JSON.stringify(DEFAULT_CATEGORIES));
             const localDebts = JSON.parse(localStorage.getItem('family_debts') || '[]');
             
             setIncomes(localIncomes); 
@@ -137,7 +136,11 @@ const App: React.FC = () => {
             setCategories(localCats); 
             setDebts(localDebts); 
             setFixedTracking(localFixedTracking);
+            
+            return { incomes: localIncomes, expenses: localExpenses, fixedTemplate: localFixed, categories: localCats, debts: localDebts, fixedTracking: localFixedTracking };
         };
+
+        const { incomes: localI, expenses: localE, fixedTemplate: localFT, categories: localC, debts: localD, fixedTracking: localTr } = loadLocal();
 
         if (firebaseConfigStr && familyCode) {
             try {
@@ -151,42 +154,54 @@ const App: React.FC = () => {
                 const unsubscribe = db.collection('families').doc(familyCode).onSnapshot((doc: any) => {
                     if (doc.exists) { 
                         const data = doc.data(); 
-                        setIncomes(data.incomes || []); 
-                        setExpenses(data.expenses || []); 
-                        setFixedTemplate(data.fixedTemplate || []);
-                        setCategories(data.categories || DEFAULT_CATEGORIES);
-                        setDebts(data.debts || []);
-                        setFixedTracking(data.fixedTracking || {});
+                        const cloudIncomes = data.incomes || [];
+                        const cloudExpenses = data.expenses || [];
+                        const cloudFixed = data.fixedTemplate || [];
+                        const cloudCategories = data.categories || DEFAULT_CATEGORIES;
+                        const cloudDebts = data.debts || [];
+                        const cloudTracking = data.fixedTracking || {};
+
+                        // Update states
+                        setIncomes(cloudIncomes); 
+                        setExpenses(cloudExpenses); 
+                        setFixedTemplate(cloudFixed); 
+                        setCategories(cloudCategories); 
+                        setDebts(cloudDebts); 
+                        setFixedTracking(cloudTracking);
+
+                        // CRITICAL: Update LocalStorage to keep offline data in sync with cloud data
+                        localStorage.setItem('family_incomes', JSON.stringify(cloudIncomes));
+                        localStorage.setItem('family_expenses', JSON.stringify(cloudExpenses));
+                        localStorage.setItem('family_fixed_template', JSON.stringify(cloudFixed));
+                        localStorage.setItem('family_categories', JSON.stringify(cloudCategories));
+                        localStorage.setItem('family_debts', JSON.stringify(cloudDebts));
+                        localStorage.setItem('family_fixed_tracking', JSON.stringify(cloudTracking));
                     } else { 
-                        // If doc doesn't exist, create it with local data
-                        const initialCats = JSON.parse(localStorage.getItem('family_categories') || JSON.stringify(DEFAULT_CATEGORIES));
+                        // If document doesn't exist on Cloud yet, UPLOAD local data to initialize it
                         db.collection('families').doc(familyCode).set({ 
-                            incomes: [], expenses: [], fixedTemplate: [], 
-                            categories: initialCats, debts: [], fixedTracking: {}
+                            incomes: localI, 
+                            expenses: localE, 
+                            fixedTemplate: localFT, 
+                            categories: localC, 
+                            debts: localD, 
+                            fixedTracking: localTr
                         }); 
-                        initLocal();
                     }
                     setIsSyncing(false);
-                    isFirstRun.current = false;
                 }, (error: any) => { 
-                    console.error(error); 
+                    console.error("Firebase connection error:", error); 
                     setIsConnected(false); 
-                    initLocal(); 
                 });
                 return () => unsubscribe();
             } catch (e) { 
-                console.error(e); 
+                console.error("Firebase config parsing error:", e); 
                 setIsConnected(false); 
-                initLocal(); 
             }
-        } else { 
-            initLocal(); 
         }
     }, [firebaseConfigStr, familyCode]);
 
-    // Single source of truth for saving - explicitly called after actions
+    // Action function to save all data to both Local and Cloud
     const saveData = (newIncomes: Income[], newExpenses: Expense[], newFixed = fixedTemplate, newCats = categories, newDebts = debts, newTracking = fixedTracking) => {
-        // Linked removal logic: ensure fixed templates and tracking only exist for existing categories
         const catSet = new Set(newCats);
         const syncedFixed = newFixed.filter(f => catSet.has(f.category));
         const syncedTracking = { ...newTracking };
@@ -194,7 +209,7 @@ const App: React.FC = () => {
             syncedTracking[monthKey] = syncedTracking[monthKey].filter(c => catSet.has(c));
         });
 
-        // Update local state
+        // Update states
         setIncomes(newIncomes); 
         setExpenses(newExpenses); 
         setFixedTemplate(syncedFixed); 
@@ -202,7 +217,7 @@ const App: React.FC = () => {
         setDebts(newDebts); 
         setFixedTracking(syncedTracking);
 
-        // Save to LocalStorage
+        // Save to LocalStorage immediately
         localStorage.setItem('family_incomes', JSON.stringify(newIncomes));
         localStorage.setItem('family_expenses', JSON.stringify(newExpenses));
         localStorage.setItem('family_fixed_template', JSON.stringify(syncedFixed));
@@ -210,7 +225,7 @@ const App: React.FC = () => {
         localStorage.setItem('family_debts', JSON.stringify(newDebts));
         localStorage.setItem('family_fixed_tracking', JSON.stringify(syncedTracking));
         
-        // Save to Firebase
+        // Push to Firebase Cloud
         if (isConnected && dbRef.current && familyCode) {
             setIsSyncing(true);
             dbRef.current.collection('families').doc(familyCode).set({ 
@@ -222,10 +237,9 @@ const App: React.FC = () => {
                 fixedTracking: syncedTracking
             }).then(() => {
                 setIsSyncing(false);
-                console.log("Firebase sync successful");
             }).catch((err: any) => {
                 setIsSyncing(false);
-                console.error("Firebase sync failed:", err);
+                console.error("Firebase sync error:", err);
             });
         }
     };
@@ -429,7 +443,6 @@ const App: React.FC = () => {
         reader.readAsText(file);
     };
 
-    // Savings Calculation
     const savingsSummary = useMemo(() => {
         return SAVING_CATEGORIES.map(cat => {
             const total = expenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0);
