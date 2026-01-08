@@ -100,7 +100,7 @@ const App: React.FC = () => {
     const [fixedPaymentInputs, setFixedPaymentInputs] = useState<Record<string, string>>({});
 
     const [firebaseConfigStr, setFirebaseConfigStr] = useState(() => localStorage.getItem('fb_config') || '');
-    const [familyCode, setFamilyCode] = useState(() => localStorage.getItem('fb_family_code') || '');
+    const [familyCode, setFamilyCode] = useState(() => (localStorage.getItem('fb_family_code') || '').trim());
     const [isConnected, setIsConnected] = useState(false);
     const [isSyncing, setIsSyncing] = useState(false);
     const [showCloudForm, setShowCloudForm] = useState(false);
@@ -119,9 +119,8 @@ const App: React.FC = () => {
 
     const dbRef = useRef<any>(null);
 
-    // Initial Data Loading & Persistence Logic
+    // Initial Data Loading & Persistent Sync
     useEffect(() => {
-        // Function to load from local and set states
         const loadLocal = () => {
             const localIncomes = JSON.parse(localStorage.getItem('family_incomes') || '[]');
             const localExpenses = JSON.parse(localStorage.getItem('family_expenses') || '[]');
@@ -140,20 +139,24 @@ const App: React.FC = () => {
             return { incomes: localIncomes, expenses: localExpenses, fixedTemplate: localFixed, categories: localCats, debts: localDebts, fixedTracking: localFixedTracking };
         };
 
-        const { incomes: localI, expenses: localE, fixedTemplate: localFT, categories: localC, debts: localD, fixedTracking: localTr } = loadLocal();
+        const localData = loadLocal();
 
         if (firebaseConfigStr && familyCode) {
             try {
                 const config = JSON.parse(firebaseConfigStr);
-                if (!firebase.apps.length) firebase.initializeApp(config);
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(config);
+                }
                 const db = firebase.firestore();
                 dbRef.current = db;
                 setIsConnected(true);
                 setIsSyncing(true);
 
+                // Lắng nghe thay đổi thời gian thực
                 const unsubscribe = db.collection('families').doc(familyCode).onSnapshot((doc: any) => {
                     if (doc.exists) { 
                         const data = doc.data(); 
+                        // Chỉ cập nhật nếu dữ liệu hợp lệ để tránh reset về rỗng do lỗi mạng
                         const cloudIncomes = data.incomes || [];
                         const cloudExpenses = data.expenses || [];
                         const cloudFixed = data.fixedTemplate || [];
@@ -161,7 +164,6 @@ const App: React.FC = () => {
                         const cloudDebts = data.debts || [];
                         const cloudTracking = data.fixedTracking || {};
 
-                        // Update states
                         setIncomes(cloudIncomes); 
                         setExpenses(cloudExpenses); 
                         setFixedTemplate(cloudFixed); 
@@ -169,7 +171,7 @@ const App: React.FC = () => {
                         setDebts(cloudDebts); 
                         setFixedTracking(cloudTracking);
 
-                        // CRITICAL: Update LocalStorage to keep offline data in sync with cloud data
+                        // Lưu vào localStorage ngay khi nhận được bản cập nhật từ Cloud
                         localStorage.setItem('family_incomes', JSON.stringify(cloudIncomes));
                         localStorage.setItem('family_expenses', JSON.stringify(cloudExpenses));
                         localStorage.setItem('family_fixed_template', JSON.stringify(cloudFixed));
@@ -177,30 +179,31 @@ const App: React.FC = () => {
                         localStorage.setItem('family_debts', JSON.stringify(cloudDebts));
                         localStorage.setItem('family_fixed_tracking', JSON.stringify(cloudTracking));
                     } else { 
-                        // If document doesn't exist on Cloud yet, UPLOAD local data to initialize it
+                        // Nếu tài liệu chưa tồn tại trên Cloud, hãy đẩy dữ liệu hiện tại của máy này lên để khởi tạo
                         db.collection('families').doc(familyCode).set({ 
-                            incomes: localI, 
-                            expenses: localE, 
-                            fixedTemplate: localFT, 
-                            categories: localC, 
-                            debts: localD, 
-                            fixedTracking: localTr
-                        }); 
+                            incomes: localData.incomes, 
+                            expenses: localData.expenses, 
+                            fixedTemplate: localData.fixedTemplate, 
+                            categories: localData.categories, 
+                            debts: localData.debts, 
+                            fixedTracking: localData.fixedTracking
+                        }).then(() => console.log("Khởi tạo Cloud thành công với dữ liệu máy này."));
                     }
                     setIsSyncing(false);
                 }, (error: any) => { 
-                    console.error("Firebase connection error:", error); 
+                    console.error("Lỗi kết nối Firebase:", error); 
                     setIsConnected(false); 
+                    setIsSyncing(false);
                 });
                 return () => unsubscribe();
             } catch (e) { 
-                console.error("Firebase config parsing error:", e); 
+                console.error("Lỗi cấu hình Firebase JSON:", e); 
                 setIsConnected(false); 
             }
         }
     }, [firebaseConfigStr, familyCode]);
 
-    // Action function to save all data to both Local and Cloud
+    // Hàm lưu dữ liệu (Cập nhật cả local và cloud)
     const saveData = (newIncomes: Income[], newExpenses: Expense[], newFixed = fixedTemplate, newCats = categories, newDebts = debts, newTracking = fixedTracking) => {
         const catSet = new Set(newCats);
         const syncedFixed = newFixed.filter(f => catSet.has(f.category));
@@ -209,7 +212,7 @@ const App: React.FC = () => {
             syncedTracking[monthKey] = syncedTracking[monthKey].filter(c => catSet.has(c));
         });
 
-        // Update states
+        // Cập nhật State để UI mượt mà
         setIncomes(newIncomes); 
         setExpenses(newExpenses); 
         setFixedTemplate(syncedFixed); 
@@ -217,7 +220,7 @@ const App: React.FC = () => {
         setDebts(newDebts); 
         setFixedTracking(syncedTracking);
 
-        // Save to LocalStorage immediately
+        // Lưu LocalStorage dự phòng
         localStorage.setItem('family_incomes', JSON.stringify(newIncomes));
         localStorage.setItem('family_expenses', JSON.stringify(newExpenses));
         localStorage.setItem('family_fixed_template', JSON.stringify(syncedFixed));
@@ -225,7 +228,7 @@ const App: React.FC = () => {
         localStorage.setItem('family_debts', JSON.stringify(newDebts));
         localStorage.setItem('family_fixed_tracking', JSON.stringify(syncedTracking));
         
-        // Push to Firebase Cloud
+        // Đẩy lên Firebase Cloud
         if (isConnected && dbRef.current && familyCode) {
             setIsSyncing(true);
             dbRef.current.collection('families').doc(familyCode).set({ 
@@ -239,12 +242,12 @@ const App: React.FC = () => {
                 setIsSyncing(false);
             }).catch((err: any) => {
                 setIsSyncing(false);
-                console.error("Firebase sync error:", err);
+                console.error("Lỗi đồng bộ Cloud:", err);
             });
         }
     };
 
-    // Formatting & Calculations
+    // Định dạng & Tính toán
     const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN').format(amount);
     const formatDate = (date: string) => { if(!date) return ''; const d = new Date(date); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; };
     
@@ -279,7 +282,7 @@ const App: React.FC = () => {
     const handleAmountInput = (val: string, setter: (v: string) => void) => { const raw = val.replace(/\D/g,''); setter(raw === '' ? '' : Number(raw).toLocaleString('vi-VN')); };
     const getCombinedDate = (dateInput: string) => { const d = new Date(dateInput); const now = new Date(); d.setHours(now.getHours(), now.getMinutes(), now.getSeconds()); return d.toISOString(); };
 
-    // Handlers
+    // Hành động Người dùng
     const handleAddIncome = () => {
         const amt = parseAmount(incomeAmount); if(!incomeSource || amt <= 0) return;
         const newItem: Income = { id: editingId || Date.now(), source: incomeSource, amount: amt, date: getCombinedDate(incomeDate), note: incomeNote };
@@ -483,8 +486,8 @@ const App: React.FC = () => {
                             </button>
                         ) : (
                             <div className="flex items-center gap-3 bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-500/30 backdrop-blur-md">
-                                <div className="text-[10px] text-blue-200">Mã: <span className="font-bold text-white">{familyCode}</span></div>
-                                <button onClick={()=>{if(confirm('Ngắt?')){localStorage.removeItem('fb_config'); window.location.reload();}}} className="text-[10px] text-red-300 font-bold border-l border-white/10 pl-3">Ngắt</button>
+                                <div className="text-[10px] text-blue-200">Mã: <span className="font-bold text-white uppercase">{familyCode}</span></div>
+                                <button onClick={()=>{if(confirm('Ngắt kết nối Cloud?')){localStorage.removeItem('fb_config'); localStorage.removeItem('fb_family_code'); window.location.reload();}}} className="text-[10px] text-red-300 font-bold border-l border-white/10 pl-3">Ngắt</button>
                                 {isSyncing && <div className="text-[10px] text-green-300 animate-pulse ml-2 font-bold uppercase tracking-tighter">● Đang lưu...</div>}
                             </div>
                         )}
@@ -816,9 +819,15 @@ const App: React.FC = () => {
                         <div className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl text-left border border-gray-100">
                             <div className="flex justify-between items-center mb-6"><div className="flex items-center gap-3"><Cloud size={24} className="text-blue-600"/><h3 className="font-bold text-gray-800 text-xl">Đám mây</h3></div><button onClick={()=>setShowCloudForm(false)} className="bg-gray-50 p-2 rounded-full text-gray-400"><X size={20}/></button></div>
                             <div className="space-y-5">
-                                <div><label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Mã Gia Đình</label><input type="text" value={familyCode} onChange={e=>setFamilyCode(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-blue-500/20" placeholder="GD-XXXXXX" /></div>
+                                <div><label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Mã Gia Đình</label><input type="text" value={familyCode} onChange={e=>setFamilyCode(e.target.value.trim())} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-blue-500/20" placeholder="GD-XXXXXX" /></div>
                                 <div><label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Cấu hình Firebase (JSON)</label><textarea value={firebaseConfigStr} onChange={e=>setFirebaseConfigStr(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-[10px] h-32 outline-none resize-none font-mono focus:ring-2 ring-blue-500/20" placeholder='{"apiKey": "...", ...}'></textarea></div>
-                                <button onClick={()=>{localStorage.setItem('fb_config', firebaseConfigStr); localStorage.setItem('fb_family_code', familyCode); window.location.reload();}} className="w-full py-4.5 bg-blue-600 text-white font-bold rounded-[20px] shadow-xl shadow-blue-100 uppercase text-xs tracking-[0.3em] mt-2 active:scale-95 transition-all">Lưu & Kết nối</button>
+                                <button onClick={()=>{
+                                    const cleanCode = familyCode.trim();
+                                    if(!cleanCode || !firebaseConfigStr) { alert("Vui lòng nhập đủ thông tin."); return; }
+                                    localStorage.setItem('fb_config', firebaseConfigStr); 
+                                    localStorage.setItem('fb_family_code', cleanCode); 
+                                    window.location.reload();
+                                }} className="w-full py-4.5 bg-blue-600 text-white font-bold rounded-[20px] shadow-xl shadow-blue-100 uppercase text-xs tracking-[0.3em] mt-2 active:scale-95 transition-all">Lưu & Kết nối</button>
                             </div>
                         </div>
                     </div>
