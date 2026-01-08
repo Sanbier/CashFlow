@@ -644,6 +644,7 @@ const App: React.FC = () => {
                                             </div>
                                             <div className="max-w-[180px] overflow-hidden">
                                                 <p className="font-black text-gray-800 text-[11px] truncate uppercase tracking-tight">{(item as any).source || (item as any).category}</p>
+                                                {item.note && <p className="text-[10px] text-gray-500 font-medium truncate italic my-0.5">{item.note}</p>}
                                                 <p className="text-[9px] text-gray-300 font-black uppercase tracking-widest mt-0.5">{formatDate(item.date)}</p>
                                             </div>
                                         </div>
