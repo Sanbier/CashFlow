@@ -407,11 +407,11 @@ const App: React.FC = () => {
                     
                     <div className="grid grid-cols-2 gap-4 mt-2">
                         <div className="bg-green-500/20 backdrop-blur-sm p-4 rounded-2xl border border-green-500/30">
-                            <div className="text-green-300 text-xs font-bold uppercase mb-1 flex items-center gap-1"><TrendingUp size={14}/> Thu</div>
+                            <div className="text-green-300 text-xs font-bold uppercase mb-1 flex items-center gap-1"><TrendingUp size={14}/> Tổng Thu Nhập</div>
                             <div className="font-bold text-lg">{formatCurrency(sumIncomeMonth)} đ</div>
                         </div>
                         <div className="bg-red-500/20 backdrop-blur-sm p-4 rounded-2xl border border-red-500/30">
-                            <div className="text-red-300 text-xs font-bold uppercase mb-1 flex items-center gap-1"><TrendingDown size={14}/> Chi</div>
+                            <div className="text-red-300 text-xs font-bold uppercase mb-1 flex items-center gap-1"><TrendingDown size={14}/> Tổng Chi Tiêu</div>
                             <div className="font-bold text-lg">{formatCurrency(sumExpenseMonth)} đ</div>
                         </div>
                     </div>
