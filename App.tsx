@@ -100,7 +100,7 @@ const App: React.FC = () => {
     const [fixedPaymentInputs, setFixedPaymentInputs] = useState<Record<string, string>>({});
 
     const [firebaseConfigStr, setFirebaseConfigStr] = useState(() => localStorage.getItem('fb_config') || '');
-    const [familyCode, setFamilyCode] = useState(() => (localStorage.getItem('fb_family_code') || '').trim());
+    const [familyCode, setFamilyCode] = useState(() => (localStorage.getItem('fb_family_code') || '').trim().toUpperCase());
     const [isConnected, setIsConnected] = useState(false);
     const [isSyncing, setIsSyncing] = useState(false);
     const [showCloudForm, setShowCloudForm] = useState(false);
@@ -119,7 +119,7 @@ const App: React.FC = () => {
 
     const dbRef = useRef<any>(null);
 
-    // Initial Data Loading & Persistent Sync
+    // Initial Data Loading & Persistent Sync Logic
     useEffect(() => {
         const loadLocal = () => {
             const localIncomes = JSON.parse(localStorage.getItem('family_incomes') || '[]');
@@ -152,58 +152,57 @@ const App: React.FC = () => {
                 setIsConnected(true);
                 setIsSyncing(true);
 
-                // Lắng nghe thay đổi thời gian thực
+                // Quan trọng: Sử dụng onSnapshot để lắng nghe thay đổi từ các máy khác
                 const unsubscribe = db.collection('families').doc(familyCode).onSnapshot((doc: any) => {
                     if (doc.exists) { 
                         const data = doc.data(); 
-                        // Chỉ cập nhật nếu dữ liệu hợp lệ để tránh reset về rỗng do lỗi mạng
-                        const cloudIncomes = data.incomes || [];
-                        const cloudExpenses = data.expenses || [];
-                        const cloudFixed = data.fixedTemplate || [];
-                        const cloudCategories = data.categories || DEFAULT_CATEGORIES;
-                        const cloudDebts = data.debts || [];
-                        const cloudTracking = data.fixedTracking || {};
+                        
+                        // Cập nhật State từ Cloud
+                        setIncomes(data.incomes || []); 
+                        setExpenses(data.expenses || []); 
+                        setFixedTemplate(data.fixedTemplate || []);
+                        setCategories(data.categories || DEFAULT_CATEGORIES);
+                        setDebts(data.debts || []);
+                        setFixedTracking(data.fixedTracking || {});
 
-                        setIncomes(cloudIncomes); 
-                        setExpenses(cloudExpenses); 
-                        setFixedTemplate(cloudFixed); 
-                        setCategories(cloudCategories); 
-                        setDebts(cloudDebts); 
-                        setFixedTracking(cloudTracking);
-
-                        // Lưu vào localStorage ngay khi nhận được bản cập nhật từ Cloud
-                        localStorage.setItem('family_incomes', JSON.stringify(cloudIncomes));
-                        localStorage.setItem('family_expenses', JSON.stringify(cloudExpenses));
-                        localStorage.setItem('family_fixed_template', JSON.stringify(cloudFixed));
-                        localStorage.setItem('family_categories', JSON.stringify(cloudCategories));
-                        localStorage.setItem('family_debts', JSON.stringify(cloudDebts));
-                        localStorage.setItem('family_fixed_tracking', JSON.stringify(cloudTracking));
+                        // Cập nhật LocalStorage để đồng bộ khi offline
+                        localStorage.setItem('family_incomes', JSON.stringify(data.incomes || []));
+                        localStorage.setItem('family_expenses', JSON.stringify(data.expenses || []));
+                        localStorage.setItem('family_fixed_template', JSON.stringify(data.fixedTemplate || []));
+                        localStorage.setItem('family_categories', JSON.stringify(data.categories || DEFAULT_CATEGORIES));
+                        localStorage.setItem('family_debts', JSON.stringify(data.debts || []));
+                        localStorage.setItem('family_fixed_tracking', JSON.stringify(data.fixedTracking || {}));
+                        
+                        console.log("Đã cập nhật dữ liệu từ Cloud (Mã: " + familyCode + ")");
                     } else { 
-                        // Nếu tài liệu chưa tồn tại trên Cloud, hãy đẩy dữ liệu hiện tại của máy này lên để khởi tạo
-                        db.collection('families').doc(familyCode).set({ 
-                            incomes: localData.incomes, 
-                            expenses: localData.expenses, 
-                            fixedTemplate: localData.fixedTemplate, 
-                            categories: localData.categories, 
-                            debts: localData.debts, 
-                            fixedTracking: localData.fixedTracking
-                        }).then(() => console.log("Khởi tạo Cloud thành công với dữ liệu máy này."));
+                        // Nếu chưa có tài liệu trên Cloud, hãy đẩy dữ liệu hiện tại lên để làm gốc
+                        if (localData.incomes.length > 0 || localData.expenses.length > 0) {
+                            console.log("Đang khởi tạo tài liệu mới trên Cloud...");
+                            db.collection('families').doc(familyCode).set({ 
+                                incomes: localData.incomes, 
+                                expenses: localData.expenses, 
+                                fixedTemplate: localData.fixedTemplate, 
+                                categories: localData.categories, 
+                                debts: localData.debts, 
+                                fixedTracking: localData.fixedTracking
+                            });
+                        }
                     }
                     setIsSyncing(false);
                 }, (error: any) => { 
-                    console.error("Lỗi kết nối Firebase:", error); 
-                    setIsConnected(false); 
+                    console.error("Lỗi Firestore Snapshot:", error); 
+                    setIsConnected(false);
                     setIsSyncing(false);
                 });
                 return () => unsubscribe();
             } catch (e) { 
-                console.error("Lỗi cấu hình Firebase JSON:", e); 
+                console.error("Lỗi cấu hình Firebase:", e); 
                 setIsConnected(false); 
             }
         }
     }, [firebaseConfigStr, familyCode]);
 
-    // Hàm lưu dữ liệu (Cập nhật cả local và cloud)
+    // Hàm lưu dữ liệu chung - Chỉ gọi khi có thay đổi thực tế từ người dùng
     const saveData = (newIncomes: Income[], newExpenses: Expense[], newFixed = fixedTemplate, newCats = categories, newDebts = debts, newTracking = fixedTracking) => {
         const catSet = new Set(newCats);
         const syncedFixed = newFixed.filter(f => catSet.has(f.category));
@@ -212,7 +211,7 @@ const App: React.FC = () => {
             syncedTracking[monthKey] = syncedTracking[monthKey].filter(c => catSet.has(c));
         });
 
-        // Cập nhật State để UI mượt mà
+        // Cập nhật State
         setIncomes(newIncomes); 
         setExpenses(newExpenses); 
         setFixedTemplate(syncedFixed); 
@@ -220,7 +219,7 @@ const App: React.FC = () => {
         setDebts(newDebts); 
         setFixedTracking(syncedTracking);
 
-        // Lưu LocalStorage dự phòng
+        // Lưu LocalStorage
         localStorage.setItem('family_incomes', JSON.stringify(newIncomes));
         localStorage.setItem('family_expenses', JSON.stringify(newExpenses));
         localStorage.setItem('family_fixed_template', JSON.stringify(syncedFixed));
@@ -237,17 +236,19 @@ const App: React.FC = () => {
                 fixedTemplate: syncedFixed, 
                 categories: newCats, 
                 debts: newDebts, 
-                fixedTracking: syncedTracking
+                fixedTracking: syncedTracking,
+                lastUpdate: new Date().toISOString() // Đánh dấu thời gian cập nhật
             }).then(() => {
                 setIsSyncing(false);
+                console.log("Đã lưu lên Cloud.");
             }).catch((err: any) => {
                 setIsSyncing(false);
-                console.error("Lỗi đồng bộ Cloud:", err);
+                console.error("Lỗi khi lưu lên Cloud:", err);
             });
         }
     };
 
-    // Định dạng & Tính toán
+    // Formatting & Calculations
     const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN').format(amount);
     const formatDate = (date: string) => { if(!date) return ''; const d = new Date(date); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; };
     
@@ -282,7 +283,7 @@ const App: React.FC = () => {
     const handleAmountInput = (val: string, setter: (v: string) => void) => { const raw = val.replace(/\D/g,''); setter(raw === '' ? '' : Number(raw).toLocaleString('vi-VN')); };
     const getCombinedDate = (dateInput: string) => { const d = new Date(dateInput); const now = new Date(); d.setHours(now.getHours(), now.getMinutes(), now.getSeconds()); return d.toISOString(); };
 
-    // Hành động Người dùng
+    // UI Handlers
     const handleAddIncome = () => {
         const amt = parseAmount(incomeAmount); if(!incomeSource || amt <= 0) return;
         const newItem: Income = { id: editingId || Date.now(), source: incomeSource, amount: amt, date: getCombinedDate(incomeDate), note: incomeNote };
@@ -485,10 +486,13 @@ const App: React.FC = () => {
                                 <CloudOff size={14}/> <span>Kết Nối Đám Mây</span>
                             </button>
                         ) : (
-                            <div className="flex items-center gap-3 bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-500/30 backdrop-blur-md">
-                                <div className="text-[10px] text-blue-200">Mã: <span className="font-bold text-white uppercase">{familyCode}</span></div>
-                                <button onClick={()=>{if(confirm('Ngắt kết nối Cloud?')){localStorage.removeItem('fb_config'); localStorage.removeItem('fb_family_code'); window.location.reload();}}} className="text-[10px] text-red-300 font-bold border-l border-white/10 pl-3">Ngắt</button>
-                                {isSyncing && <div className="text-[10px] text-green-300 animate-pulse ml-2 font-bold uppercase tracking-tighter">● Đang lưu...</div>}
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="flex items-center gap-3 bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-500/30 backdrop-blur-md">
+                                    <div className="text-[10px] text-blue-200 uppercase tracking-tighter">Mã: <span className="font-bold text-white">{familyCode}</span></div>
+                                    <button onClick={()=>{if(confirm('Ngắt kết nối Cloud?')){localStorage.removeItem('fb_config'); localStorage.removeItem('fb_family_code'); window.location.reload();}}} className="text-[10px] text-red-300 font-bold border-l border-white/10 pl-3">Ngắt</button>
+                                    {isSyncing && <div className="text-[10px] text-green-300 animate-pulse ml-1 font-bold">●</div>}
+                                </div>
+                                <span className="text-[8px] text-white/40 uppercase tracking-widest font-bold">Đã đồng bộ thời gian thực</span>
                             </div>
                         )}
                     </div>
@@ -819,10 +823,10 @@ const App: React.FC = () => {
                         <div className="bg-white rounded-[40px] w-full max-w-sm p-8 shadow-2xl text-left border border-gray-100">
                             <div className="flex justify-between items-center mb-6"><div className="flex items-center gap-3"><Cloud size={24} className="text-blue-600"/><h3 className="font-bold text-gray-800 text-xl">Đám mây</h3></div><button onClick={()=>setShowCloudForm(false)} className="bg-gray-50 p-2 rounded-full text-gray-400"><X size={20}/></button></div>
                             <div className="space-y-5">
-                                <div><label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Mã Gia Đình</label><input type="text" value={familyCode} onChange={e=>setFamilyCode(e.target.value.trim())} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-blue-500/20" placeholder="GD-XXXXXX" /></div>
+                                <div><label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Mã Gia Đình</label><input type="text" value={familyCode} onChange={e=>setFamilyCode(e.target.value.trim().toUpperCase())} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-sm font-bold outline-none focus:ring-2 ring-blue-500/20" placeholder="GD-XXXXXX" /></div>
                                 <div><label className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-2 ml-1">Cấu hình Firebase (JSON)</label><textarea value={firebaseConfigStr} onChange={e=>setFirebaseConfigStr(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl text-[10px] h-32 outline-none resize-none font-mono focus:ring-2 ring-blue-500/20" placeholder='{"apiKey": "...", ...}'></textarea></div>
                                 <button onClick={()=>{
-                                    const cleanCode = familyCode.trim();
+                                    const cleanCode = familyCode.trim().toUpperCase();
                                     if(!cleanCode || !firebaseConfigStr) { alert("Vui lòng nhập đủ thông tin."); return; }
                                     localStorage.setItem('fb_config', firebaseConfigStr); 
                                     localStorage.setItem('fb_family_code', cleanCode); 
