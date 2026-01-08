@@ -187,7 +187,7 @@ const App: React.FC = () => {
                                 fixedTemplate: localData.fixedTemplate, 
                                 categories: localData.categories, 
                                 debts: localData.debts, 
-                                fixedTracking: localData.fixedTracking,
+                                fixedTracking: localData.fixedTracking, 
                                 lastUpdate: new Date().toISOString()
                             });
                         }
@@ -476,6 +476,7 @@ const App: React.FC = () => {
                                         <input type="text" inputMode="numeric" placeholder="Số tiền..." value={incomeAmount} onChange={e=>handleAmountInput(e.target.value, setIncomeAmount)} className="w-1/2 p-3 bg-gray-50 border-none rounded-xl font-black text-gray-700 text-lg input-effect"/>
                                         <CustomDatePicker value={incomeDate} onChange={e=>setIncomeDate(e.target.value)} className="flex-1" />
                                     </div>
+                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={incomeNote} onChange={e=>setIncomeNote(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect text-sm"/>
                                     <button onClick={handleAddIncome} disabled={!incomeSource || !incomeAmount} className="w-full py-3.5 bg-green-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Thu Nhập</button>
                                 </div>
                             </div>
@@ -535,6 +536,7 @@ const App: React.FC = () => {
                                         <input type="text" inputMode="numeric" placeholder="Số tiền..." value={expenseAmount} onChange={e=>handleAmountInput(e.target.value, setExpenseAmount)} className="w-1/2 p-3 bg-gray-50 border-none rounded-xl font-black text-gray-700 text-lg input-effect"/>
                                         <CustomDatePicker value={expenseDate} onChange={e=>setExpenseDate(e.target.value)} className="flex-1" />
                                     </div>
+                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={expenseNote} onChange={e=>setExpenseNote(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect text-sm"/>
                                     <button onClick={handleAddExpense} disabled={!expenseCategory || !expenseAmount} className="w-full py-3.5 bg-red-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Chi Tiêu</button>
                                 </div>
                             </div>
@@ -548,7 +550,7 @@ const App: React.FC = () => {
                                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
                                         <div className="flex justify-between items-center mb-4">
                                             <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-sm tracking-widest"><Users className="text-blue-600" size={18}/> Quản Lý Vay Mượn</h3>
-                                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); }} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-blue-100">Mới</button>
+                                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-blue-100">Mới</button>
                                         </div>
                                         <div className="flex p-1 bg-gray-100 rounded-xl mb-2">
                                             <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-white text-orange-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Mình nợ</button>
@@ -564,7 +566,6 @@ const App: React.FC = () => {
                                                     <div className="text-[10px] text-gray-400 mt-1 font-bold">CÒN: {formatCurrency(item.total - item.paid)} đ / TỔNG: {formatCurrency(item.total)} đ</div>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <button onClick={()=>{setIsEditingDebt(item.id); setDebtName(item.name); setDebtTotal(formatCurrency(item.total)); setDebtPaid(formatCurrency(item.paid)); setDebtNote(item.note||''); setDebtType(item.type); setShowDebtForm(true);}} className="text-blue-500 p-2 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"><Edit2 size={16}/></button>
                                                     <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"><Trash2 size={16}/></button>
                                                 </div>
                                             </div>
@@ -589,6 +590,7 @@ const App: React.FC = () => {
                                             <input type="text" value={debtPaid} onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-blue-600 outline-none text-lg" />
                                         </div>
                                     </div>
+                                    <input type="text" value={debtNote} onChange={e=>setDebtNote(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-medium outline-none text-sm placeholder:text-gray-300" placeholder="Ghi chú (tùy chọn)..."/>
                                     <div className="flex items-center gap-2 px-2">
                                         <input type="checkbox" checked={autoCreateTransaction} onChange={e=>setAutoCreateTransaction(e.target.checked)} id="autoSync" className="w-4 h-4 rounded-md accent-blue-600"/>
                                         <label htmlFor="autoSync" className="text-[10px] text-gray-500 font-black uppercase tracking-tighter">Đồng bộ vào sổ thu chi</label>
