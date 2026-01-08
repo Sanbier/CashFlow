@@ -419,7 +419,7 @@ const App: React.FC = () => {
                     <div className="mt-4 flex items-center justify-center gap-2">
                         {!isConnected ? (
                             <button onClick={()=>setShowCloudForm(true)} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl border border-white/20 text-xs font-bold text-white transition-all backdrop-blur-md btn-effect">
-                                <CloudOff size={14}/> <span>Kết nối Đám mây</span>
+                                <CloudOff size={14}/> <span>Kết Nối Dữ Liệu</span>
                             </button>
                         ) : (
                             <div className="flex items-center gap-3 bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-500/30 backdrop-blur-md">
@@ -448,9 +448,9 @@ const App: React.FC = () => {
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
                                 <div className="flex items-center gap-2 text-green-700 font-bold mb-3"><TrendingUp size={18}/> 1. Thu Nhập</div>
                                 <div className="space-y-3 pl-2">
-                                    <input type="text" placeholder="Nguồn thu..." value={incomeSource} onChange={e=>setIncomeSource(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect"/>
+                                    <input type="text" placeholder="Tên nguồn thu nhập" value={incomeSource} onChange={e=>setIncomeSource(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect"/>
                                     <div className="flex gap-3">
-                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={incomeAmount} onChange={e=>handleAmountInput(e.target.value, setIncomeAmount)} className="w-1/2 p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 text-lg input-effect"/>
+                                        <input type="text" inputMode="numeric" placeholder="Nhập số tiền" value={incomeAmount} onChange={e=>handleAmountInput(e.target.value, setIncomeAmount)} className="w-1/2 p-3 bg-gray-50 border-none rounded-xl font-bold text-gray-700 text-lg input-effect"/>
                                         <CustomDatePicker value={incomeDate} onChange={e=>setIncomeDate(e.target.value)} className="flex-1" />
                                     </div>
                                     <button onClick={handleAddIncome} disabled={!incomeSource || !incomeAmount} className="w-full py-3 bg-green-600 text-white font-bold rounded-xl shadow-lg btn-effect">Thêm Thu Nhập</button>
