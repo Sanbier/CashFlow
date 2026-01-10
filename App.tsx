@@ -33,7 +33,8 @@ import {
   Users, 
   MessageCircle, 
   Clock,
-  Activity
+  Activity,
+  Check
 } from './constants';
 import { Income, Expense, Debt, FixedTemplateItem, TabType } from './types';
 
@@ -96,6 +97,10 @@ const App: React.FC = () => {
     const [showFixedTrackingModal, setShowFixedTrackingModal] = useState(false); 
     const [tempFixedList, setTempFixedList] = useState<Record<string, number>>({});
     const [fixedPaymentInputs, setFixedPaymentInputs] = useState<Record<string, string>>({});
+
+    // Editing Note States
+    const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
+    const [tempNoteValue, setTempNoteValue] = useState('');
 
     // Saving States
     const [showSavingForm, setShowSavingForm] = useState(false);
@@ -418,6 +423,18 @@ const App: React.FC = () => {
         else saveData(incomes, expenses.filter(e => e.id !== id));
     };
 
+    const handleSaveNote = (id: number, type: 'income' | 'expense') => {
+        if (type === 'income') {
+            const newIncomes = incomes.map(i => i.id === id ? { ...i, note: tempNoteValue } : i);
+            saveData(newIncomes, expenses);
+        } else {
+            const newExpenses = expenses.map(e => e.id === id ? { ...e, note: tempNoteValue } : e);
+            saveData(incomes, newExpenses);
+        }
+        setEditingNoteId(null);
+        setTempNoteValue('');
+    };
+
     const handleExportExcel = () => {
         if (typeof XLSX === 'undefined') { alert("Lỗi tải thư viện"); return; }
         const wb = XLSX.utils.book_new();
@@ -514,7 +531,7 @@ const App: React.FC = () => {
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
                                 <div className="flex items-center justify-between mb-3 pl-2">
                                     <div className="flex items-center gap-2 text-red-700 font-bold uppercase text-xs tracking-widest"><TrendingDown size={16}/> 2. Chi Tiêu</div>
-                                    <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[10px] font-bold px-3 py-1 rounded-lg border transition-all ${isCategoryManageMode ? 'bg-red-600 text-white border-red-700 shadow-md' : 'bg-gray-100 text-gray-500'}`}>{isCategoryManageMode ? 'Xong' : 'Sửa Danh Mục'}</button>
+                                    <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[10px] font-bold px-3 py-1 rounded-lg border transition-all ${isCategoryManageMode ? 'bg-red-600 text-white border-red-700 shadow-md' : 'bg-gray-100 text-gray-50'}`}>{isCategoryManageMode ? 'Xong' : 'Quản Lý Mục'}</button>
                                 </div>
                                 <div className="space-y-4 pl-2">
                                     <div className="grid grid-cols-3 gap-2 pr-1">
@@ -752,24 +769,51 @@ const App: React.FC = () => {
                                 <input type="text" placeholder="Tìm kiếm giao dịch..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 outline-none text-xs font-black uppercase tracking-widest placeholder:text-gray-200"/>
                             </div>
                             <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
-                                {[...filteredIncomes.map(i=>({...i,type:'income'})), ...filteredExpenses.map(e=>({...e,type:'expense'}))].sort((a,b)=>new Date(b.date).getTime() - new Date(a.date).getTime()).map(item => (
-                                    <div key={item.id} className="p-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-all group">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${item.type==='income'?'bg-green-50 text-green-600 shadow-green-100':'bg-red-50 text-red-600 shadow-red-100'}`}>
-                                                {item.type==='income'?<TrendingUp size={22}/>:<TrendingDown size={22}/>}
+                                {[...filteredIncomes.map(i=>({...i,type:'income'})), ...filteredExpenses.map(e=>({...e,type:'expense'}))].sort((a,b)=>new Date(b.date).getTime() - new Date(a.date).getTime()).map(item => {
+                                    const isEditing = editingNoteId === item.id;
+                                    return (
+                                        <div key={item.id} className="p-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-all group">
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 ${item.type==='income'?'bg-green-50 text-green-600 shadow-green-100':'bg-red-50 text-red-600 shadow-red-100'}`}>
+                                                    {item.type==='income'?<TrendingUp size={22}/>:<TrendingDown size={22}/>}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-black text-gray-800 text-[11px] truncate uppercase tracking-tight">{(item as any).source || (item as any).category}</p>
+                                                    {isEditing ? (
+                                                        <div className="flex items-center gap-2 mt-1" onClick={e => e.stopPropagation()}>
+                                                            <input
+                                                                type="text"
+                                                                value={tempNoteValue}
+                                                                onChange={e => setTempNoteValue(e.target.value)}
+                                                                className="flex-1 p-1.5 text-[10px] bg-white border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100"
+                                                                autoFocus
+                                                                placeholder="Nhập ghi chú..."
+                                                            />
+                                                            <button onClick={() => handleSaveNote(item.id, item.type as any)} className="p-1.5 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"><Check size={12}/></button>
+                                                            <button onClick={() => setEditingNoteId(null)} className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200"><X size={12}/></button>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            {item.note && <p className="text-[10px] text-gray-500 font-medium truncate italic my-0.5">{item.note}</p>}
+                                                            <p className="text-[9px] text-gray-300 font-black uppercase tracking-widest mt-0.5">{formatDate(item.date)}</p>
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <div className="max-w-[180px] overflow-hidden">
-                                                <p className="font-black text-gray-800 text-[11px] truncate uppercase tracking-tight">{(item as any).source || (item as any).category}</p>
-                                                {item.note && <p className="text-[10px] text-gray-500 font-medium truncate italic my-0.5">{item.note}</p>}
-                                                <p className="text-[9px] text-gray-300 font-black uppercase tracking-widest mt-0.5">{formatDate(item.date)}</p>
+                                            <div className="text-right pl-2">
+                                                <p className={`font-black text-[13px] ${item.type==='income'?'text-green-600':'text-red-600'}`}>{item.type==='income'?'+':'-'}{formatCurrency(item.amount)}</p>
+                                                <div className="flex justify-end gap-2 mt-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                    <button onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingNoteId(item.id);
+                                                        setTempNoteValue(item.note || '');
+                                                    }} className="text-[9px] text-blue-400 font-black uppercase tracking-widest hover:text-blue-600 p-1 bg-blue-50 rounded-lg"><Edit2 size={12}/></button>
+                                                    <button onClick={()=>deleteItem(item.id, item.type as any)} className="text-[9px] text-red-400 font-black uppercase tracking-widest hover:text-red-600 p-1 bg-red-50 rounded-lg"><Trash2 size={12}/></button>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="text-right">
-                                            <p className={`font-black text-[13px] ${item.type==='income'?'text-green-600':'text-red-600'}`}>{item.type==='income'?'+':'-'}{formatCurrency(item.amount)}</p>
-                                            <button onClick={()=>deleteItem(item.id, item.type as any)} className="opacity-0 group-hover:opacity-100 text-[9px] text-red-400 font-black uppercase mt-1 tracking-widest transition-all">Xóa</button>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                                 {(filteredIncomes.length === 0 && filteredExpenses.length === 0) && <div className="p-16 text-center text-gray-300 text-[10px] font-black uppercase tracking-[0.3em]">Lịch sử trống</div>}
                             </div>
                         </div>
