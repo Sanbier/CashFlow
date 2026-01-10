@@ -617,9 +617,22 @@ const App: React.FC = () => {
                                         {debts.filter(d => d.type === activeDebtTab).map(item => (
                                             <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
                                                 <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.total - item.paid <= 0 ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-orange-500' : 'bg-blue-500')}`}></div>
-                                                <div className="pl-3">
-                                                    <p className="font-black text-gray-800 text-sm uppercase">{item.name}</p>
-                                                    <div className="text-[10px] text-gray-400 mt-1 font-bold">CÒN: {formatCurrency(item.total - item.paid)} đ / TỔNG: {formatCurrency(item.total)} đ</div>
+                                                <div className="pl-3 flex-1 mr-2">
+                                                    <div className="flex justify-between items-center">
+                                                        <p className="font-black text-gray-800 text-sm uppercase">{item.name}</p>
+                                                        <span className="text-[9px] font-black text-gray-400">{Math.round((item.paid/item.total)*100)}%</span>
+                                                    </div>
+                                                    
+                                                    <div className="w-full bg-gray-100 rounded-full h-1.5 my-1.5 overflow-hidden">
+                                                        <div className={`h-full rounded-full transition-all duration-500 ${activeDebtTab==='payable'?'bg-orange-500':'bg-blue-500'}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
+                                                    </div>
+
+                                                    <div className="flex justify-between items-center text-[10px] font-bold">
+                                                        <span className="text-gray-400">ĐÃ TRẢ: <span className="text-gray-600">{formatCurrency(item.paid)}</span></span>
+                                                        <span className={item.total - item.paid <= 0 ? "text-green-500" : "text-gray-400"}>
+                                                            {item.total - item.paid <= 0 ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)}`}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"><Trash2 size={16}/></button>
