@@ -508,7 +508,7 @@ const App: React.FC = () => {
                 <div className="px-4 -mt-6 relative z-10">
                     <div className="bg-white rounded-xl shadow-xl p-1.5 flex border border-gray-100 overflow-x-auto no-scrollbar">
                         {(['add', 'debt', 'report', 'savings', 'history', 'settings'] as TabType[]).map(tab => (
-                            <button key={tab} onClick={()=>setActiveTab(tab)} className={`flex-1 min-w-[60px] py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all btn-effect flex flex-col items-center gap-1 ${activeTab === tab ? 'bg-gradient-to-br from-slate-700 to-slate-900 text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>
+                            <button key={tab} onClick={()=>setActiveTab(tab)} className={`flex-1 min-w-[60px] py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all btn-effect flex flex-col items-center gap-1 ${activeTab === tab ? 'bg-gradient-to-br from-slate-700 to-slate-900 text-white shadow-md animate-scale-loop' : 'text-gray-400 hover:bg-gray-50'}`}>
                                 {tab === 'add' ? 'Nhập' : tab === 'debt' ? 'Sổ Nợ' : tab === 'report' ? 'Báo Cáo' : tab === 'savings' ? 'Heo Đất' : tab === 'history' ? 'Lịch Sử' : <SettingsIcon size={16}/>}
                             </button>
                         ))}
