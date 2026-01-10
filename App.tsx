@@ -45,8 +45,8 @@ const CustomDatePicker: React.FC<{ value: string; onChange: (e: React.ChangeEven
     return (
         <div className={`relative h-12 ${className}`}> 
             <input type="date" value={value} onChange={onChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"/>
-            <div className="w-full h-full p-3 bg-gray-50 border-none rounded-xl text-sm font-medium text-gray-500 flex items-center justify-center pointer-events-none gap-2 input-effect transition-all duration-200"> 
-                <span>{displayDate}</span><CalendarIcon size={16} className="opacity-70"/>
+            <div className="w-full h-full p-3 bg-gray-50 border-none rounded-xl text-xl font-bold text-gray-600 flex items-center justify-center pointer-events-none gap-2 input-effect transition-all duration-200"> 
+                <span>{displayDate}</span><CalendarIcon size={20} className="opacity-70"/>
             </div>
         </div>
     );

@@ -8,7 +8,25 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     <title>Sổ Thu Chi & Quản Lý Nợ</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alumni+Sans+Pinstripe:ital@0;1&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Alumni Sans Pinstripe"', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
@@ -28,6 +46,8 @@
             -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
+            font-family: "Alumni Sans Pinstripe", sans-serif; /* Fallback/Force */
+            font-weight: 600; /* Tăng độ đậm mặc định vì font này rất mảnh */
         }
         .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
         .btn-effect:active { transform: scale(0.95); }
