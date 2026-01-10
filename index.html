@@ -47,13 +47,14 @@
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
             font-family: "Alumni Sans Pinstripe", sans-serif; /* Fallback/Force */
-            font-weight: 600; /* Tăng độ đậm mặc định vì font này rất mảnh */
+            font-weight: 700; /* Tăng độ đậm lên 700 để font mảnh hiển thị rõ hơn */
+            font-size: 18px; /* Tăng size gốc nhẹ */
         }
         .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
         .btn-effect:active { transform: scale(0.95); }
         .input-effect:focus { transform: scale(1.01); border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1); }
         .category-btn {
-            min-height: 48px;
+            min-height: 54px; /* Tăng chiều cao nút danh mục */
             display: flex;
             align-items: center;
             justify-content: center;
