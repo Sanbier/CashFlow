@@ -102,6 +102,9 @@ const App: React.FC = () => {
     const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
     const [tempNoteValue, setTempNoteValue] = useState('');
 
+    // Debt Expansion State
+    const [expandedDebtIds, setExpandedDebtIds] = useState<number[]>([]);
+
     // Saving States
     const [showSavingForm, setShowSavingForm] = useState(false);
     const [savingAmount, setSavingAmount] = useState('');
@@ -435,6 +438,10 @@ const App: React.FC = () => {
         setTempNoteValue('');
     };
 
+    const toggleDebtExpansion = (id: number) => {
+        setExpandedDebtIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+    };
+
     const handleExportExcel = () => {
         if (typeof XLSX === 'undefined') { alert("Lỗi tải thư viện"); return; }
         const wb = XLSX.utils.book_new();
@@ -634,7 +641,7 @@ const App: React.FC = () => {
                                             );
                                         })()}
                                     </div>
-                                    <div className="space-y-4">
+                                    <div className="flex flex-wrap gap-3">
                                         {debts.filter(d => d.type === activeDebtTab).sort((a,b) => {
                                             const aDone = a.total - a.paid <= 0;
                                             const bDone = b.total - b.paid <= 0;
@@ -651,12 +658,30 @@ const App: React.FC = () => {
                                                 if (item.total - item.paid <= 0) progressBarColor = 'bg-green-500';
                                             }
 
+                                            const isDone = item.total - item.paid <= 0;
+                                            const isExpanded = expandedDebtIds.includes(item.id);
+
+                                            // Render Compact Card for Completed Debts (if not expanded)
+                                            if (isDone && !isExpanded) {
+                                                return (
+                                                    <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow-0 aspect-square bg-green-50 border border-green-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-green-100 transition-all shadow-sm active:scale-95">
+                                                        <Check size={20} className="text-green-600 mb-1"/>
+                                                        <span className="text-[9px] font-black text-green-700 uppercase truncate w-full text-center px-1">{item.name}</span>
+                                                        <span className="text-[8px] font-bold text-green-500 uppercase mt-0.5">Xong</span>
+                                                    </div>
+                                                );
+                                            }
+
+                                            // Render Full Card
                                             return (
-                                                <div key={item.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
-                                                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.total - item.paid <= 0 ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500')}`}></div>
+                                                <div key={item.id} className="w-full bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
+                                                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${isDone ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500')}`}></div>
                                                     <div className="pl-3 flex-1 mr-2">
-                                                        <div className="flex justify-between items-center">
-                                                            <p className="font-black text-gray-800 text-sm uppercase">{item.name}</p>
+                                                        <div className="flex justify-between items-center cursor-pointer" onClick={() => isDone && toggleDebtExpansion(item.id)}>
+                                                            <p className="font-black text-gray-800 text-sm uppercase flex items-center gap-2">
+                                                                {item.name}
+                                                                {isDone && <span className="bg-green-100 text-green-600 px-1.5 py-0.5 rounded text-[8px]">ĐÃ XONG</span>}
+                                                            </p>
                                                             <span className="text-[9px] font-black text-gray-400">{Math.round((item.paid/item.total)*100)}%</span>
                                                         </div>
                                                         
@@ -666,18 +691,21 @@ const App: React.FC = () => {
 
                                                         <div className="flex justify-between items-center text-[10px] font-bold">
                                                             <span className="text-gray-400">ĐÃ TRẢ: <span className="text-gray-600">{formatCurrency(item.paid)}</span></span>
-                                                            <span className={item.total - item.paid <= 0 ? "text-green-500" : "text-gray-400"}>
-                                                                {item.total - item.paid <= 0 ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)}`}
+                                                            <span className={isDone ? "text-green-500" : "text-gray-400"}>
+                                                                {isDone ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)}`}
                                                             </span>
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-2">
                                                         <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"><Trash2 size={16}/></button>
+                                                        {isDone && (
+                                                            <button onClick={() => toggleDebtExpansion(item.id)} className="text-gray-400 p-2 bg-gray-50 rounded-xl hover:bg-gray-200 transition-colors"><ChevronUp size={16}/></button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             );
                                         })}
-                                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-12 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50 rounded-3xl border border-dashed border-gray-200">Danh sách trống</div>}
+                                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-12 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50 rounded-3xl border border-dashed border-gray-200 w-full">Danh sách trống</div>}
                                     </div>
                                 </>
                              ) : (
