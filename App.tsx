@@ -15,8 +15,8 @@ import {
   Save, 
   ChevronLeft, 
   ChevronRight, 
-  ChevronUp,
-  ChevronDown,
+  ChevronUp, 
+  ChevronDown, 
   RefreshCw, 
   SettingsIcon, 
   Download, 
@@ -613,9 +613,14 @@ const App: React.FC = () => {
                                             );
                                         })()}
                                     </div>
-                                    <div className="space-y-3">
-                                        {debts.filter(d => d.type === activeDebtTab).map(item => (
-                                            <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
+                                    <div className="space-y-4">
+                                        {debts.filter(d => d.type === activeDebtTab).sort((a,b) => {
+                                            const aDone = a.total - a.paid <= 0;
+                                            const bDone = b.total - b.paid <= 0;
+                                            if (aDone === bDone) return 0;
+                                            return aDone ? 1 : -1;
+                                        }).map(item => (
+                                            <div key={item.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
                                                 <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.total - item.paid <= 0 ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-orange-500' : 'bg-blue-500')}`}></div>
                                                 <div className="pl-3 flex-1 mr-2">
                                                     <div className="flex justify-between items-center">
@@ -872,7 +877,6 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {/* Modal Chi cố định & Reload Confirm giữ nguyên logic nhưng update UI font-black */}
                 {showReloadConfirm && (
                     <div className="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn">
                         <div className="bg-white rounded-[40px] p-8 shadow-2xl text-center max-w-[300px] w-full border border-gray-100">
