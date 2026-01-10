@@ -86,6 +86,7 @@ const App: React.FC = () => {
     const [expenseDate, setExpenseDate] = useState(getLocalToday()); 
     const [expenseNote, setExpenseNote] = useState('');
     const [selectedDebtorId, setSelectedDebtorId] = useState('');
+    const [whoSpent, setWhoSpent] = useState<'Ba' | 'Mẹ'>('Ba'); // State mới cho việc chọn Ba hoặc Mẹ
     
     const [activeTab, setActiveTab] = useState<TabType>('add');
     const [editingId, setEditingId] = useState<number | null>(null); 
@@ -317,6 +318,12 @@ const App: React.FC = () => {
     const handleAddExpense = () => {
         const amt = parseAmount(expenseAmount); if(!expenseCategory || amt <= 0) return;
         let updatedDebts = debts; let finalNote = expenseNote; let linkedDebtId = null; let actionType: any = null;
+        
+        // Logic xử lý Tiền Cá Nhân - Thêm người chi vào ghi chú
+        if (expenseCategory === "Tiền Cá Nhân") {
+            finalNote = `[${whoSpent}] ${expenseNote}`.trim();
+        }
+
         if (expenseCategory === DEBT_CATEGORY_NAME) {
             if (!selectedDebtorId) { alert("Vui lòng chọn người liên quan!"); return; }
             const debtItem = debts.find(d => d.id === Number(selectedDebtorId));
@@ -604,6 +611,25 @@ const App: React.FC = () => {
                                         <input type="text" inputMode="numeric" placeholder="Số tiền..." value={expenseAmount} onChange={e=>handleAmountInput(e.target.value, setExpenseAmount)} className="w-1/2 p-3 bg-white border border-gray-300 rounded-xl font-black text-gray-700 text-lg input-effect focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all"/>
                                         <CustomDatePicker value={expenseDate} onChange={e=>setExpenseDate(e.target.value)} className="flex-1" />
                                     </div>
+
+                                    {/* Lựa chọn Ba/Mẹ cho Tiền Cá Nhân */}
+                                    {expenseCategory === "Tiền Cá Nhân" && (
+                                        <div className="flex gap-2 animate-fadeIn">
+                                            <button 
+                                                onClick={() => setWhoSpent('Ba')} 
+                                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase border transition-all ${whoSpent === 'Ba' ? 'bg-blue-100 text-blue-700 border-blue-300 shadow-sm' : 'bg-gray-50 text-gray-400 border-gray-200'}`}
+                                            >
+                                                Ba Chi
+                                            </button>
+                                            <button 
+                                                onClick={() => setWhoSpent('Mẹ')} 
+                                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase border transition-all ${whoSpent === 'Mẹ' ? 'bg-pink-100 text-pink-700 border-pink-300 shadow-sm' : 'bg-gray-50 text-gray-400 border-gray-200'}`}
+                                            >
+                                                Mẹ Chi
+                                            </button>
+                                        </div>
+                                    )}
+
                                     <input type="text" placeholder="Ghi chú (tùy chọn)..." value={expenseNote} onChange={e=>setExpenseNote(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all"/>
                                     <button onClick={handleAddExpense} disabled={!expenseCategory || !expenseAmount} className="w-full py-3.5 bg-gradient-to-r from-red-500 to-rose-600 text-white font-black rounded-xl shadow-lg shadow-red-200 btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Chi Tiêu</button>
                                 </div>
