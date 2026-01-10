@@ -43,10 +43,10 @@ declare const XLSX: any;
 const CustomDatePicker: React.FC<{ value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; className?: string }> = ({ value, onChange, className="" }) => {
     const displayDate = value ? value.split('-').reverse().join('/') : '';
     return (
-        <div className={`relative h-14 ${className}`}> 
+        <div className={`relative h-12 ${className}`}> 
             <input type="date" value={value} onChange={onChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"/>
-            <div className="w-full h-full p-3 bg-gray-50 border border-gray-300 rounded-xl text-2xl font-bold text-gray-700 flex items-center justify-center pointer-events-none gap-2 input-effect transition-all duration-200"> 
-                <span>{displayDate}</span><CalendarIcon size={24} className="opacity-70"/>
+            <div className="w-full h-full p-3 bg-gray-50 border-none rounded-xl text-sm font-medium text-gray-500 flex items-center justify-center pointer-events-none gap-2 input-effect transition-all duration-200"> 
+                <span>{displayDate}</span><CalendarIcon size={16} className="opacity-70"/>
             </div>
         </div>
     );
@@ -439,53 +439,53 @@ const App: React.FC = () => {
     return (
         <div className="min-h-screen pb-24 md:pb-0 relative font-sans overflow-x-hidden">
             <div className="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative">
-                {isOverBudget && <div className="bg-red-50 text-red-600 px-4 py-2 text-sm font-bold flex items-center justify-center gap-2 animate-pulse-red border-b border-red-100"><AlertTriangle size={20} /> CHI TIÊU QUÁ HẠN MỨC 90%!</div>}
+                {isOverBudget && <div className="bg-red-50 text-red-600 px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 animate-pulse-red border-b border-red-100"><AlertTriangle size={16} /> CHI TIÊU QUÁ HẠN MỨC 90%!</div>}
                 
                 <div className={`bg-gradient-to-r ${isConnected ? 'from-blue-800 to-indigo-900' : 'from-slate-700 to-gray-800'} p-6 pb-6 text-white rounded-b-3xl shadow-lg relative`}>
                     <div className="flex items-center justify-between mb-4">
-                        <button onClick={()=>setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 15))} className="p-2 text-white/70 hover:text-white btn-effect"><ChevronLeft size={28}/></button>
+                        <button onClick={()=>setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 15))} className="p-2 text-white/70 hover:text-white btn-effect"><ChevronLeft size={24}/></button>
                         <div className="text-center">
-                            <span className="text-[12px] font-medium text-white/60 block mb-0.5 tracking-wider">{formatDate(startDate.toISOString())} - {formatDate(endDate.toISOString())}</span>
-                            <div className="font-bold text-3xl text-white flex items-center gap-2 justify-center uppercase tracking-wide"><CalendarIcon size={22}/> Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</div>
+                            <span className="text-[10px] font-medium text-white/60 block mb-0.5 tracking-wider">{formatDate(startDate.toISOString())} - {formatDate(endDate.toISOString())}</span>
+                            <div className="font-bold text-xl text-white flex items-center gap-2 justify-center uppercase tracking-wide"><CalendarIcon size={18}/> Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</div>
                         </div>
-                        <button onClick={()=>setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 15))} className="p-2 text-white/70 hover:text-white btn-effect"><ChevronRight size={28}/></button>
+                        <button onClick={()=>setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth()+1, 15))} className="p-2 text-white/70 hover:text-white btn-effect"><ChevronRight size={24}/></button>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 mt-2">
                         <div className="bg-green-500/20 backdrop-blur-sm p-4 rounded-2xl border border-green-500/30 shadow-inner">
-                            <div className="text-green-300 text-[12px] font-black uppercase mb-1 flex items-center gap-1"><TrendingUp size={14}/> Thu Nhập</div>
-                            <div className="font-bold text-2xl">{formatCurrency(sumIncomeMonth)} đ</div>
+                            <div className="text-green-300 text-[10px] font-black uppercase mb-1 flex items-center gap-1"><TrendingUp size={12}/> Thu Nhập</div>
+                            <div className="font-bold text-lg">{formatCurrency(sumIncomeMonth)} đ</div>
                         </div>
                         <div className="bg-red-500/20 backdrop-blur-sm p-4 rounded-2xl border border-red-500/30 shadow-inner">
-                            <div className="text-red-300 text-[12px] font-black uppercase mb-1 flex items-center gap-1"><TrendingDown size={14}/> Chi Tiêu</div>
-                            <div className="font-bold text-2xl">{formatCurrency(sumExpenseMonth)} đ</div>
+                            <div className="text-red-300 text-[10px] font-black uppercase mb-1 flex items-center gap-1"><TrendingDown size={12}/> Chi Tiêu</div>
+                            <div className="font-bold text-lg">{formatCurrency(sumExpenseMonth)} đ</div>
                         </div>
                     </div>
 
                     <div className="mt-4 flex flex-col items-center gap-1">
                         {!isConnected ? (
-                            <button onClick={()=>setShowCloudForm(true)} className="flex items-center gap-2 bg-red-500/80 px-4 py-2 rounded-xl text-sm font-bold text-white transition-all backdrop-blur-md btn-effect">
-                                <CloudOff size={16}/> <span>Kết Nối Cloud</span>
+                            <button onClick={()=>setShowCloudForm(true)} className="flex items-center gap-2 bg-red-500/80 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all backdrop-blur-md btn-effect">
+                                <CloudOff size={14}/> <span>Kết Nối Cloud</span>
                             </button>
                         ) : (
                             <div className="flex flex-col items-center">
                                 <div className="flex items-center gap-3 bg-white/10 px-3 py-1.5 rounded-lg border border-white/10 backdrop-blur-md">
-                                    <div className="text-[12px] text-blue-200 uppercase font-black tracking-widest">Mã: <span className="text-white">{familyCode}</span></div>
+                                    <div className="text-[10px] text-blue-200 uppercase font-black tracking-widest">Mã: <span className="text-white">{familyCode}</span></div>
                                     <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></div>
-                                    <button onClick={()=>setShowCloudForm(true)} className="text-[12px] text-white/60 font-bold border-l border-white/10 pl-3">Sửa</button>
+                                    <button onClick={()=>setShowCloudForm(true)} className="text-[10px] text-white/60 font-bold border-l border-white/10 pl-3">Sửa</button>
                                 </div>
-                                {isSyncing && <span className="text-[10px] text-green-300 font-bold uppercase mt-1 tracking-widest">Đang tải dữ liệu...</span>}
+                                {isSyncing && <span className="text-[8px] text-green-300 font-bold uppercase mt-1 tracking-widest">Đang tải dữ liệu...</span>}
                             </div>
                         )}
-                        {syncError && <div className="text-[11px] bg-red-500/90 text-white px-3 py-1 rounded-full mt-2 font-bold animate-bounce shadow-lg">LỖI: {syncError}</div>}
+                        {syncError && <div className="text-[9px] bg-red-500/90 text-white px-3 py-1 rounded-full mt-2 font-bold animate-bounce shadow-lg">LỖI: {syncError}</div>}
                     </div>
                 </div>
 
                 <div className="px-4 -mt-6 relative z-10">
                     <div className="bg-white rounded-xl shadow-xl p-1.5 flex border border-gray-100 overflow-x-auto no-scrollbar">
                         {(['add', 'debt', 'report', 'savings', 'history', 'settings'] as TabType[]).map(tab => (
-                            <button key={tab} onClick={()=>setActiveTab(tab)} className={`flex-1 min-w-[60px] py-2.5 rounded-lg text-[12px] font-bold uppercase transition-all btn-effect flex flex-col items-center gap-1 ${activeTab === tab ? 'bg-slate-800 text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>
-                                {tab === 'add' ? 'Nhập' : tab === 'debt' ? 'Sổ Nợ' : tab === 'report' ? 'Báo Cáo' : tab === 'savings' ? 'Heo Đất' : tab === 'history' ? 'Lịch Sử' : <SettingsIcon size={20}/>}
+                            <button key={tab} onClick={()=>setActiveTab(tab)} className={`flex-1 min-w-[60px] py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all btn-effect flex flex-col items-center gap-1 ${activeTab === tab ? 'bg-slate-800 text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>
+                                {tab === 'add' ? 'Nhập' : tab === 'debt' ? 'Sổ Nợ' : tab === 'report' ? 'Báo Cáo' : tab === 'savings' ? 'Heo Đất' : tab === 'history' ? 'Lịch Sử' : <SettingsIcon size={16}/>}
                             </button>
                         ))}
                     </div>
@@ -497,15 +497,15 @@ const App: React.FC = () => {
                             {/* Nhập Thu Nhập */}
                             <div className="bg-white border border-green-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
-                                <div className="flex items-center gap-2 text-green-700 font-bold mb-3 uppercase text-sm tracking-widest"><TrendingUp size={18}/> 1. Thu Nhập</div>
+                                <div className="flex items-center gap-2 text-green-700 font-bold mb-3 uppercase text-xs tracking-widest"><TrendingUp size={16}/> 1. Thu Nhập</div>
                                 <div className="space-y-3 pl-2">
-                                    <input type="text" placeholder="Nguồn thu (Lương, Thưởng...)" value={incomeSource} onChange={e=>setIncomeSource(e.target.value)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl font-bold input-effect text-lg placeholder:text-gray-400"/>
+                                    <input type="text" placeholder="Nguồn thu (Lương, Thưởng...)" value={incomeSource} onChange={e=>setIncomeSource(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect text-sm"/>
                                     <div className="flex gap-3">
-                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={incomeAmount} onChange={e=>handleAmountInput(e.target.value, setIncomeAmount)} className="w-1/2 p-4 bg-gray-50 border border-gray-200 rounded-xl font-black text-gray-700 text-2xl input-effect placeholder:text-gray-300"/>
+                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={incomeAmount} onChange={e=>handleAmountInput(e.target.value, setIncomeAmount)} className="w-1/2 p-3 bg-gray-50 border-none rounded-xl font-black text-gray-700 text-lg input-effect"/>
                                         <CustomDatePicker value={incomeDate} onChange={e=>setIncomeDate(e.target.value)} className="flex-1" />
                                     </div>
-                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={incomeNote} onChange={e=>setIncomeNote(e.target.value)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl font-bold input-effect text-lg placeholder:text-gray-400"/>
-                                    <button onClick={handleAddIncome} disabled={!incomeSource || !incomeAmount} className="w-full py-4 bg-green-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-sm tracking-[0.2em] transition-all disabled:opacity-30 mt-2">Lưu Thu Nhập</button>
+                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={incomeNote} onChange={e=>setIncomeNote(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect text-sm"/>
+                                    <button onClick={handleAddIncome} disabled={!incomeSource || !incomeAmount} className="w-full py-3.5 bg-green-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Thu Nhập</button>
                                 </div>
                             </div>
                             
@@ -513,47 +513,47 @@ const App: React.FC = () => {
                             <div className="bg-white border border-red-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
                                 <div className="flex items-center justify-between mb-3 pl-2">
-                                    <div className="flex items-center gap-2 text-red-700 font-bold uppercase text-sm tracking-widest"><TrendingDown size={18}/> 2. Chi Tiêu</div>
-                                    <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[11px] font-bold px-4 py-1.5 rounded-lg border transition-all ${isCategoryManageMode ? 'bg-red-600 text-white border-red-700 shadow-md' : 'bg-gray-100 text-gray-500'}`}>{isCategoryManageMode ? 'Xong' : 'Sửa Danh Mục'}</button>
+                                    <div className="flex items-center gap-2 text-red-700 font-bold uppercase text-xs tracking-widest"><TrendingDown size={16}/> 2. Chi Tiêu</div>
+                                    <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[10px] font-bold px-3 py-1 rounded-lg border transition-all ${isCategoryManageMode ? 'bg-red-600 text-white border-red-700 shadow-md' : 'bg-gray-100 text-gray-500'}`}>{isCategoryManageMode ? 'Xong' : 'Sửa Danh Mục'}</button>
                                 </div>
                                 <div className="space-y-4 pl-2">
                                     <div className="grid grid-cols-3 gap-2 pr-1">
                                         {categories.map((cat, idx) => (
-                                            <div key={cat} className="relative h-[80px]">
+                                            <div key={cat} className="relative h-[72px]">
                                                 {isCategoryManageMode ? (
                                                     <div className="absolute inset-0 bg-white border border-gray-200 rounded-lg flex flex-col items-center justify-between p-1 z-20 shadow-sm animate-fadeIn">
-                                                        <span className="text-[9px] font-extrabold text-gray-400 truncate w-full text-center uppercase tracking-tighter">{cat}</span>
+                                                        <span className="text-[7px] font-extrabold text-gray-400 truncate w-full text-center uppercase tracking-tighter">{cat}</span>
                                                         <div className="grid grid-cols-3 gap-0.5 w-full place-items-center">
-                                                            <button onClick={() => handleMoveCategory(idx, 'up')} className="p-0.5 text-gray-400"><ChevronUp size={14}/></button>
-                                                            <button onClick={() => handleRenameCategory(cat)} className="p-0.5 text-blue-500"><Edit2 size={12}/></button>
-                                                            <button onClick={() => handleMoveCategory(idx, 'down')} className="p-0.5 text-gray-400"><ChevronDown size={14}/></button>
-                                                            <button onClick={() => handleMoveCategory(idx, 'left')} className="p-0.5 text-gray-400"><ChevronLeft size={14}/></button>
-                                                            <button onClick={() => handleDeleteCategory(cat)} className="p-0.5 text-red-500"><Trash2 size={14}/></button>
-                                                            <button onClick={() => handleMoveCategory(idx, 'right')} className="p-0.5 text-gray-400"><ChevronRight size={14}/></button>
+                                                            <button onClick={() => handleMoveCategory(idx, 'up')} className="p-0.5 text-gray-400"><ChevronUp size={12}/></button>
+                                                            <button onClick={() => handleRenameCategory(cat)} className="p-0.5 text-blue-500"><Edit2 size={10}/></button>
+                                                            <button onClick={() => handleMoveCategory(idx, 'down')} className="p-0.5 text-gray-400"><ChevronDown size={12}/></button>
+                                                            <button onClick={() => handleMoveCategory(idx, 'left')} className="p-0.5 text-gray-400"><ChevronLeft size={12}/></button>
+                                                            <button onClick={() => handleDeleteCategory(cat)} className="p-0.5 text-red-500"><Trash2 size={12}/></button>
+                                                            <button onClick={() => handleMoveCategory(idx, 'right')} className="p-0.5 text-gray-400"><ChevronRight size={12}/></button>
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <button onClick={() => setExpenseCategory(cat)} className={`category-btn w-full h-full text-[12px] font-bold rounded-lg border transition-all ${expenseCategory === cat ? 'bg-red-600 text-white border-red-600 shadow-lg scale-105 z-10' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>{cat}</button>
+                                                    <button onClick={() => setExpenseCategory(cat)} className={`category-btn w-full h-full text-[10px] font-bold rounded-lg border transition-all ${expenseCategory === cat ? 'bg-red-600 text-white border-red-600 shadow-lg scale-105 z-10' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>{cat}</button>
                                                 )}
                                             </div>
                                         ))}
-                                        {!isCategoryManageMode && <button onClick={handleAddCustomCategory} className="category-btn h-[80px] text-[12px] font-bold rounded-lg border border-dashed border-gray-400 text-gray-400 hover:bg-gray-50"><Plus size={24}/></button>}
+                                        {!isCategoryManageMode && <button onClick={handleAddCustomCategory} className="category-btn h-[72px] text-[10px] font-bold rounded-lg border border-dashed border-gray-400 text-gray-400 hover:bg-gray-50"><Plus size={20}/></button>}
                                     </div>
                                     
                                     {expenseCategory && !isCategoryManageMode && (
                                         <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl animate-fadeIn flex items-center justify-between shadow-sm">
                                             <div className="flex items-center gap-2">
-                                                <div className="bg-indigo-600 p-1.5 rounded-lg text-white shadow-sm"><Clock size={14}/></div>
-                                                <span className="text-[12px] font-black text-indigo-700 uppercase tracking-tight">Đã tiêu tháng này :</span>
+                                                <div className="bg-indigo-600 p-1.5 rounded-lg text-white shadow-sm"><Clock size={12}/></div>
+                                                <span className="text-[10px] font-black text-indigo-700 uppercase tracking-tight">Đã tiêu tháng này :</span>
                                             </div>
-                                            <span className="text-lg font-black text-indigo-800">{formatCurrency(getMonthlyPaidForCategory(expenseCategory))} đ</span>
+                                            <span className="text-sm font-black text-indigo-800">{formatCurrency(getMonthlyPaidForCategory(expenseCategory))} đ</span>
                                         </div>
                                     )}
 
                                     {expenseCategory === DEBT_CATEGORY_NAME && (
                                         <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl animate-fadeIn shadow-inner">
-                                            <label className="text-[11px] font-black text-blue-700 uppercase mb-1 block tracking-widest pl-1">Người liên quan:</label>
-                                            <select value={selectedDebtorId} onChange={(e) => setSelectedDebtorId(e.target.value)} className="w-full p-3 bg-white border border-blue-300 rounded-lg text-sm font-black outline-none shadow-sm">
+                                            <label className="text-[9px] font-black text-blue-700 uppercase mb-1 block tracking-widest pl-1">Người liên quan:</label>
+                                            <select value={selectedDebtorId} onChange={(e) => setSelectedDebtorId(e.target.value)} className="w-full p-2.5 bg-white border border-blue-300 rounded-lg text-xs font-black outline-none shadow-sm">
                                                 <option value="">-- Chọn Sổ Nợ --</option>
                                                 {debts.map(d => <option key={d.id} value={d.id}>{d.type === 'receivable' ? 'THU: ' : 'TRẢ: '}{d.name}</option>)}
                                             </select>
@@ -561,11 +561,11 @@ const App: React.FC = () => {
                                     )}
 
                                     <div className="flex gap-3">
-                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={expenseAmount} onChange={e=>handleAmountInput(e.target.value, setExpenseAmount)} className="w-1/2 p-4 bg-gray-50 border border-gray-200 rounded-xl font-black text-gray-700 text-2xl input-effect placeholder:text-gray-300"/>
+                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={expenseAmount} onChange={e=>handleAmountInput(e.target.value, setExpenseAmount)} className="w-1/2 p-3 bg-gray-50 border-none rounded-xl font-black text-gray-700 text-lg input-effect"/>
                                         <CustomDatePicker value={expenseDate} onChange={e=>setExpenseDate(e.target.value)} className="flex-1" />
                                     </div>
-                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={expenseNote} onChange={e=>setExpenseNote(e.target.value)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl font-bold input-effect text-lg placeholder:text-gray-400"/>
-                                    <button onClick={handleAddExpense} disabled={!expenseCategory || !expenseAmount} className="w-full py-4 bg-red-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-sm tracking-[0.2em] transition-all disabled:opacity-30 mt-2">Lưu Chi Tiêu</button>
+                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={expenseNote} onChange={e=>setExpenseNote(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect text-sm"/>
+                                    <button onClick={handleAddExpense} disabled={!expenseCategory || !expenseAmount} className="w-full py-3.5 bg-red-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Chi Tiêu</button>
                                 </div>
                             </div>
                         </div>
@@ -577,12 +577,12 @@ const App: React.FC = () => {
                                 <>
                                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
                                         <div className="flex justify-between items-center mb-4">
-                                            <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-base tracking-widest"><Users className="text-blue-600" size={20}/> Quản Lý Vay Mượn</h3>
-                                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-[11px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-blue-100">Mới</button>
+                                            <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-sm tracking-widest"><Users className="text-blue-600" size={18}/> Quản Lý Vay Mượn</h3>
+                                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-blue-100">Mới</button>
                                         </div>
                                         <div className="flex p-1 bg-gray-100 rounded-xl mb-2">
-                                            <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-3 rounded-lg text-[12px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-white text-orange-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Mình nợ</button>
-                                            <button onClick={()=>setActiveDebtTab('receivable')} className={`flex-1 py-3 rounded-lg text-[12px] font-black uppercase transition-all ${activeDebtTab==='receivable' ? 'bg-white text-blue-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Họ nợ</button>
+                                            <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-white text-orange-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Mình nợ</button>
+                                            <button onClick={()=>setActiveDebtTab('receivable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='receivable' ? 'bg-white text-blue-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Họ nợ</button>
                                         </div>
                                         
                                         {/* STATS SUMMARY for Active Debt Tab */}
@@ -594,40 +594,40 @@ const App: React.FC = () => {
                                             const isPayable = activeDebtTab === 'payable';
 
                                             return (
-                                                <div className={`mb-4 p-5 rounded-2xl text-white shadow-lg bg-gradient-to-r ${isPayable ? 'from-orange-400 to-red-500 shadow-orange-200' : 'from-blue-400 to-indigo-500 shadow-blue-200'}`}>
+                                                <div className={`mb-4 p-4 rounded-2xl text-white shadow-lg bg-gradient-to-r ${isPayable ? 'from-orange-400 to-red-500 shadow-orange-200' : 'from-blue-400 to-indigo-500 shadow-blue-200'}`}>
                                                     <div className="flex justify-between items-end mb-2">
                                                         <div>
-                                                            <div className="text-[12px] font-black uppercase opacity-80 mb-1">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
-                                                            <div className="text-3xl font-black">{formatCurrency(sumTotal)} đ</div>
+                                                            <div className="text-[10px] font-black uppercase opacity-80 mb-1">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
+                                                            <div className="text-2xl font-black">{formatCurrency(sumTotal)} đ</div>
                                                         </div>
                                                         <div className="text-right">
-                                                            <div className="text-[12px] font-black uppercase opacity-80 mb-1">Còn lại</div>
-                                                            <div className="text-xl font-black">{formatCurrency(sumRemaining)} đ</div>
+                                                            <div className="text-[10px] font-black uppercase opacity-80 mb-1">Còn lại</div>
+                                                            <div className="text-lg font-black">{formatCurrency(sumRemaining)} đ</div>
                                                         </div>
                                                     </div>
-                                                    <div className="bg-white/20 p-2.5 rounded-xl flex justify-between items-center backdrop-blur-sm">
-                                                        <span className="text-[12px] font-black uppercase">{isPayable ? 'Đã trả được' : 'Đã thu hồi'}</span>
-                                                        <span className="text-base font-black">{formatCurrency(sumPaid)} đ</span>
+                                                    <div className="bg-white/20 p-2 rounded-xl flex justify-between items-center backdrop-blur-sm">
+                                                        <span className="text-[10px] font-black uppercase">{isPayable ? 'Đã trả được' : 'Đã thu hồi'}</span>
+                                                        <span className="text-sm font-black">{formatCurrency(sumPaid)} đ</span>
                                                     </div>
                                                 </div>
                                             );
                                         })()}
                                     </div>
-                                    <div className="space-y-4">
+                                    <div className="space-y-3">
                                         {debts.filter(d => d.type === activeDebtTab).map(item => (
-                                            <div key={item.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
+                                            <div key={item.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
                                                 <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.total - item.paid <= 0 ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-orange-500' : 'bg-blue-500')}`}></div>
                                                 <div className="pl-3 flex-1 mr-2">
                                                     <div className="flex justify-between items-center">
-                                                        <p className="font-black text-gray-800 text-lg uppercase">{item.name}</p>
-                                                        <span className="text-[11px] font-black text-gray-400">{Math.round((item.paid/item.total)*100)}%</span>
+                                                        <p className="font-black text-gray-800 text-sm uppercase">{item.name}</p>
+                                                        <span className="text-[9px] font-black text-gray-400">{Math.round((item.paid/item.total)*100)}%</span>
                                                     </div>
                                                     
-                                                    <div className="w-full bg-gray-100 rounded-full h-2 my-2 overflow-hidden">
+                                                    <div className="w-full bg-gray-100 rounded-full h-1.5 my-1.5 overflow-hidden">
                                                         <div className={`h-full rounded-full transition-all duration-500 ${activeDebtTab==='payable'?'bg-orange-500':'bg-blue-500'}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
                                                     </div>
 
-                                                    <div className="flex justify-between items-center text-[11px] font-bold">
+                                                    <div className="flex justify-between items-center text-[10px] font-bold">
                                                         <span className="text-gray-400">ĐÃ TRẢ: <span className="text-gray-600">{formatCurrency(item.paid)}</span></span>
                                                         <span className={item.total - item.paid <= 0 ? "text-green-500" : "text-gray-400"}>
                                                             {item.total - item.paid <= 0 ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)}`}
@@ -635,38 +635,38 @@ const App: React.FC = () => {
                                                     </div>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2.5 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"><Trash2 size={18}/></button>
+                                                    <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"><Trash2 size={16}/></button>
                                                 </div>
                                             </div>
                                         ))}
-                                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-16 text-gray-400 text-[12px] font-black uppercase tracking-widest bg-gray-50 rounded-3xl border border-dashed border-gray-200">Danh sách trống</div>}
+                                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-12 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50 rounded-3xl border border-dashed border-gray-200">Danh sách trống</div>}
                                     </div>
                                 </>
                              ) : (
-                                <div className="bg-white p-6 rounded-[32px] shadow-xl border border-gray-100 animate-fadeIn space-y-6">
+                                <div className="bg-white p-6 rounded-[32px] shadow-xl border border-gray-100 animate-fadeIn space-y-5">
                                     <div className="flex gap-2 mb-2">
-                                        <button onClick={()=>setDebtType('payable')} className={`flex-1 py-4 text-[12px] font-black uppercase rounded-2xl border transition-all ${debtType==='payable'?'bg-orange-100 text-orange-700 border-orange-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Mình nợ</button>
-                                        <button onClick={()=>setDebtType('receivable')} className={`flex-1 py-4 text-[12px] font-black uppercase rounded-2xl border transition-all ${debtType==='receivable'?'bg-blue-100 text-blue-700 border-blue-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Họ nợ</button>
+                                        <button onClick={()=>setDebtType('payable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='payable'?'bg-orange-100 text-orange-700 border-orange-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Mình nợ</button>
+                                        <button onClick={()=>setDebtType('receivable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='receivable'?'bg-blue-100 text-blue-700 border-blue-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Họ nợ</button>
                                     </div>
-                                    <input type="text" value={debtName} onChange={e=>setDebtName(e.target.value)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-black outline-none text-lg placeholder:text-gray-300" placeholder="TÊN NGƯỜI LIÊN QUAN..."/>
+                                    <input type="text" value={debtName} onChange={e=>setDebtName(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-black outline-none text-sm placeholder:text-gray-300" placeholder="TÊN NGƯỜI LIÊN QUAN..."/>
                                     <div className="flex gap-3">
                                         <div className="flex-1">
-                                            <label className="text-[10px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Tổng nợ</label>
-                                            <input type="text" value={debtTotal} onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl font-black text-orange-600 outline-none text-xl" />
+                                            <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Tổng nợ</label>
+                                            <input type="text" value={debtTotal} onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-orange-600 outline-none text-lg" />
                                         </div>
                                         <div className="flex-1">
-                                            <label className="text-[10px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Đã trả/thu</label>
-                                            <input type="text" value={debtPaid} onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl font-black text-blue-600 outline-none text-xl" />
+                                            <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Đã trả/thu</label>
+                                            <input type="text" value={debtPaid} onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-blue-600 outline-none text-lg" />
                                         </div>
                                     </div>
-                                    <input type="text" value={debtNote} onChange={e=>setDebtNote(e.target.value)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl font-medium outline-none text-base placeholder:text-gray-300" placeholder="Ghi chú (tùy chọn)..."/>
+                                    <input type="text" value={debtNote} onChange={e=>setDebtNote(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-medium outline-none text-sm placeholder:text-gray-300" placeholder="Ghi chú (tùy chọn)..."/>
                                     <div className="flex items-center gap-2 px-2">
-                                        <input type="checkbox" checked={autoCreateTransaction} onChange={e=>setAutoCreateTransaction(e.target.checked)} id="autoSync" className="w-5 h-5 rounded-md accent-blue-600"/>
-                                        <label htmlFor="autoSync" className="text-[12px] text-gray-500 font-black uppercase tracking-tighter">Đồng bộ vào sổ thu chi</label>
+                                        <input type="checkbox" checked={autoCreateTransaction} onChange={e=>setAutoCreateTransaction(e.target.checked)} id="autoSync" className="w-4 h-4 rounded-md accent-blue-600"/>
+                                        <label htmlFor="autoSync" className="text-[10px] text-gray-500 font-black uppercase tracking-tighter">Đồng bộ vào sổ thu chi</label>
                                     </div>
                                     <div className="flex gap-3 pt-2">
-                                        <button onClick={()=>setShowDebtForm(false)} className="flex-1 py-4 bg-gray-100 text-gray-500 font-black rounded-2xl text-[12px] uppercase tracking-widest btn-effect">Hủy</button>
-                                        <button onClick={handleSaveDebt} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-100 text-[12px] uppercase tracking-widest btn-effect">Lưu Sổ</button>
+                                        <button onClick={()=>setShowDebtForm(false)} className="flex-1 py-4 bg-gray-100 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest btn-effect">Hủy</button>
+                                        <button onClick={handleSaveDebt} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-100 text-[10px] uppercase tracking-widest btn-effect">Lưu Sổ</button>
                                     </div>
                                 </div>
                              )}
@@ -676,13 +676,13 @@ const App: React.FC = () => {
                     {activeTab === 'report' && (
                         <div className="space-y-6 animate-fadeIn mt-2">
                             <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100">
-                                <h3 className="font-black text-gray-800 mb-6 flex items-center gap-2 border-b border-gray-50 pb-4 uppercase text-base tracking-widest"><PieChart size={20} className="text-indigo-600"/> Phân tích chi tiêu</h3>
+                                <h3 className="font-black text-gray-800 mb-6 flex items-center gap-2 border-b border-gray-50 pb-4 uppercase text-sm tracking-widest"><PieChart size={18} className="text-indigo-600"/> Phân tích chi tiêu</h3>
                                 <div className="space-y-6">
                                     {Object.entries(filteredExpenses.reduce((a,c)=>{a[c.category]=(a[c.category]||0)+c.amount; return a;}, {} as any)).sort(([,a],[,b]) => (b as number)-(a as number)).map(([cat, amt]) => {
                                         const pct = sumIncomeMonth > 0 ? Math.round(((amt as number)/sumIncomeMonth)*100) : 0;
                                         return (
                                             <div key={cat} className="animate-fadeIn">
-                                                <div className="flex justify-between text-[13px] font-black mb-2 uppercase tracking-tight">
+                                                <div className="flex justify-between text-[11px] font-black mb-2 uppercase tracking-tight">
                                                     <span className="text-gray-500">{cat}</span>
                                                     <span className="text-gray-900">{formatCurrency(amt as number)} đ <span className="text-indigo-400 font-bold ml-1">({pct}%)</span></span>
                                                 </div>
@@ -692,7 +692,7 @@ const App: React.FC = () => {
                                             </div>
                                         );
                                     })}
-                                    {filteredExpenses.length === 0 && <div className="text-center py-12 text-gray-400 text-[12px] font-black uppercase tracking-widest">Không có dữ liệu</div>}
+                                    {filteredExpenses.length === 0 && <div className="text-center py-12 text-gray-400 text-[10px] font-black uppercase tracking-widest">Không có dữ liệu</div>}
                                 </div>
                             </div>
                         </div>
@@ -703,20 +703,20 @@ const App: React.FC = () => {
                             {/* Heo Đất - Hiển thị tích lũy trọn đời (không reset theo tháng) */}
                             <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100">
                                 <div className="flex justify-between items-center mb-6 border-b border-gray-50 pb-4">
-                                    <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-base tracking-widest"><PiggyBank size={20} className="text-rose-500"/> Heo Đất Tiết Kiệm</h3>
-                                    <button onClick={()=>setShowSavingForm(true)} className="bg-rose-500 text-white px-4 py-2 rounded-lg text-[12px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-rose-200">Nạp Heo</button>
+                                    <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-sm tracking-widest"><PiggyBank size={18} className="text-rose-500"/> Heo Đất Tiết Kiệm</h3>
+                                    <button onClick={()=>setShowSavingForm(true)} className="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-rose-200">Nạp Heo</button>
                                 </div>
                                 
                                 <div className="text-center mb-8">
-                                    <div className="text-[12px] text-gray-400 font-black uppercase tracking-widest mb-1">Tổng tích lũy</div>
-                                    <div className="text-4xl font-black text-rose-600">{formatCurrency(totalAccumulatedSavings)} đ</div>
+                                    <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Tổng tích lũy</div>
+                                    <div className="text-3xl font-black text-rose-600">{formatCurrency(totalAccumulatedSavings)} đ</div>
                                 </div>
 
                                 <div className="space-y-4">
                                     {savingsSummary.map((item) => (
-                                        <div key={item.category} className="bg-rose-50 p-5 rounded-2xl border border-rose-100 flex justify-between items-center">
-                                            <span className="text-[13px] font-black text-gray-600 uppercase tracking-tight">{item.category}</span>
-                                            <span className="font-black text-rose-600 text-lg">{formatCurrency(item.total)} đ</span>
+                                        <div key={item.category} className="bg-rose-50 p-4 rounded-2xl border border-rose-100 flex justify-between items-center">
+                                            <span className="text-[11px] font-black text-gray-600 uppercase tracking-tight">{item.category}</span>
+                                            <span className="font-black text-rose-600 text-sm">{formatCurrency(item.total)} đ</span>
                                         </div>
                                     ))}
                                 </div>
@@ -727,29 +727,29 @@ const App: React.FC = () => {
                     {activeTab === 'history' && (
                         <div className="animate-fadeIn mt-2 space-y-3">
                             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-50 flex gap-3 items-center group focus-within:ring-2 ring-blue-500/10 transition-all">
-                                <Search size={20} className="text-gray-300 group-focus-within:text-blue-500"/>
-                                <input type="text" placeholder="Tìm kiếm giao dịch..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 outline-none text-sm font-black uppercase tracking-widest placeholder:text-gray-200"/>
+                                <Search size={18} className="text-gray-300 group-focus-within:text-blue-500"/>
+                                <input type="text" placeholder="Tìm kiếm giao dịch..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 outline-none text-xs font-black uppercase tracking-widest placeholder:text-gray-200"/>
                             </div>
                             <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
                                 {[...filteredIncomes.map(i=>({...i,type:'income'})), ...filteredExpenses.map(e=>({...e,type:'expense'}))].sort((a,b)=>new Date(b.date).getTime() - new Date(a.date).getTime()).map(item => (
                                     <div key={item.id} className="p-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-all group">
                                         <div className="flex items-center gap-3">
-                                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm ${item.type==='income'?'bg-green-50 text-green-600 shadow-green-100':'bg-red-50 text-red-600 shadow-red-100'}`}>
-                                                {item.type==='income'?<TrendingUp size={24}/>:<TrendingDown size={24}/>}
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${item.type==='income'?'bg-green-50 text-green-600 shadow-green-100':'bg-red-50 text-red-600 shadow-red-100'}`}>
+                                                {item.type==='income'?<TrendingUp size={22}/>:<TrendingDown size={22}/>}
                                             </div>
-                                            <div className="max-w-[200px] overflow-hidden">
-                                                <p className="font-black text-gray-800 text-[13px] truncate uppercase tracking-tight">{(item as any).source || (item as any).category}</p>
-                                                {item.note && <p className="text-[11px] text-gray-500 font-medium truncate italic my-0.5">{item.note}</p>}
-                                                <p className="text-[11px] text-gray-300 font-black uppercase tracking-widest mt-0.5">{formatDate(item.date)}</p>
+                                            <div className="max-w-[180px] overflow-hidden">
+                                                <p className="font-black text-gray-800 text-[11px] truncate uppercase tracking-tight">{(item as any).source || (item as any).category}</p>
+                                                {item.note && <p className="text-[10px] text-gray-500 font-medium truncate italic my-0.5">{item.note}</p>}
+                                                <p className="text-[9px] text-gray-300 font-black uppercase tracking-widest mt-0.5">{formatDate(item.date)}</p>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <p className={`font-black text-[15px] ${item.type==='income'?'text-green-600':'text-red-600'}`}>{item.type==='income'?'+':'-'}{formatCurrency(item.amount)}</p>
-                                            <button onClick={()=>deleteItem(item.id, item.type as any)} className="opacity-0 group-hover:opacity-100 text-[11px] text-red-400 font-black uppercase mt-1 tracking-widest transition-all">Xóa</button>
+                                            <p className={`font-black text-[13px] ${item.type==='income'?'text-green-600':'text-red-600'}`}>{item.type==='income'?'+':'-'}{formatCurrency(item.amount)}</p>
+                                            <button onClick={()=>deleteItem(item.id, item.type as any)} className="opacity-0 group-hover:opacity-100 text-[9px] text-red-400 font-black uppercase mt-1 tracking-widest transition-all">Xóa</button>
                                         </div>
                                     </div>
                                 ))}
-                                {(filteredIncomes.length === 0 && filteredExpenses.length === 0) && <div className="p-16 text-center text-gray-300 text-[12px] font-black uppercase tracking-[0.3em]">Lịch sử trống</div>}
+                                {(filteredIncomes.length === 0 && filteredExpenses.length === 0) && <div className="p-16 text-center text-gray-300 text-[10px] font-black uppercase tracking-[0.3em]">Lịch sử trống</div>}
                             </div>
                         </div>
                     )}
@@ -758,38 +758,38 @@ const App: React.FC = () => {
                         <div className="space-y-6 animate-fadeIn mt-2">
                             {/* SYNC STATUS / DEBUG INFO */}
                             {isConnected && (
-                                <div className="bg-slate-800 p-6 rounded-[32px] text-white shadow-xl space-y-4">
+                                <div className="bg-slate-800 p-6 rounded-[32px] text-white shadow-xl space-y-3">
                                     <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                                        <h4 className="text-[12px] font-black uppercase tracking-widest text-blue-400">Trạng thái Cloud</h4>
-                                        <span className="text-[11px] bg-green-500/20 text-green-400 px-3 py-1 rounded font-black">ACTIVE</span>
+                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-blue-400">Trạng thái Cloud</h4>
+                                        <span className="text-[9px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-black">ACTIVE</span>
                                     </div>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between text-[11px] font-black">
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-[9px] font-black">
                                             <span className="text-white/40 uppercase">Project ID:</span>
                                             <span className="text-white/80">{projectId}</span>
                                         </div>
-                                        <div className="flex justify-between text-[11px] font-black">
+                                        <div className="flex justify-between text-[9px] font-black">
                                             <span className="text-white/40 uppercase">Document:</span>
                                             <span className="text-white/80">{familyCode}</span>
                                         </div>
-                                        <div className="flex justify-between text-[11px] font-black">
+                                        <div className="flex justify-between text-[9px] font-black">
                                             <span className="text-white/40 uppercase">Máy chủ:</span>
                                             <span className="text-blue-300">Firestore Google</span>
                                         </div>
                                     </div>
-                                    <button onClick={()=>window.location.reload()} className="w-full py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] border border-white/10 transition-all flex items-center justify-center gap-2"><RefreshCw size={14}/> Buộc đồng bộ lại</button>
+                                    <button onClick={()=>window.location.reload()} className="w-full py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border border-white/10 transition-all flex items-center justify-center gap-2"><RefreshCw size={12}/> Buộc đồng bộ lại</button>
                                 </div>
                             )}
 
                             <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 space-y-4">
-                                <h3 className="font-black text-gray-800 border-b border-gray-50 pb-4 flex items-center gap-2 uppercase text-sm tracking-widest"><SettingsIcon size={22} className="text-slate-500"/> Thiết lập hệ thống</h3>
+                                <h3 className="font-black text-gray-800 border-b border-gray-50 pb-4 flex items-center gap-2 uppercase text-xs tracking-widest"><SettingsIcon size={20} className="text-slate-500"/> Thiết lập hệ thống</h3>
                                 <div className="grid grid-cols-1 gap-3">
-                                    <button onClick={()=>setShowFixedConfig(true)} className="w-full p-5 bg-purple-50 text-purple-700 rounded-2xl font-black text-[11px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Chi Tiêu Cố Định <Clock size={20}/></button>
-                                    <button onClick={handleExportExcel} className="w-full p-5 bg-green-50 text-green-700 rounded-2xl font-black text-[11px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Xuất Báo Cáo Excel <FileSpreadsheet size={20}/></button>
-                                    <button onClick={()=>setShowCloudForm(true)} className="w-full p-5 bg-blue-50 text-blue-700 rounded-2xl font-black text-[11px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Cấu Hình Đám Mây <Cloud size={20}/></button>
+                                    <button onClick={()=>setShowFixedConfig(true)} className="w-full p-4 bg-purple-50 text-purple-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Chi Tiêu Cố Định <Clock size={18}/></button>
+                                    <button onClick={handleExportExcel} className="w-full p-4 bg-green-50 text-green-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Xuất Báo Cáo Excel <FileSpreadsheet size={18}/></button>
+                                    <button onClick={()=>setShowCloudForm(true)} className="w-full p-4 bg-blue-50 text-blue-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Cấu Hình Đám Mây <Cloud size={18}/></button>
                                 </div>
                                 <div className="pt-6 border-t border-gray-50 text-center">
-                                    <p className="text-[10px] text-gray-300 font-black uppercase tracking-[0.4em]">CashFlow v2.5 • Private Cloud</p>
+                                    <p className="text-[8px] text-gray-300 font-black uppercase tracking-[0.4em]">CashFlow v2.5 • Private Cloud</p>
                                 </div>
                             </div>
                         </div>
@@ -799,45 +799,45 @@ const App: React.FC = () => {
                 {/* FAB & Bottom Overlays */}
                 <div className="fixed bottom-8 left-4 z-50 flex flex-col gap-3">
                     <button onClick={()=>setShowFixedTrackingModal(true)} className="bg-slate-900 text-white p-4 rounded-3xl shadow-2xl border-2 border-white/20 transform hover:rotate-12 transition-all ring-8 ring-slate-900/5">
-                        <MessageCircle size={24}/>
+                        <MessageCircle size={22}/>
                     </button>
                 </div>
 
                 <div onClick={()=>setShowReloadConfirm(true)} className="fixed bottom-8 right-4 z-50">
                     <div className={`shadow-2xl rounded-[24px] px-6 py-4 flex items-center gap-4 border-2 border-white/40 transform active:scale-90 transition-all ring-8 ${balance>=0?'bg-gradient-to-r from-blue-700 to-indigo-600 ring-blue-500/10':'bg-gradient-to-r from-red-700 to-orange-600 ring-red-500/10'}`}>
-                        <div className="bg-white/20 p-2 rounded-xl"><Wallet size={24} className="text-white"/></div>
-                        <div className="flex flex-col items-start text-white font-black text-2xl leading-none tracking-tight">{formatCurrency(balance)} đ</div>
+                        <div className="bg-white/20 p-2 rounded-xl"><Wallet size={22} className="text-white"/></div>
+                        <div className="flex flex-col items-start text-white font-black text-xl leading-none tracking-tight">{formatCurrency(balance)} đ</div>
                     </div>
                 </div>
 
                 {/* MODALS */}
                 {showSavingForm && (
                     <div className="fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-6 backdrop-blur-md animate-fadeIn">
-                        <div className="bg-white rounded-[32px] w-full max-w-sm p-8 shadow-2xl relative border border-gray-100">
-                            <button onClick={()=>setShowSavingForm(false)} className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-400"><X size={22}/></button>
-                            <h3 className="font-black text-rose-600 text-xl mb-6 uppercase tracking-tighter flex items-center gap-2"><PiggyBank size={28}/> Nạp Heo Đất</h3>
-                            <div className="space-y-5">
+                        <div className="bg-white rounded-[32px] w-full max-w-sm p-6 shadow-2xl relative border border-gray-100">
+                            <button onClick={()=>setShowSavingForm(false)} className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-400"><X size={20}/></button>
+                            <h3 className="font-black text-rose-600 text-lg mb-6 uppercase tracking-tighter flex items-center gap-2"><PiggyBank size={24}/> Nạp Heo Đất</h3>
+                            <div className="space-y-4">
                                 <div>
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Chọn Hũ:</label>
-                                    <select value={savingCategory} onChange={e=>setSavingCategory(e.target.value)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black outline-none">
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Chọn Hũ:</label>
+                                    <select value={savingCategory} onChange={e=>setSavingCategory(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-black outline-none">
                                         {SAVING_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 </div>
                                 <div className="flex gap-3">
                                     <div className="flex-1">
-                                        <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Số tiền:</label>
-                                        <input type="text" value={savingAmount} onChange={e=>handleAmountInput(e.target.value, setSavingAmount)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl font-black text-xl text-rose-600 outline-none" placeholder="0 đ"/>
+                                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Số tiền:</label>
+                                        <input type="text" value={savingAmount} onChange={e=>handleAmountInput(e.target.value, setSavingAmount)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-lg text-rose-600 outline-none" placeholder="0 đ"/>
                                     </div>
                                     <div className="flex-1">
-                                         <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ngày:</label>
+                                         <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ngày:</label>
                                          <CustomDatePicker value={savingDate} onChange={e=>setSavingDate(e.target.value)} />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ghi chú:</label>
-                                    <input type="text" value={savingNote} onChange={e=>setSavingNote(e.target.value)} className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-base font-medium outline-none" placeholder="Ví dụ: Tiền thưởng tết..."/>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ghi chú:</label>
+                                    <input type="text" value={savingNote} onChange={e=>setSavingNote(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm font-medium outline-none" placeholder="Ví dụ: Tiền thưởng tết..."/>
                                 </div>
-                                <button onClick={handleAddSavings} className="w-full py-4 bg-rose-500 text-white font-black rounded-2xl shadow-lg shadow-rose-200 uppercase text-sm tracking-[0.2em] active:scale-95 transition-all mt-2">Xác Nhận Nạp</button>
+                                <button onClick={handleAddSavings} className="w-full py-4 bg-rose-500 text-white font-black rounded-2xl shadow-lg shadow-rose-200 uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-2">Xác Nhận Nạp</button>
                             </div>
                         </div>
                     </div>
@@ -846,19 +846,19 @@ const App: React.FC = () => {
                 {showCloudForm && (
                     <div className="fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-6 backdrop-blur-md animate-fadeIn">
                         <div className="bg-white rounded-[48px] w-full max-w-sm p-8 shadow-2xl text-left border border-white/20 relative">
-                            <button onClick={()=>setShowCloudForm(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-400"><X size={22}/></button>
-                            <div className="flex items-center gap-3 mb-8"><Cloud size={32} className="text-blue-600"/><h3 className="font-black text-gray-800 text-2xl uppercase tracking-tighter">Đám mây Riêng</h3></div>
+                            <button onClick={()=>setShowCloudForm(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-400"><X size={20}/></button>
+                            <div className="flex items-center gap-3 mb-8"><Cloud size={28} className="text-blue-600"/><h3 className="font-black text-gray-800 text-xl uppercase tracking-tighter">Đám mây Riêng</h3></div>
                             <div className="space-y-6">
                                 <div>
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-2">Mã Gia Đình (Dùng chung 2 máy)</label>
-                                    <input type="text" value={familyCode} onChange={e=>setFamilyCode(e.target.value.trim().toUpperCase())} className="w-full p-5 bg-gray-50 border-2 border-transparent rounded-2xl text-base font-black outline-none focus:border-blue-500 transition-all" placeholder="VÍ DỤ: GIADINH001" />
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-2">Mã Gia Đình (Dùng chung 2 máy)</label>
+                                    <input type="text" value={familyCode} onChange={e=>setFamilyCode(e.target.value.trim().toUpperCase())} className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-black outline-none focus:border-blue-500 transition-all" placeholder="VÍ DỤ: GIADINH001" />
                                 </div>
                                 <div>
-                                    <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-2">Firebase Config (Dán đúng JSON)</label>
-                                    <textarea value={firebaseConfigStr} onChange={e=>setFirebaseConfigStr(e.target.value)} className="w-full p-5 bg-gray-50 border-2 border-transparent rounded-2xl text-[11px] h-40 outline-none resize-none font-mono focus:border-blue-500 transition-all" placeholder='{"apiKey": "...", "projectId": "...", ...}'></textarea>
+                                    <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-2">Firebase Config (Dán đúng JSON)</label>
+                                    <textarea value={firebaseConfigStr} onChange={e=>setFirebaseConfigStr(e.target.value)} className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-2xl text-[9px] h-40 outline-none resize-none font-mono focus:border-blue-500 transition-all" placeholder='{"apiKey": "...", "projectId": "...", ...}'></textarea>
                                 </div>
-                                <div className="bg-yellow-50 p-5 rounded-2xl border border-yellow-100">
-                                    <p className="text-[10px] text-yellow-700 font-black uppercase leading-relaxed">Lưu ý: Bạn phải thiết lập Firebase Rules thành "allow read, write: if true;" để đồng bộ được.</p>
+                                <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100">
+                                    <p className="text-[8px] text-yellow-700 font-black uppercase leading-relaxed">Lưu ý: Bạn phải thiết lập Firebase Rules thành "allow read, write: if true;" để đồng bộ được.</p>
                                 </div>
                                 <button onClick={()=>{
                                     const code = familyCode.trim().toUpperCase();
@@ -866,7 +866,7 @@ const App: React.FC = () => {
                                     localStorage.setItem('fb_config', firebaseConfigStr); 
                                     localStorage.setItem('fb_family_code', code); 
                                     window.location.reload();
-                                }} className="w-full py-5 bg-blue-600 text-white font-black rounded-[24px] shadow-xl shadow-blue-100 uppercase text-sm tracking-[0.3em] active:scale-95 transition-all">Lưu & Kết Nối</button>
+                                }} className="w-full py-5 bg-blue-600 text-white font-black rounded-[24px] shadow-xl shadow-blue-100 uppercase text-xs tracking-[0.3em] active:scale-95 transition-all">Lưu & Kết Nối</button>
                             </div>
                         </div>
                     </div>
@@ -876,12 +876,12 @@ const App: React.FC = () => {
                 {showReloadConfirm && (
                     <div className="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn">
                         <div className="bg-white rounded-[40px] p-8 shadow-2xl text-center max-w-[300px] w-full border border-gray-100">
-                            <div className="bg-slate-100 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner"><RefreshCw size={32} className="text-blue-600"/></div>
-                            <h3 className="font-black text-xl mb-2 text-gray-800 uppercase tracking-tighter">Tải lại App?</h3>
-                            <p className="text-[12px] text-gray-400 font-bold mb-8 uppercase tracking-tight">Dữ liệu sẽ được cập nhật mới nhất từ Đám mây.</p>
+                            <div className="bg-slate-100 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner"><RefreshCw size={28} className="text-blue-600"/></div>
+                            <h3 className="font-black text-lg mb-2 text-gray-800 uppercase tracking-tighter">Tải lại App?</h3>
+                            <p className="text-[10px] text-gray-400 font-bold mb-8 uppercase tracking-tight">Dữ liệu sẽ được cập nhật mới nhất từ Đám mây.</p>
                             <div className="flex gap-4">
-                                <button onClick={()=>setShowReloadConfirm(false)} className="flex-1 py-4 bg-gray-50 text-gray-400 font-black rounded-2xl text-[12px] uppercase tracking-widest">Hủy</button>
-                                <button onClick={()=>window.location.reload()} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl text-[12px] uppercase tracking-widest shadow-lg shadow-blue-100">Đồng ý</button>
+                                <button onClick={()=>setShowReloadConfirm(false)} className="flex-1 py-4 bg-gray-50 text-gray-400 font-black rounded-2xl text-[10px] uppercase tracking-widest">Hủy</button>
+                                <button onClick={()=>window.location.reload()} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100">Đồng ý</button>
                             </div>
                         </div>
                     </div>
@@ -894,13 +894,13 @@ const App: React.FC = () => {
                             {/* Header */}
                             <div className="p-6 pb-2 bg-white rounded-t-[40px] flex justify-between items-center shadow-sm z-10">
                                 <div className="flex items-center gap-3">
-                                    <div className="bg-gradient-to-br from-purple-600 to-indigo-600 p-2.5 rounded-2xl text-white shadow-lg shadow-indigo-200"><Clock size={24}/></div>
+                                    <div className="bg-gradient-to-br from-purple-600 to-indigo-600 p-2.5 rounded-2xl text-white shadow-lg shadow-indigo-200"><Clock size={20}/></div>
                                     <div>
-                                        <h3 className="font-black text-gray-800 text-xl uppercase tracking-tight leading-none">Chi Cố Định</h3>
-                                        <span className="text-[12px] text-gray-400 font-bold uppercase tracking-wider">Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</span>
+                                        <h3 className="font-black text-gray-800 text-lg uppercase tracking-tight leading-none">Chi Cố Định</h3>
+                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</span>
                                     </div>
                                 </div>
-                                <button onClick={()=>setShowFixedTrackingModal(false)} className="bg-gray-100 p-2.5 rounded-full text-gray-400 hover:bg-gray-200 transition-colors"><X size={24}/></button>
+                                <button onClick={()=>setShowFixedTrackingModal(false)} className="bg-gray-100 p-2.5 rounded-full text-gray-400 hover:bg-gray-200 transition-colors"><X size={20}/></button>
                             </div>
 
                             {/* Dashboard Summary */}
@@ -912,23 +912,23 @@ const App: React.FC = () => {
                                     const overallProgress = totalFixedBudget > 0 ? (totalFixedPaid / totalFixedBudget) * 100 : 0;
 
                                     return (
-                                        <div className="bg-gradient-to-r from-slate-800 to-gray-900 rounded-[28px] p-6 text-white shadow-xl shadow-slate-200 relative overflow-hidden">
+                                        <div className="bg-gradient-to-r from-slate-800 to-gray-900 rounded-[28px] p-5 text-white shadow-xl shadow-slate-200 relative overflow-hidden">
                                             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-10 -mt-10 blur-2xl"></div>
                                             <div className="relative z-10">
                                                 <div className="flex justify-between items-end mb-4">
                                                     <div>
-                                                        <div className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1">Tổng Ngân Sách</div>
-                                                        <div className="text-3xl font-black tracking-tight">{formatCurrency(totalFixedBudget)}</div>
+                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Tổng Ngân Sách</div>
+                                                        <div className="text-2xl font-black tracking-tight">{formatCurrency(totalFixedBudget)}</div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-1">Đã chi</div>
-                                                        <div className="text-2xl font-bold text-white/90">{formatCurrency(totalFixedPaid)}</div>
+                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Đã chi</div>
+                                                        <div className="text-lg font-bold text-white/90">{formatCurrency(totalFixedPaid)}</div>
                                                     </div>
                                                 </div>
-                                                <div className="bg-slate-700/50 rounded-full h-3 mb-4 overflow-hidden backdrop-blur-sm">
+                                                <div className="bg-slate-700/50 rounded-full h-2 mb-3 overflow-hidden backdrop-blur-sm">
                                                     <div className="bg-gradient-to-r from-emerald-400 to-teal-300 h-full rounded-full transition-all duration-700" style={{width: `${Math.min(100, overallProgress)}%`}}></div>
                                                 </div>
-                                                <div className="flex justify-between items-center text-[12px] font-black uppercase">
+                                                <div className="flex justify-between items-center text-[10px] font-black uppercase">
                                                     <span className="text-emerald-400">Còn lại: {formatCurrency(totalFixedRemaining)}</span>
                                                     <span className="text-slate-500">{Math.round(overallProgress)}%</span>
                                                 </div>
@@ -953,14 +953,14 @@ const App: React.FC = () => {
                                                 <div className="flex items-center gap-3">
                                                     <div className={`w-2 h-8 rounded-full ${done ? 'bg-green-500' : 'bg-indigo-500'}`}></div>
                                                     <div>
-                                                        <h4 className="font-black text-gray-800 text-base uppercase tracking-tight">{item.category}</h4>
-                                                        <p className="text-[12px] font-bold text-gray-400 uppercase mt-0.5">Mục tiêu: {formatCurrency(item.amount)}</p>
+                                                        <h4 className="font-black text-gray-800 text-sm uppercase tracking-tight">{item.category}</h4>
+                                                        <p className="text-[10px] font-bold text-gray-400 uppercase mt-0.5">Mục tiêu: {formatCurrency(item.amount)}</p>
                                                     </div>
                                                 </div>
                                                 {done ? (
-                                                     <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest">Hoàn thành</span>
+                                                     <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">Hoàn thành</span>
                                                 ) : (
-                                                     <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest">Còn: {formatCurrency(rem)}</span>
+                                                     <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">Còn: {formatCurrency(rem)}</span>
                                                 )}
                                             </div>
 
@@ -978,14 +978,14 @@ const App: React.FC = () => {
                                                             inputMode="numeric" 
                                                             value={inp} 
                                                             onChange={(e) => handleAmountInput(e.target.value, (v)=>setFixedPaymentInputs(p=>({...p, [item.category]: v})))} 
-                                                            className="w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base font-black text-gray-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder:text-gray-300" 
+                                                            className="w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black text-gray-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder:text-gray-300" 
                                                             placeholder="Nhập số tiền..." 
                                                         />
-                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[12px] font-bold text-gray-400 pointer-events-none">VNĐ</div>
+                                                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400 pointer-events-none">VNĐ</div>
                                                     </div>
                                                     <button 
                                                         onClick={() => handleConfirmFixedItem(item, parseAmount(inp))} 
-                                                        className="px-6 py-3 bg-indigo-600 text-white text-[12px] font-black rounded-xl shadow-lg shadow-indigo-200 uppercase tracking-widest active:scale-95 transition-all hover:bg-indigo-700"
+                                                        className="px-5 py-3 bg-indigo-600 text-white text-[10px] font-black rounded-xl shadow-lg shadow-indigo-200 uppercase tracking-widest active:scale-95 transition-all hover:bg-indigo-700"
                                                     >
                                                         Chi
                                                     </button>
@@ -997,7 +997,7 @@ const App: React.FC = () => {
                                 {fixedTemplate.length === 0 && (
                                     <div className="flex flex-col items-center justify-center py-16 text-center opacity-50">
                                         <Clock size={48} className="text-gray-300 mb-4"/>
-                                        <p className="text-sm font-black text-gray-400 uppercase tracking-widest">Chưa có mục cố định nào</p>
+                                        <p className="text-xs font-black text-gray-400 uppercase tracking-widest">Chưa có mục cố định nào</p>
                                     </div>
                                 )}
                             </div>
@@ -1008,17 +1008,17 @@ const App: React.FC = () => {
                 {showFixedConfig && (
                     <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-6 backdrop-blur-md animate-fadeIn">
                         <div className="bg-white rounded-[48px] w-full max-w-sm p-8 shadow-2xl relative border border-gray-100">
-                            <button onClick={()=>setShowFixedConfig(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-400"><X size={22}/></button>
-                            <h3 className="font-black text-gray-800 text-xl mb-8 uppercase tracking-tighter flex items-center gap-3"><Clock size={28} className="text-purple-600"/> Thiết lập hạn mức</h3>
+                            <button onClick={()=>setShowFixedConfig(false)} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-400"><X size={20}/></button>
+                            <h3 className="font-black text-gray-800 text-lg mb-8 uppercase tracking-tighter flex items-center gap-3"><Clock size={24} className="text-purple-600"/> Thiết lập hạn mức</h3>
                             <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 no-scrollbar">
                                 {categories.map(cat => (
                                     <div key={cat} className="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100 group">
-                                        <span className="flex-1 text-[12px] font-black text-gray-500 uppercase truncate tracking-tighter">{cat}</span>
-                                        <input type="text" inputMode="numeric" value={tempFixedList[cat] ? formatCurrency(tempFixedList[cat]) : (fixedTemplate.find(f => f.category === cat)?.amount ? formatCurrency(fixedTemplate.find(f => f.category === cat)!.amount) : '')} onChange={(e) => handleAmountInput(e.target.value, (v)=>setTempFixedList(p=>({...p, [cat]: parseAmount(v)})))} className="w-24 p-2.5 bg-white border-2 border-transparent rounded-xl text-[12px] font-black text-right text-purple-700 outline-none focus:border-purple-300 transition-all" placeholder="0 đ"/>
+                                        <span className="flex-1 text-[10px] font-black text-gray-500 uppercase truncate tracking-tighter">{cat}</span>
+                                        <input type="text" inputMode="numeric" value={tempFixedList[cat] ? formatCurrency(tempFixedList[cat]) : (fixedTemplate.find(f => f.category === cat)?.amount ? formatCurrency(fixedTemplate.find(f => f.category === cat)!.amount) : '')} onChange={(e) => handleAmountInput(e.target.value, (v)=>setTempFixedList(p=>({...p, [cat]: parseAmount(v)})))} className="w-24 p-2 bg-white border-2 border-transparent rounded-xl text-[11px] font-black text-right text-purple-700 outline-none focus:border-purple-300 transition-all" placeholder="0 đ"/>
                                     </div>
                                 ))}
                             </div>
-                            <button onClick={()=>{saveData(incomes, expenses, Object.entries(tempFixedList).filter(([,a])=>(a as number)>0).map(([c,a])=>({category:c, amount:a as number}))); setShowFixedConfig(false);}} className="w-full py-5 bg-slate-900 text-white font-black rounded-[24px] mt-8 uppercase text-[12px] tracking-[0.3em] shadow-2xl shadow-slate-200 active:scale-95 transition-all">Lưu Cấu Hình</button>
+                            <button onClick={()=>{saveData(incomes, expenses, Object.entries(tempFixedList).filter(([,a])=>(a as number)>0).map(([c,a])=>({category:c, amount:a as number}))); setShowFixedConfig(false);}} className="w-full py-5 bg-slate-900 text-white font-black rounded-[24px] mt-8 uppercase text-[10px] tracking-[0.3em] shadow-2xl shadow-slate-200 active:scale-95 transition-all">Lưu Cấu Hình</button>
                         </div>
                     </div>
                 )}

@@ -9,18 +9,13 @@
     <meta name="format-detection" content="telephone=no">
     <title>Sổ Thu Chi & Quản Lý Nợ</title>
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Alumni+Sans+Pinstripe:ital@0;1&display=swap" rel="stylesheet">
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['"Alumni Sans Pinstripe"', 'sans-serif'],
+                        sans: ['Tahoma', 'sans-serif'],
                     },
                 }
             }
@@ -46,20 +41,20 @@
             -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
-            font-family: "Alumni Sans Pinstripe", sans-serif; /* Fallback/Force */
-            font-weight: 700; /* Tăng độ đậm lên 700 để font mảnh hiển thị rõ hơn */
-            font-size: 18px; /* Tăng size gốc nhẹ */
+            font-family: 'Tahoma', sans-serif;
+            font-weight: 400; /* Trả về độ đậm chuẩn cho Tahoma */
+            font-size: 16px; /* Kích thước chuẩn dễ đọc cho Tahoma */
         }
         .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
         .btn-effect:active { transform: scale(0.95); }
         .input-effect:focus { transform: scale(1.01); border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1); }
         .category-btn {
-            min-height: 54px; /* Tăng chiều cao nút danh mục */
+            min-height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            line-height: 1.1;
+            line-height: 1.2;
             word-break: break-word;
             white-space: normal;
             padding: 4px;
