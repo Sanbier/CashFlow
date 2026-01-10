@@ -581,7 +581,7 @@ const App: React.FC = () => {
                                             <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-blue-100">Mới</button>
                                         </div>
                                         <div className="flex p-1 bg-gray-100 rounded-xl mb-2">
-                                            <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-white text-orange-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Mình nợ</button>
+                                            <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-white text-red-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Mình nợ</button>
                                             <button onClick={()=>setActiveDebtTab('receivable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='receivable' ? 'bg-white text-blue-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Họ nợ</button>
                                         </div>
                                         
@@ -594,7 +594,7 @@ const App: React.FC = () => {
                                             const isPayable = activeDebtTab === 'payable';
 
                                             return (
-                                                <div className={`mb-4 p-4 rounded-2xl text-white shadow-lg bg-gradient-to-r ${isPayable ? 'from-orange-400 to-red-500 shadow-orange-200' : 'from-blue-400 to-indigo-500 shadow-blue-200'}`}>
+                                                <div className={`mb-4 p-4 rounded-2xl text-white shadow-lg bg-gradient-to-r ${isPayable ? 'from-red-500 to-rose-600 shadow-red-200' : 'from-blue-400 to-indigo-500 shadow-blue-200'}`}>
                                                     <div className="flex justify-between items-end mb-2">
                                                         <div>
                                                             <div className="text-[10px] font-black uppercase opacity-80 mb-1">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
@@ -619,49 +619,61 @@ const App: React.FC = () => {
                                             const bDone = b.total - b.paid <= 0;
                                             if (aDone === bDone) return 0;
                                             return aDone ? 1 : -1;
-                                        }).map(item => (
-                                            <div key={item.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
-                                                <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.total - item.paid <= 0 ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-orange-500' : 'bg-blue-500')}`}></div>
-                                                <div className="pl-3 flex-1 mr-2">
-                                                    <div className="flex justify-between items-center">
-                                                        <p className="font-black text-gray-800 text-sm uppercase">{item.name}</p>
-                                                        <span className="text-[9px] font-black text-gray-400">{Math.round((item.paid/item.total)*100)}%</span>
-                                                    </div>
-                                                    
-                                                    <div className="w-full bg-gray-100 rounded-full h-1.5 my-1.5 overflow-hidden">
-                                                        <div className={`h-full rounded-full transition-all duration-500 ${activeDebtTab==='payable'?'bg-orange-500':'bg-blue-500'}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
-                                                    </div>
+                                        }).map(item => {
+                                            let progressBarColor = activeDebtTab === 'receivable' ? 'bg-blue-500' : 'bg-red-500';
+                                            if (activeDebtTab === 'payable') {
+                                                const percentage = (item.paid / item.total) * 100;
+                                                if (item.total - item.paid <= 0) progressBarColor = 'bg-green-500';
+                                                else if (percentage >= 50) progressBarColor = 'bg-yellow-400';
+                                                else progressBarColor = 'bg-red-500';
+                                            } else {
+                                                if (item.total - item.paid <= 0) progressBarColor = 'bg-green-500';
+                                            }
 
-                                                    <div className="flex justify-between items-center text-[10px] font-bold">
-                                                        <span className="text-gray-400">ĐÃ TRẢ: <span className="text-gray-600">{formatCurrency(item.paid)}</span></span>
-                                                        <span className={item.total - item.paid <= 0 ? "text-green-500" : "text-gray-400"}>
-                                                            {item.total - item.paid <= 0 ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)}`}
-                                                        </span>
+                                            return (
+                                                <div key={item.id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
+                                                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${item.total - item.paid <= 0 ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500')}`}></div>
+                                                    <div className="pl-3 flex-1 mr-2">
+                                                        <div className="flex justify-between items-center">
+                                                            <p className="font-black text-gray-800 text-sm uppercase">{item.name}</p>
+                                                            <span className="text-[9px] font-black text-gray-400">{Math.round((item.paid/item.total)*100)}%</span>
+                                                        </div>
+                                                        
+                                                        <div className="w-full bg-gray-100 rounded-full h-1.5 my-1.5 overflow-hidden">
+                                                            <div className={`h-full rounded-full transition-all duration-500 ${progressBarColor}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
+                                                        </div>
+
+                                                        <div className="flex justify-between items-center text-[10px] font-bold">
+                                                            <span className="text-gray-400">ĐÃ TRẢ: <span className="text-gray-600">{formatCurrency(item.paid)}</span></span>
+                                                            <span className={item.total - item.paid <= 0 ? "text-green-500" : "text-gray-400"}>
+                                                                {item.total - item.paid <= 0 ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)}`}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"><Trash2 size={16}/></button>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"><Trash2 size={16}/></button>
-                                                </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                         {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-12 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50 rounded-3xl border border-dashed border-gray-200">Danh sách trống</div>}
                                     </div>
                                 </>
                              ) : (
                                 <div className="bg-white p-6 rounded-[32px] shadow-xl border border-gray-100 animate-fadeIn space-y-5">
                                     <div className="flex gap-2 mb-2">
-                                        <button onClick={()=>setDebtType('payable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='payable'?'bg-orange-100 text-orange-700 border-orange-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Mình nợ</button>
+                                        <button onClick={()=>setDebtType('payable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='payable'?'bg-red-100 text-red-700 border-red-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Mình nợ</button>
                                         <button onClick={()=>setDebtType('receivable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='receivable'?'bg-blue-100 text-blue-700 border-blue-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Họ nợ</button>
                                     </div>
                                     <input type="text" value={debtName} onChange={e=>setDebtName(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-black outline-none text-sm placeholder:text-gray-300" placeholder="TÊN NGƯỜI LIÊN QUAN..."/>
                                     <div className="flex gap-3">
                                         <div className="flex-1">
                                             <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Tổng nợ</label>
-                                            <input type="text" value={debtTotal} onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-orange-600 outline-none text-lg" />
+                                            <input type="text" value={debtTotal} onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} className={`w-full p-3 bg-gray-50 border-none rounded-xl font-black ${debtType==='payable' ? 'text-red-600' : 'text-blue-600'} outline-none text-lg`} />
                                         </div>
                                         <div className="flex-1">
                                             <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Đã trả/thu</label>
-                                            <input type="text" value={debtPaid} onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-blue-600 outline-none text-lg" />
+                                            <input type="text" value={debtPaid} onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-gray-700 outline-none text-lg" />
                                         </div>
                                     </div>
                                     <input type="text" value={debtNote} onChange={e=>setDebtNote(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-medium outline-none text-sm placeholder:text-gray-300" placeholder="Ghi chú (tùy chọn)..."/>
