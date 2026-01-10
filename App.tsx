@@ -45,8 +45,8 @@ const CustomDatePicker: React.FC<{ value: string; onChange: (e: React.ChangeEven
     return (
         <div className={`relative h-12 ${className}`}> 
             <input type="date" value={value} onChange={onChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"/>
-            <div className="w-full h-full p-3 bg-gray-50 border-none rounded-xl text-sm font-medium text-gray-500 flex items-center justify-center pointer-events-none gap-2 input-effect transition-all duration-200"> 
-                <span>{displayDate}</span><CalendarIcon size={16} className="opacity-70"/>
+            <div className="w-full h-full p-3 bg-white border border-gray-300 rounded-xl text-sm font-medium text-gray-700 flex items-center justify-center pointer-events-none gap-2 shadow-sm transition-all duration-200"> 
+                <span>{displayDate}</span><CalendarIcon size={16} className="opacity-70 text-gray-500"/>
             </div>
         </div>
     );
@@ -499,12 +499,12 @@ const App: React.FC = () => {
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
                                 <div className="flex items-center gap-2 text-green-700 font-bold mb-3 uppercase text-xs tracking-widest"><TrendingUp size={16}/> 1. Thu Nhập</div>
                                 <div className="space-y-3 pl-2">
-                                    <input type="text" placeholder="Nguồn thu (Lương, Thưởng...)" value={incomeSource} onChange={e=>setIncomeSource(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect text-sm"/>
+                                    <input type="text" placeholder="Nguồn thu (Lương, Thưởng...)" value={incomeSource} onChange={e=>setIncomeSource(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"/>
                                     <div className="flex gap-3">
-                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={incomeAmount} onChange={e=>handleAmountInput(e.target.value, setIncomeAmount)} className="w-1/2 p-3 bg-gray-50 border-none rounded-xl font-black text-gray-700 text-lg input-effect"/>
+                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={incomeAmount} onChange={e=>handleAmountInput(e.target.value, setIncomeAmount)} className="w-1/2 p-3 bg-white border border-gray-300 rounded-xl font-black text-gray-700 text-lg input-effect focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"/>
                                         <CustomDatePicker value={incomeDate} onChange={e=>setIncomeDate(e.target.value)} className="flex-1" />
                                     </div>
-                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={incomeNote} onChange={e=>setIncomeNote(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect text-sm"/>
+                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={incomeNote} onChange={e=>setIncomeNote(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"/>
                                     <button onClick={handleAddIncome} disabled={!incomeSource || !incomeAmount} className="w-full py-3.5 bg-green-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Thu Nhập</button>
                                 </div>
                             </div>
@@ -553,7 +553,7 @@ const App: React.FC = () => {
                                     {expenseCategory === DEBT_CATEGORY_NAME && (
                                         <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl animate-fadeIn shadow-inner">
                                             <label className="text-[9px] font-black text-blue-700 uppercase mb-1 block tracking-widest pl-1">Người liên quan:</label>
-                                            <select value={selectedDebtorId} onChange={(e) => setSelectedDebtorId(e.target.value)} className="w-full p-2.5 bg-white border border-blue-300 rounded-lg text-xs font-black outline-none shadow-sm">
+                                            <select value={selectedDebtorId} onChange={(e) => setSelectedDebtorId(e.target.value)} className="w-full p-2.5 bg-white border border-blue-300 rounded-lg text-xs font-black outline-none shadow-sm focus:ring-2 focus:ring-blue-100 transition-all">
                                                 <option value="">-- Chọn Sổ Nợ --</option>
                                                 {[...debts].sort((a, b) => {
                                                     if (a.type === 'payable' && b.type !== 'payable') return -1;
@@ -565,10 +565,10 @@ const App: React.FC = () => {
                                     )}
 
                                     <div className="flex gap-3">
-                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={expenseAmount} onChange={e=>handleAmountInput(e.target.value, setExpenseAmount)} className="w-1/2 p-3 bg-gray-50 border-none rounded-xl font-black text-gray-700 text-lg input-effect"/>
+                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={expenseAmount} onChange={e=>handleAmountInput(e.target.value, setExpenseAmount)} className="w-1/2 p-3 bg-white border border-gray-300 rounded-xl font-black text-gray-700 text-lg input-effect focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all"/>
                                         <CustomDatePicker value={expenseDate} onChange={e=>setExpenseDate(e.target.value)} className="flex-1" />
                                     </div>
-                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={expenseNote} onChange={e=>setExpenseNote(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-medium input-effect text-sm"/>
+                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={expenseNote} onChange={e=>setExpenseNote(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all"/>
                                     <button onClick={handleAddExpense} disabled={!expenseCategory || !expenseAmount} className="w-full py-3.5 bg-red-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Chi Tiêu</button>
                                 </div>
                             </div>
@@ -669,18 +669,18 @@ const App: React.FC = () => {
                                         <button onClick={()=>setDebtType('payable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='payable'?'bg-red-100 text-red-700 border-red-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Mình nợ</button>
                                         <button onClick={()=>setDebtType('receivable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='receivable'?'bg-blue-100 text-blue-700 border-blue-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Họ nợ</button>
                                     </div>
-                                    <input type="text" value={debtName} onChange={e=>setDebtName(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-black outline-none text-sm placeholder:text-gray-300" placeholder="TÊN NGƯỜI LIÊN QUAN..."/>
+                                    <input type="text" value={debtName} onChange={e=>setDebtName(e.target.value)} className="w-full p-4 bg-white border border-gray-300 rounded-2xl font-black outline-none text-sm placeholder:text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="TÊN NGƯỜI LIÊN QUAN..."/>
                                     <div className="flex gap-3">
                                         <div className="flex-1">
                                             <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Tổng nợ</label>
-                                            <input type="text" value={debtTotal} onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} className={`w-full p-3 bg-gray-50 border-none rounded-xl font-black ${debtType==='payable' ? 'text-red-600' : 'text-blue-600'} outline-none text-lg`} />
+                                            <input type="text" value={debtTotal} onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} className={`w-full p-3 bg-white border border-gray-300 rounded-xl font-black ${debtType==='payable' ? 'text-red-600' : 'text-blue-600'} outline-none text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all`} />
                                         </div>
                                         <div className="flex-1">
                                             <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Đã trả/thu</label>
-                                            <input type="text" value={debtPaid} onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-gray-700 outline-none text-lg" />
+                                            <input type="text" value={debtPaid} onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-black text-gray-700 outline-none text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
                                         </div>
                                     </div>
-                                    <input type="text" value={debtNote} onChange={e=>setDebtNote(e.target.value)} className="w-full p-4 bg-gray-50 border-none rounded-2xl font-medium outline-none text-sm placeholder:text-gray-300" placeholder="Ghi chú (tùy chọn)..."/>
+                                    <input type="text" value={debtNote} onChange={e=>setDebtNote(e.target.value)} className="w-full p-4 bg-white border border-gray-300 rounded-2xl font-medium outline-none text-sm placeholder:text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Ghi chú (tùy chọn)..."/>
                                     <div className="flex items-center gap-2 px-2">
                                         <input type="checkbox" checked={autoCreateTransaction} onChange={e=>setAutoCreateTransaction(e.target.checked)} id="autoSync" className="w-4 h-4 rounded-md accent-blue-600"/>
                                         <label htmlFor="autoSync" className="text-[10px] text-gray-500 font-black uppercase tracking-tighter">Đồng bộ vào sổ thu chi</label>
@@ -840,14 +840,14 @@ const App: React.FC = () => {
                             <div className="space-y-4">
                                 <div>
                                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Chọn Hũ:</label>
-                                    <select value={savingCategory} onChange={e=>setSavingCategory(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl text-xs font-black outline-none">
+                                    <select value={savingCategory} onChange={e=>setSavingCategory(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl text-xs font-black outline-none shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all">
                                         {SAVING_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 </div>
                                 <div className="flex gap-3">
                                     <div className="flex-1">
                                         <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Số tiền:</label>
-                                        <input type="text" value={savingAmount} onChange={e=>handleAmountInput(e.target.value, setSavingAmount)} className="w-full p-3 bg-gray-50 border-none rounded-xl font-black text-lg text-rose-600 outline-none" placeholder="0 đ"/>
+                                        <input type="text" value={savingAmount} onChange={e=>handleAmountInput(e.target.value, setSavingAmount)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-black text-lg text-rose-600 outline-none shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="0 đ"/>
                                     </div>
                                     <div className="flex-1">
                                          <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ngày:</label>
@@ -856,7 +856,7 @@ const App: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ghi chú:</label>
-                                    <input type="text" value={savingNote} onChange={e=>setSavingNote(e.target.value)} className="w-full p-3 bg-gray-50 border-none rounded-xl text-sm font-medium outline-none" placeholder="Ví dụ: Tiền thưởng tết..."/>
+                                    <input type="text" value={savingNote} onChange={e=>setSavingNote(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl text-sm font-medium outline-none shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="Ví dụ: Tiền thưởng tết..."/>
                                 </div>
                                 <button onClick={handleAddSavings} className="w-full py-4 bg-rose-500 text-white font-black rounded-2xl shadow-lg shadow-rose-200 uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-2">Xác Nhận Nạp</button>
                             </div>
@@ -872,11 +872,11 @@ const App: React.FC = () => {
                             <div className="space-y-6">
                                 <div>
                                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-2">Mã Gia Đình (Dùng chung 2 máy)</label>
-                                    <input type="text" value={familyCode} onChange={e=>setFamilyCode(e.target.value.trim().toUpperCase())} className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-2xl text-sm font-black outline-none focus:border-blue-500 transition-all" placeholder="VÍ DỤ: GIADINH001" />
+                                    <input type="text" value={familyCode} onChange={e=>setFamilyCode(e.target.value.trim().toUpperCase())} className="w-full p-4 bg-white border-2 border-gray-300 rounded-2xl text-sm font-black outline-none focus:border-blue-500 transition-all" placeholder="VÍ DỤ: GIADINH001" />
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-2 ml-2">Firebase Config (Dán đúng JSON)</label>
-                                    <textarea value={firebaseConfigStr} onChange={e=>setFirebaseConfigStr(e.target.value)} className="w-full p-4 bg-gray-50 border-2 border-transparent rounded-2xl text-[9px] h-40 outline-none resize-none font-mono focus:border-blue-500 transition-all" placeholder='{"apiKey": "...", "projectId": "...", ...}'></textarea>
+                                    <textarea value={firebaseConfigStr} onChange={e=>setFirebaseConfigStr(e.target.value)} className="w-full p-4 bg-white border-2 border-gray-300 rounded-2xl text-[9px] h-40 outline-none resize-none font-mono focus:border-blue-500 transition-all" placeholder='{"apiKey": "...", "projectId": "...", ...}'></textarea>
                                 </div>
                                 <div className="bg-yellow-50 p-4 rounded-2xl border border-yellow-100">
                                     <p className="text-[8px] text-yellow-700 font-black uppercase leading-relaxed">Lưu ý: Bạn phải thiết lập Firebase Rules thành "allow read, write: if true;" để đồng bộ được.</p>
@@ -998,7 +998,7 @@ const App: React.FC = () => {
                                                             inputMode="numeric" 
                                                             value={inp} 
                                                             onChange={(e) => handleAmountInput(e.target.value, (v)=>setFixedPaymentInputs(p=>({...p, [item.category]: v})))} 
-                                                            className="w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-black text-gray-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder:text-gray-300" 
+                                                            className="w-full pl-4 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-black text-gray-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all placeholder:text-gray-300" 
                                                             placeholder="Nhập số tiền..." 
                                                         />
                                                         <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400 pointer-events-none">VNĐ</div>
@@ -1034,7 +1034,7 @@ const App: React.FC = () => {
                                 {categories.map(cat => (
                                     <div key={cat} className="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100 group">
                                         <span className="flex-1 text-[10px] font-black text-gray-500 uppercase truncate tracking-tighter">{cat}</span>
-                                        <input type="text" inputMode="numeric" value={tempFixedList[cat] ? formatCurrency(tempFixedList[cat]) : (fixedTemplate.find(f => f.category === cat)?.amount ? formatCurrency(fixedTemplate.find(f => f.category === cat)!.amount) : '')} onChange={(e) => handleAmountInput(e.target.value, (v)=>setTempFixedList(p=>({...p, [cat]: parseAmount(v)})))} className="w-24 p-2 bg-white border-2 border-transparent rounded-xl text-[11px] font-black text-right text-purple-700 outline-none focus:border-purple-300 transition-all" placeholder="0 đ"/>
+                                        <input type="text" inputMode="numeric" value={tempFixedList[cat] ? formatCurrency(tempFixedList[cat]) : (fixedTemplate.find(f => f.category === cat)?.amount ? formatCurrency(fixedTemplate.find(f => f.category === cat)!.amount) : '')} onChange={(e) => handleAmountInput(e.target.value, (v)=>setTempFixedList(p=>({...p, [cat]: parseAmount(v)})))} className="w-24 p-2 bg-white border-2 border-gray-300 rounded-xl text-[11px] font-black text-right text-purple-700 outline-none focus:border-purple-300 transition-all" placeholder="0 đ"/>
                                     </div>
                                 ))}
                             </div>
