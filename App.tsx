@@ -476,11 +476,11 @@ const App: React.FC = () => {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 mt-2">
-                        <div className="bg-green-500/20 backdrop-blur-sm p-4 rounded-2xl border border-green-500/30 shadow-inner">
+                        <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/30 backdrop-blur-sm p-4 rounded-2xl border border-green-500/30 shadow-inner">
                             <div className="text-green-300 text-[10px] font-black uppercase mb-1 flex items-center gap-1"><TrendingUp size={12}/> Thu Nhập</div>
                             <div className="font-bold text-lg">{formatCurrency(sumIncomeMonth)} đ</div>
                         </div>
-                        <div className="bg-red-500/20 backdrop-blur-sm p-4 rounded-2xl border border-red-500/30 shadow-inner">
+                        <div className="bg-gradient-to-br from-red-500/20 to-orange-500/30 backdrop-blur-sm p-4 rounded-2xl border border-red-500/30 shadow-inner">
                             <div className="text-red-300 text-[10px] font-black uppercase mb-1 flex items-center gap-1"><TrendingDown size={12}/> Chi Tiêu</div>
                             <div className="font-bold text-lg">{formatCurrency(sumExpenseMonth)} đ</div>
                         </div>
@@ -488,7 +488,7 @@ const App: React.FC = () => {
 
                     <div className="mt-4 flex flex-col items-center gap-1">
                         {!isConnected ? (
-                            <button onClick={()=>setShowCloudForm(true)} className="flex items-center gap-2 bg-red-500/80 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all backdrop-blur-md btn-effect">
+                            <button onClick={()=>setShowCloudForm(true)} className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all backdrop-blur-md btn-effect opacity-90 hover:opacity-100">
                                 <CloudOff size={14}/> <span>Kết Nối Cloud</span>
                             </button>
                         ) : (
@@ -508,7 +508,7 @@ const App: React.FC = () => {
                 <div className="px-4 -mt-6 relative z-10">
                     <div className="bg-white rounded-xl shadow-xl p-1.5 flex border border-gray-100 overflow-x-auto no-scrollbar">
                         {(['add', 'debt', 'report', 'savings', 'history', 'settings'] as TabType[]).map(tab => (
-                            <button key={tab} onClick={()=>setActiveTab(tab)} className={`flex-1 min-w-[60px] py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all btn-effect flex flex-col items-center gap-1 ${activeTab === tab ? 'bg-slate-800 text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>
+                            <button key={tab} onClick={()=>setActiveTab(tab)} className={`flex-1 min-w-[60px] py-2.5 rounded-lg text-[10px] font-bold uppercase transition-all btn-effect flex flex-col items-center gap-1 ${activeTab === tab ? 'bg-gradient-to-br from-slate-700 to-slate-900 text-white shadow-md' : 'text-gray-400 hover:bg-gray-50'}`}>
                                 {tab === 'add' ? 'Nhập' : tab === 'debt' ? 'Sổ Nợ' : tab === 'report' ? 'Báo Cáo' : tab === 'savings' ? 'Heo Đất' : tab === 'history' ? 'Lịch Sử' : <SettingsIcon size={16}/>}
                             </button>
                         ))}
@@ -520,7 +520,7 @@ const App: React.FC = () => {
                         <div className="space-y-6 animate-fadeIn mt-2">
                             {/* Nhập Thu Nhập */}
                             <div className="bg-white border border-green-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1.5 h-full bg-green-500"></div>
+                                <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-green-400 to-green-600"></div>
                                 <div className="flex items-center gap-2 text-green-700 font-bold mb-3 uppercase text-xs tracking-widest"><TrendingUp size={16}/> 1. Thu Nhập</div>
                                 <div className="space-y-3 pl-2">
                                     <input type="text" placeholder="Nguồn thu (Lương, Thưởng...)" value={incomeSource} onChange={e=>setIncomeSource(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"/>
@@ -529,13 +529,13 @@ const App: React.FC = () => {
                                         <CustomDatePicker value={incomeDate} onChange={e=>setIncomeDate(e.target.value)} className="flex-1" />
                                     </div>
                                     <input type="text" placeholder="Ghi chú (tùy chọn)..." value={incomeNote} onChange={e=>setIncomeNote(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"/>
-                                    <button onClick={handleAddIncome} disabled={!incomeSource || !incomeAmount} className="w-full py-3.5 bg-green-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Thu Nhập</button>
+                                    <button onClick={handleAddIncome} disabled={!incomeSource || !incomeAmount} className="w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black rounded-xl shadow-lg shadow-green-200 btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Thu Nhập</button>
                                 </div>
                             </div>
                             
                             {/* Nhập Chi Tiêu */}
                             <div className="bg-white border border-red-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
+                                <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-red-400 to-red-600"></div>
                                 <div className="flex items-center justify-between mb-3 pl-2">
                                     <div className="flex items-center gap-2 text-red-700 font-bold uppercase text-xs tracking-widest"><TrendingDown size={16}/> 2. Chi Tiêu</div>
                                     <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[10px] font-bold px-3 py-1 rounded-lg border transition-all ${isCategoryManageMode ? 'bg-gray-800 text-white border-gray-700 shadow-md' : 'bg-gradient-to-r from-red-500 to-pink-600 text-white border-transparent shadow-md shadow-red-200'}`}>{isCategoryManageMode ? 'Xong' : 'Quản Lý Mục'}</button>
@@ -557,7 +557,7 @@ const App: React.FC = () => {
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <button onClick={() => setExpenseCategory(cat)} className={`category-btn w-full h-full text-[10px] font-bold rounded-lg border transition-all ${expenseCategory === cat ? 'bg-red-600 text-white border-red-600 shadow-lg scale-105 z-10 [text-shadow:0_0_5px_rgba(255,255,255,1)]' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>{cat}</button>
+                                                    <button onClick={() => setExpenseCategory(cat)} className={`category-btn w-full h-full text-[10px] font-bold rounded-lg border transition-all ${expenseCategory === cat ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white border-red-600 shadow-lg scale-105 z-10 [text-shadow:0_0_5px_rgba(255,255,255,1)]' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>{cat}</button>
                                                 )}
                                             </div>
                                         ))}
@@ -567,7 +567,7 @@ const App: React.FC = () => {
                                     {expenseCategory && !isCategoryManageMode && (
                                         <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl animate-fadeIn flex items-center justify-between shadow-sm">
                                             <div className="flex items-center gap-2">
-                                                <div className="bg-indigo-600 p-1.5 rounded-lg text-white shadow-sm"><Clock size={12}/></div>
+                                                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-1.5 rounded-lg text-white shadow-sm"><Clock size={12}/></div>
                                                 <span className="text-[10px] font-black text-indigo-700 uppercase tracking-tight">Đã tiêu tháng này :</span>
                                             </div>
                                             <span className="text-sm font-black text-indigo-800">{formatCurrency(getMonthlyPaidForCategory(expenseCategory))} đ</span>
@@ -593,7 +593,7 @@ const App: React.FC = () => {
                                         <CustomDatePicker value={expenseDate} onChange={e=>setExpenseDate(e.target.value)} className="flex-1" />
                                     </div>
                                     <input type="text" placeholder="Ghi chú (tùy chọn)..." value={expenseNote} onChange={e=>setExpenseNote(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all"/>
-                                    <button onClick={handleAddExpense} disabled={!expenseCategory || !expenseAmount} className="w-full py-3.5 bg-red-600 text-white font-black rounded-xl shadow-lg btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Chi Tiêu</button>
+                                    <button onClick={handleAddExpense} disabled={!expenseCategory || !expenseAmount} className="w-full py-3.5 bg-gradient-to-r from-red-500 to-rose-600 text-white font-black rounded-xl shadow-lg shadow-red-200 btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Chi Tiêu</button>
                                 </div>
                             </div>
                         </div>
@@ -606,7 +606,7 @@ const App: React.FC = () => {
                                     <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
                                         <div className="flex justify-between items-center mb-4">
                                             <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-sm tracking-widest"><Users className="text-blue-600" size={18}/> Quản Lý Vay Mượn</h3>
-                                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-blue-100">Mới</button>
+                                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-blue-100">Mới</button>
                                         </div>
                                         <div className="flex p-1 bg-gray-100 rounded-xl mb-2">
                                             <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-white text-red-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Mình nợ</button>
@@ -648,14 +648,14 @@ const App: React.FC = () => {
                                             if (aDone === bDone) return 0;
                                             return aDone ? 1 : -1;
                                         }).map(item => {
-                                            let progressBarColor = activeDebtTab === 'receivable' ? 'bg-blue-500' : 'bg-red-500';
+                                            let progressBarColor = activeDebtTab === 'receivable' ? 'bg-gradient-to-r from-blue-400 to-indigo-500' : 'bg-gradient-to-r from-red-500 to-rose-500';
                                             if (activeDebtTab === 'payable') {
                                                 const percentage = (item.paid / item.total) * 100;
-                                                if (item.total - item.paid <= 0) progressBarColor = 'bg-green-500';
-                                                else if (percentage >= 50) progressBarColor = 'bg-yellow-400';
-                                                else progressBarColor = 'bg-red-500';
+                                                if (item.total - item.paid <= 0) progressBarColor = 'bg-gradient-to-r from-green-400 to-emerald-500';
+                                                else if (percentage >= 50) progressBarColor = 'bg-gradient-to-r from-yellow-400 to-amber-500';
+                                                else progressBarColor = 'bg-gradient-to-r from-red-500 to-rose-500';
                                             } else {
-                                                if (item.total - item.paid <= 0) progressBarColor = 'bg-green-500';
+                                                if (item.total - item.paid <= 0) progressBarColor = 'bg-gradient-to-r from-green-400 to-emerald-500';
                                             }
 
                                             const isDone = item.total - item.paid <= 0;
@@ -664,7 +664,7 @@ const App: React.FC = () => {
                                             // Render Compact Card for Completed Debts (if not expanded)
                                             if (isDone && !isExpanded) {
                                                 return (
-                                                    <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow-0 aspect-square bg-green-50 border border-green-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-green-100 transition-all shadow-sm active:scale-95">
+                                                    <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow-0 aspect-square bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:from-green-100 hover:to-emerald-200 transition-all shadow-sm active:scale-95">
                                                         <Check size={20} className="text-green-600 mb-1"/>
                                                         <span className="text-[9px] font-black text-green-700 uppercase truncate w-full text-center px-1">{item.name}</span>
                                                         <span className="text-[8px] font-bold text-green-500 uppercase mt-0.5">Xong</span>
@@ -697,9 +697,9 @@ const App: React.FC = () => {
                                                         </div>
                                                     </div>
                                                     <div className="flex gap-2">
-                                                        <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"><Trash2 size={16}/></button>
+                                                        <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-gradient-to-br from-red-50 to-red-100 rounded-xl hover:from-red-100 hover:to-red-200 transition-colors"><Trash2 size={16}/></button>
                                                         {isDone && (
-                                                            <button onClick={() => toggleDebtExpansion(item.id)} className="text-gray-400 p-2 bg-gray-50 rounded-xl hover:bg-gray-200 transition-colors"><ChevronUp size={16}/></button>
+                                                            <button onClick={() => toggleDebtExpansion(item.id)} className="text-gray-400 p-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-gray-100 hover:to-gray-200 transition-colors"><ChevronUp size={16}/></button>
                                                         )}
                                                     </div>
                                                 </div>
@@ -732,7 +732,7 @@ const App: React.FC = () => {
                                     </div>
                                     <div className="flex gap-3 pt-2">
                                         <button onClick={()=>setShowDebtForm(false)} className="flex-1 py-4 bg-gray-100 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest btn-effect">Hủy</button>
-                                        <button onClick={handleSaveDebt} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl shadow-lg shadow-blue-100 text-[10px] uppercase tracking-widest btn-effect">Lưu Sổ</button>
+                                        <button onClick={handleSaveDebt} className="flex-1 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black rounded-2xl shadow-lg shadow-blue-100 text-[10px] uppercase tracking-widest btn-effect">Lưu Sổ</button>
                                     </div>
                                 </div>
                              )}
@@ -770,7 +770,7 @@ const App: React.FC = () => {
                             <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100">
                                 <div className="flex justify-between items-center mb-6 border-b border-gray-50 pb-4">
                                     <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-sm tracking-widest"><PiggyBank size={18} className="text-rose-500"/> Heo Đất Tiết Kiệm</h3>
-                                    <button onClick={()=>setShowSavingForm(true)} className="bg-rose-500 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-rose-200">Nạp Heo</button>
+                                    <button onClick={()=>setShowSavingForm(true)} className="bg-gradient-to-r from-rose-400 to-pink-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-rose-200">Nạp Heo</button>
                                 </div>
                                 
                                 <div className="text-center mb-8">
@@ -780,7 +780,7 @@ const App: React.FC = () => {
 
                                 <div className="space-y-4">
                                     {savingsSummary.map((item) => (
-                                        <div key={item.category} className="bg-rose-50 p-4 rounded-2xl border border-rose-100 flex justify-between items-center">
+                                        <div key={item.category} className="bg-gradient-to-r from-rose-50 to-pink-50 p-4 rounded-2xl border border-rose-100 flex justify-between items-center">
                                             <span className="text-[11px] font-black text-gray-600 uppercase tracking-tight">{item.category}</span>
                                             <span className="font-black text-rose-600 text-sm">{formatCurrency(item.total)} đ</span>
                                         </div>
@@ -802,7 +802,7 @@ const App: React.FC = () => {
                                     return (
                                         <div key={item.id} className="p-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-all group">
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 ${item.type==='income'?'bg-green-50 text-green-600 shadow-green-100':'bg-red-50 text-red-600 shadow-red-100'}`}>
+                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 ${item.type==='income'?'bg-gradient-to-br from-green-50 to-emerald-100 text-green-600 shadow-green-100':'bg-gradient-to-br from-red-50 to-rose-100 text-red-600 shadow-red-100'}`}>
                                                     {item.type==='income'?<TrendingUp size={22}/>:<TrendingDown size={22}/>}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -835,8 +835,8 @@ const App: React.FC = () => {
                                                         e.stopPropagation();
                                                         setEditingNoteId(item.id);
                                                         setTempNoteValue(item.note || '');
-                                                    }} className="text-[9px] text-blue-400 font-black uppercase tracking-widest hover:text-blue-600 p-1 bg-blue-50 rounded-lg"><Edit2 size={12}/></button>
-                                                    <button onClick={()=>deleteItem(item.id, item.type as any)} className="text-[9px] text-red-400 font-black uppercase tracking-widest hover:text-red-600 p-1 bg-red-50 rounded-lg"><Trash2 size={12}/></button>
+                                                    }} className="text-[9px] text-blue-400 font-black uppercase tracking-widest hover:text-blue-600 p-1 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg"><Edit2 size={12}/></button>
+                                                    <button onClick={()=>deleteItem(item.id, item.type as any)} className="text-[9px] text-red-400 font-black uppercase tracking-widest hover:text-red-600 p-1 bg-gradient-to-br from-red-50 to-red-100 rounded-lg"><Trash2 size={12}/></button>
                                                 </div>
                                             </div>
                                         </div>
@@ -851,7 +851,7 @@ const App: React.FC = () => {
                         <div className="space-y-6 animate-fadeIn mt-2">
                             {/* SYNC STATUS / DEBUG INFO */}
                             {isConnected && (
-                                <div className="bg-slate-800 p-6 rounded-[32px] text-white shadow-xl space-y-3">
+                                <div className="bg-gradient-to-br from-slate-800 to-gray-900 p-6 rounded-[32px] text-white shadow-xl space-y-3">
                                     <div className="flex justify-between items-center border-b border-white/5 pb-3">
                                         <h4 className="text-[10px] font-black uppercase tracking-widest text-blue-400">Trạng thái Cloud</h4>
                                         <span className="text-[9px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-black">ACTIVE</span>
@@ -877,9 +877,9 @@ const App: React.FC = () => {
                             <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 space-y-4">
                                 <h3 className="font-black text-gray-800 border-b border-gray-50 pb-4 flex items-center gap-2 uppercase text-xs tracking-widest"><SettingsIcon size={20} className="text-slate-500"/> Thiết lập hệ thống</h3>
                                 <div className="grid grid-cols-1 gap-3">
-                                    <button onClick={()=>setShowFixedConfig(true)} className="w-full p-4 bg-purple-50 text-purple-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Chi Tiêu Cố Định <Clock size={18}/></button>
-                                    <button onClick={handleExportExcel} className="w-full p-4 bg-green-50 text-green-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Xuất Báo Cáo Excel <FileSpreadsheet size={18}/></button>
-                                    <button onClick={()=>setShowCloudForm(true)} className="w-full p-4 bg-blue-50 text-blue-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Cấu Hình Đám Mây <Cloud size={18}/></button>
+                                    <button onClick={()=>setShowFixedConfig(true)} className="w-full p-4 bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Chi Tiêu Cố Định <Clock size={18}/></button>
+                                    <button onClick={handleExportExcel} className="w-full p-4 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Xuất Báo Cáo Excel <FileSpreadsheet size={18}/></button>
+                                    <button onClick={()=>setShowCloudForm(true)} className="w-full p-4 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Cấu Hình Đám Mây <Cloud size={18}/></button>
                                 </div>
                                 <div className="pt-6 border-t border-gray-50 text-center">
                                     <p className="text-[8px] text-gray-300 font-black uppercase tracking-[0.4em]">CashFlow v2.5 • Private Cloud</p>
@@ -891,7 +891,7 @@ const App: React.FC = () => {
 
                 {/* FAB & Bottom Overlays */}
                 <div className="fixed bottom-8 left-4 z-50 flex flex-col gap-3">
-                    <button onClick={()=>setShowFixedTrackingModal(true)} className="bg-slate-900 text-white p-4 rounded-3xl shadow-2xl border-2 border-white/20 transform hover:rotate-12 transition-all ring-8 ring-slate-900/5">
+                    <button onClick={()=>setShowFixedTrackingModal(true)} className="bg-gradient-to-br from-slate-800 to-black text-white p-4 rounded-3xl shadow-2xl border-2 border-white/20 transform hover:rotate-12 transition-all ring-8 ring-slate-900/5">
                         <MessageCircle size={22}/>
                     </button>
                 </div>
@@ -930,7 +930,7 @@ const App: React.FC = () => {
                                     <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ghi chú:</label>
                                     <input type="text" value={savingNote} onChange={e=>setSavingNote(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl text-sm font-medium outline-none shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="Ví dụ: Tiền thưởng tết..."/>
                                 </div>
-                                <button onClick={handleAddSavings} className="w-full py-4 bg-rose-500 text-white font-black rounded-2xl shadow-lg shadow-rose-200 uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-2">Xác Nhận Nạp</button>
+                                <button onClick={handleAddSavings} className="w-full py-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-black rounded-2xl shadow-lg shadow-rose-200 uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-2">Xác Nhận Nạp</button>
                             </div>
                         </div>
                     </div>
@@ -959,7 +959,7 @@ const App: React.FC = () => {
                                     localStorage.setItem('fb_config', firebaseConfigStr); 
                                     localStorage.setItem('fb_family_code', code); 
                                     window.location.reload();
-                                }} className="w-full py-5 bg-blue-600 text-white font-black rounded-[24px] shadow-xl shadow-blue-100 uppercase text-xs tracking-[0.3em] active:scale-95 transition-all">Lưu & Kết Nối</button>
+                                }} className="w-full py-5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black rounded-[24px] shadow-xl shadow-blue-100 uppercase text-xs tracking-[0.3em] active:scale-95 transition-all">Lưu & Kết Nối</button>
                             </div>
                         </div>
                     </div>
@@ -973,7 +973,7 @@ const App: React.FC = () => {
                             <p className="text-[10px] text-gray-400 font-bold mb-8 uppercase tracking-tight">Dữ liệu sẽ được cập nhật mới nhất từ Đám mây.</p>
                             <div className="flex gap-4">
                                 <button onClick={()=>setShowReloadConfirm(false)} className="flex-1 py-4 bg-gray-50 text-gray-400 font-black rounded-2xl text-[10px] uppercase tracking-widest">Hủy</button>
-                                <button onClick={()=>window.location.reload()} className="flex-1 py-4 bg-blue-600 text-white font-black rounded-2xl text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100">Đồng ý</button>
+                                <button onClick={()=>window.location.reload()} className="flex-1 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black rounded-2xl text-[10px] uppercase tracking-widest shadow-lg shadow-blue-100">Đồng ý</button>
                             </div>
                         </div>
                     </div>
@@ -1043,7 +1043,7 @@ const App: React.FC = () => {
                                         <div key={item.category} className={`bg-white p-5 rounded-[24px] border border-gray-100 shadow-sm transition-all ${done ? 'opacity-60 grayscale' : 'hover:shadow-md'}`}>
                                             <div className="flex justify-between items-start mb-3">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-2 h-8 rounded-full ${done ? 'bg-green-500' : 'bg-indigo-500'}`}></div>
+                                                    <div className={`w-2 h-8 rounded-full ${done ? 'bg-green-500' : 'bg-gradient-to-b from-indigo-500 to-purple-500'}`}></div>
                                                     <div>
                                                         <h4 className="font-black text-gray-800 text-sm uppercase tracking-tight">{item.category}</h4>
                                                         <p className="text-[10px] font-bold text-gray-400 uppercase mt-0.5">Mục tiêu: {formatCurrency(item.amount)}</p>
@@ -1058,7 +1058,7 @@ const App: React.FC = () => {
 
                                             {/* Progress Bar */}
                                             <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden mb-4">
-                                                <div className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ${done ? 'bg-green-500' : (progress > 80 ? 'bg-orange-500' : 'bg-indigo-500')}`} style={{width: `${progress}%`}}></div>
+                                                <div className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ${done ? 'bg-green-500' : (progress > 80 ? 'bg-gradient-to-r from-orange-400 to-red-500' : 'bg-gradient-to-r from-indigo-400 to-purple-500')}`} style={{width: `${progress}%`}}></div>
                                             </div>
 
                                             {/* Input Action */}
@@ -1077,7 +1077,7 @@ const App: React.FC = () => {
                                                     </div>
                                                     <button 
                                                         onClick={() => handleConfirmFixedItem(item, parseAmount(inp))} 
-                                                        className="px-5 py-3 bg-indigo-600 text-white text-[10px] font-black rounded-xl shadow-lg shadow-indigo-200 uppercase tracking-widest active:scale-95 transition-all hover:bg-indigo-700"
+                                                        className="px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-[10px] font-black rounded-xl shadow-lg shadow-indigo-200 uppercase tracking-widest active:scale-95 transition-all hover:to-purple-700"
                                                     >
                                                         Chi
                                                     </button>
@@ -1110,7 +1110,7 @@ const App: React.FC = () => {
                                     </div>
                                 ))}
                             </div>
-                            <button onClick={()=>{saveData(incomes, expenses, Object.entries(tempFixedList).filter(([,a])=>(a as number)>0).map(([c,a])=>({category:c, amount:a as number}))); setShowFixedConfig(false);}} className="w-full py-5 bg-slate-900 text-white font-black rounded-[24px] mt-8 uppercase text-[10px] tracking-[0.3em] shadow-2xl shadow-slate-200 active:scale-95 transition-all">Lưu Cấu Hình</button>
+                            <button onClick={()=>{saveData(incomes, expenses, Object.entries(tempFixedList).filter(([,a])=>(a as number)>0).map(([c,a])=>({category:c, amount:a as number}))); setShowFixedConfig(false);}} className="w-full py-5 bg-gradient-to-r from-slate-800 to-black text-white font-black rounded-[24px] mt-8 uppercase text-[10px] tracking-[0.3em] shadow-2xl shadow-slate-200 active:scale-95 transition-all">Lưu Cấu Hình</button>
                         </div>
                     </div>
                 )}
