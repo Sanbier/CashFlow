@@ -601,10 +601,16 @@ const App: React.FC = () => {
                                                {[...debts]
                                                                     .filter(d => d.total - d.paid > 0)
                                                                     .sort((a, b) => {
-                                                                    if (a.type === 'payable' && b.type !== 'payable') return -1;
-                                                                    if (a.type !== 'payable' && b.type === 'payable') return 1;
-                                                                    return 0;
-                                                                }).map(d => <option key={d.id} value={d.id}>{d.type === 'receivable' ? 'THU: ' : 'TRẢ: '}{d.name}</option>)}
+                                                                        if (a.type === 'payable' && b.type !== 'payable') return -1;
+                                                                        if (a.type !== 'payable' && b.type === 'payable') return 1;
+                                                                        return 0;
+                                                                    })
+                                                                    .map(d => (
+                                                                        <option key={d.id} value={d.id}>
+                                                                            {d.type === 'receivable' ? 'THU: ' : 'TRẢ: '}{d.name} (Còn: {formatCurrency(d.total - d.paid)})
+                                                                        </option>
+                                                                    ))
+                                                                }
                                             </select>
                                         </div>
                                     )}
