@@ -263,10 +263,22 @@ const App: React.FC = () => {
     // Helper Functions
     const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN').format(amount);
     const formatDate = (date: string) => { if(!date) return ''; const d = new Date(date); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; };
+    
+    // CẬP NHẬT LOGIC TÍNH THÁNG TÀI CHÍNH
     const getFiscalRange = (date: Date) => { 
         const year = date.getFullYear(), month = date.getMonth(); 
-        const startDate = new Date(year, month, 1); startDate.setHours(0,0,0,0); 
-        const endDate = new Date(year, month + 1, 0); endDate.setHours(23,59,59,999); 
+        
+        // Ngày bắt đầu: Ngày cuối cùng của tháng trước (Ví dụ view Tháng 1 -> Ngày 31/12)
+        // new Date(year, month, 0) trả về ngày cuối cùng của tháng (month - 1)
+        const startDate = new Date(year, month, 0); 
+        startDate.setHours(0,0,0,0); 
+        
+        // Ngày kết thúc: Ngày kế cuối (áp chót) của tháng hiện tại (Ví dụ view Tháng 1 -> Ngày 30/1)
+        // new Date(year, month + 1, 0) trả về ngày cuối cùng của tháng hiện tại
+        const endDate = new Date(year, month + 1, 0); 
+        endDate.setDate(endDate.getDate() - 1); // Trừ 1 ngày để lấy ngày kế cuối
+        endDate.setHours(23,59,59,999); 
+        
         return { startDate, endDate }; 
     };
     
