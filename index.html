@@ -45,6 +45,14 @@
         }
         .animate-scale-loop { animation: scaleLoop 1.5s infinite ease-in-out; }
 
+        /* Hiệu ứng tiền rơi */
+        @keyframes moneyFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.4; }
+            100% { transform: translateY(150px) rotate(360deg); opacity: 0; }
+        }
+        .animate-money-fall { animation: moneyFall linear infinite; }
+
         body {
             -webkit-tap-highlight-color: transparent;
             background-color: #f9fafb;

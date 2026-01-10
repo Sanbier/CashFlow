@@ -622,8 +622,27 @@ const App: React.FC = () => {
                                             const isPayable = activeDebtTab === 'payable';
 
                                             return (
-                                                <div className={`mb-4 p-4 rounded-2xl text-white shadow-lg bg-gradient-to-r ${isPayable ? 'from-red-500 to-rose-600 shadow-red-200' : 'from-blue-400 to-indigo-500 shadow-blue-200'}`}>
-                                                    <div className="flex justify-between items-end mb-2">
+                                                <div className={`mb-4 p-4 rounded-2xl text-white shadow-lg bg-gradient-to-r ${isPayable ? 'from-red-500 to-rose-600 shadow-red-200' : 'from-blue-400 to-indigo-500 shadow-blue-200'} relative overflow-hidden`}>
+                                                    {/* Animation Layer */}
+                                                    <div className="absolute inset-0 z-0 pointer-events-none">
+                                                        {[...Array(15)].map((_, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className="absolute text-white/20 font-bold animate-money-fall"
+                                                                style={{
+                                                                    left: `${Math.random() * 100}%`,
+                                                                    top: `-${Math.random() * 20}%`,
+                                                                    animationDuration: `${3 + Math.random() * 4}s`,
+                                                                    animationDelay: `${Math.random() * 2}s`,
+                                                                    fontSize: `${10 + Math.random() * 14}px`
+                                                                }}
+                                                            >
+                                                                $
+                                                            </div>
+                                                        ))}
+                                                    </div>
+
+                                                    <div className="flex justify-between items-end mb-2 relative z-10">
                                                         <div>
                                                             <div className="text-[10px] font-black uppercase opacity-80 mb-1">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
                                                             <div className="text-2xl font-black">{formatCurrency(sumTotal)} đ</div>
@@ -633,7 +652,7 @@ const App: React.FC = () => {
                                                             <div className="text-lg font-black">{formatCurrency(sumRemaining)} đ</div>
                                                         </div>
                                                     </div>
-                                                    <div className="bg-white/20 p-2 rounded-xl flex justify-between items-center backdrop-blur-sm">
+                                                    <div className="bg-white/20 p-2 rounded-xl flex justify-between items-center backdrop-blur-sm relative z-10">
                                                         <span className="text-[10px] font-black uppercase">{isPayable ? 'Đã trả được' : 'Đã thu hồi'}</span>
                                                         <span className="text-sm font-black">{formatCurrency(sumPaid)} đ</span>
                                                     </div>
