@@ -319,8 +319,8 @@ const App: React.FC = () => {
         const amt = parseAmount(expenseAmount); if(!expenseCategory || amt <= 0) return;
         let updatedDebts = debts; let finalNote = expenseNote; let linkedDebtId = null; let actionType: any = null;
         
-        // Logic xử lý Cá Nhân (Ba-Mẹ) - Thêm người chi vào ghi chú
-        if (expenseCategory === "Cá Nhân (Ba-Mẹ)") {
+        // Logic xử lý Tiền Cá Nhân - Thêm người chi vào ghi chú
+        if (expenseCategory === "Tiền Cá Nhân") {
             finalNote = `[${whoSpent}] ${expenseNote}`.trim();
         }
 
@@ -598,11 +598,13 @@ const App: React.FC = () => {
                                             <label className="text-[9px] font-black text-blue-700 uppercase mb-1 block tracking-widest pl-1">Người liên quan:</label>
                                             <select value={selectedDebtorId} onChange={(e) => setSelectedDebtorId(e.target.value)} className="w-full p-2.5 bg-white border border-blue-300 rounded-lg text-xs font-black outline-none shadow-sm focus:ring-2 focus:ring-blue-100 transition-all">
                                                 <option value="">-- Chọn Sổ Nợ --</option>
-                                                {[...debts].sort((a, b) => {
-                                                    if (a.type === 'payable' && b.type !== 'payable') return -1;
-                                                    if (a.type !== 'payable' && b.type === 'payable') return 1;
-                                                    return 0;
-                                                }).map(d => <option key={d.id} value={d.id}>{d.type === 'receivable' ? 'THU: ' : 'TRẢ: '}{d.name}</option>)}
+                                               {[...debts]
+                                                                    .filter(d => d.total - d.paid > 0)
+                                                                    .sort((a, b) => {
+                                                                    if (a.type === 'payable' && b.type !== 'payable') return -1;
+                                                                    if (a.type !== 'payable' && b.type === 'payable') return 1;
+                                                                    return 0;
+                                                                }).map(d => <option key={d.id} value={d.id}>{d.type === 'receivable' ? 'THU: ' : 'TRẢ: '}{d.name}</option>)}
                                             </select>
                                         </div>
                                     )}
@@ -612,8 +614,8 @@ const App: React.FC = () => {
                                         <CustomDatePicker value={expenseDate} onChange={e=>setExpenseDate(e.target.value)} className="flex-1" />
                                     </div>
 
-                                    {/* Lựa chọn Ba/Mẹ cho Cá Nhân (Ba-Mẹ) */}
-                                    {expenseCategory === "Cá Nhân (Ba-Mẹ)" && (
+                                    {/* Lựa chọn Ba/Mẹ cho Tiền Cá Nhân */}
+                                    {expenseCategory === "Tiền Cá Nhân" && (
                                         <div className="flex gap-2 animate-fadeIn">
                                             <button 
                                                 onClick={() => setWhoSpent('Ba')} 
