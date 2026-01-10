@@ -531,7 +531,7 @@ const App: React.FC = () => {
                                 <div className="absolute top-0 left-0 w-1.5 h-full bg-red-500"></div>
                                 <div className="flex items-center justify-between mb-3 pl-2">
                                     <div className="flex items-center gap-2 text-red-700 font-bold uppercase text-xs tracking-widest"><TrendingDown size={16}/> 2. Chi Tiêu</div>
-                                    <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[10px] font-bold px-3 py-1 rounded-lg border transition-all ${isCategoryManageMode ? 'bg-red-600 text-white border-red-700 shadow-md' : 'bg-gray-100 text-gray-50'}`}>{isCategoryManageMode ? 'Xong' : 'Quản Lý Mục'}</button>
+                                    <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[10px] font-bold px-3 py-1 rounded-lg border transition-all ${isCategoryManageMode ? 'bg-gray-800 text-white border-gray-700 shadow-md' : 'bg-gradient-to-r from-red-500 to-pink-600 text-white border-transparent shadow-md shadow-red-200'}`}>{isCategoryManageMode ? 'Xong' : 'Quản Lý Mục'}</button>
                                 </div>
                                 <div className="space-y-4 pl-2">
                                     <div className="grid grid-cols-3 gap-2 pr-1">
@@ -550,7 +550,7 @@ const App: React.FC = () => {
                                                         </div>
                                                     </div>
                                                 ) : (
-                                                    <button onClick={() => setExpenseCategory(cat)} className={`category-btn w-full h-full text-[10px] font-bold rounded-lg border transition-all ${expenseCategory === cat ? 'bg-red-600 text-white border-red-600 shadow-lg scale-105 z-10' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>{cat}</button>
+                                                    <button onClick={() => setExpenseCategory(cat)} className={`category-btn w-full h-full text-[10px] font-bold rounded-lg border transition-all ${expenseCategory === cat ? 'bg-red-600 text-white border-red-600 shadow-lg scale-105 z-10 [text-shadow:0_0_5px_rgba(255,255,255,1)]' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>{cat}</button>
                                                 )}
                                             </div>
                                         ))}
