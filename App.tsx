@@ -512,11 +512,11 @@ const App: React.FC = () => {
                     <div className="grid grid-cols-2 gap-4 mt-2">
                         <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/30 backdrop-blur-sm p-4 rounded-2xl border border-green-500/30 shadow-inner">
                             <div className="text-green-300 text-[10px] font-black uppercase mb-1 flex items-center gap-1"><TrendingUp size={12}/> Thu Nhập</div>
-                            <div className="font-bold text-lg">{formatCurrency(sumIncomeMonth)} đ</div>
+                            <div className="font-bold text-lg">{formatCurrency(sumIncomeMonth)} VNĐ</div>
                         </div>
                         <div className="bg-gradient-to-br from-red-500/20 to-orange-500/30 backdrop-blur-sm p-4 rounded-2xl border border-red-500/30 shadow-inner">
                             <div className="text-red-300 text-[10px] font-black uppercase mb-1 flex items-center gap-1"><TrendingDown size={12}/> Chi Tiêu</div>
-                            <div className="font-bold text-lg">{formatCurrency(sumExpenseMonth)} đ</div>
+                            <div className="font-bold text-lg">{formatCurrency(sumExpenseMonth)} VNĐ</div>
                         </div>
                     </div>
 
@@ -604,7 +604,7 @@ const App: React.FC = () => {
                                                 <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-1.5 rounded-lg text-white shadow-sm"><Clock size={12}/></div>
                                                 <span className="text-[10px] font-black text-indigo-700 uppercase tracking-tight">Đã tiêu tháng này :</span>
                                             </div>
-                                            <span className="text-sm font-black text-indigo-800">{formatCurrency(getMonthlyPaidForCategory(expenseCategory))} đ</span>
+                                            <span className="text-sm font-black text-indigo-800">{formatCurrency(getMonthlyPaidForCategory(expenseCategory))} VNĐ</span>
                                         </div>
                                     )}
 
@@ -622,7 +622,7 @@ const App: React.FC = () => {
                                                                     })
                                                                     .map(d => (
                                                                         <option key={d.id} value={d.id}>
-                                                                            {d.type === 'receivable' ? 'THU: ' : 'TRẢ: '}{d.name} (Còn: {formatCurrency(d.total - d.paid)})
+                                                                            {d.type === 'receivable' ? 'THU: ' : 'TRẢ: '}{d.name} (Còn: {formatCurrency(d.total - d.paid)} VNĐ)
                                                                         </option>
                                                                     ))
                                                                 }
@@ -706,16 +706,16 @@ const App: React.FC = () => {
                                                     <div className="flex justify-between items-end mb-2 relative z-10">
                                                         <div>
                                                             <div className="text-[10px] font-black uppercase opacity-80 mb-1">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
-                                                            <div className="text-2xl font-black">{formatCurrency(sumTotal)} đ</div>
+                                                            <div className="text-2xl font-black">{formatCurrency(sumTotal)} VNĐ</div>
                                                         </div>
                                                         <div className="text-right">
                                                             <div className="text-[10px] font-black uppercase opacity-80 mb-1">Còn lại</div>
-                                                            <div className="text-lg font-black">{formatCurrency(sumRemaining)} đ</div>
+                                                            <div className="text-lg font-black">{formatCurrency(sumRemaining)} VNĐ</div>
                                                         </div>
                                                     </div>
                                                     <div className="bg-white/20 p-2 rounded-xl flex justify-between items-center backdrop-blur-sm relative z-10">
                                                         <span className="text-[10px] font-black uppercase">{isPayable ? 'Đã trả được' : 'Đã thu hồi'}</span>
-                                                        <span className="text-sm font-black">{formatCurrency(sumPaid)} đ</span>
+                                                        <span className="text-sm font-black">{formatCurrency(sumPaid)} VNĐ</span>
                                                     </div>
                                                 </div>
                                             );
@@ -770,9 +770,9 @@ const App: React.FC = () => {
                                                         </div>
 
                                                         <div className="flex justify-between items-center text-[10px] font-bold">
-                                                            <span className="text-gray-400">ĐÃ TRẢ: <span className="text-gray-600">{formatCurrency(item.paid)}</span></span>
+                                                            <span className="text-gray-400">ĐÃ TRẢ: <span className="text-gray-600">{formatCurrency(item.paid)} VNĐ</span></span>
                                                             <span className={isDone ? "text-green-500" : "text-gray-400"}>
-                                                                {isDone ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)}`}
+                                                                {isDone ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)} VNĐ`}
                                                             </span>
                                                         </div>
                                                     </div>
@@ -830,7 +830,7 @@ const App: React.FC = () => {
                                             <div key={cat} className="animate-fadeIn">
                                                 <div className="flex justify-between text-[11px] font-black mb-2 uppercase tracking-tight">
                                                     <span className="text-gray-500">{cat}</span>
-                                                    <span className="text-gray-900">{formatCurrency(amt as number)} đ <span className="text-indigo-400 font-bold ml-1">({pct}%)</span></span>
+                                                    <span className="text-gray-900">{formatCurrency(amt as number)} VNĐ <span className="text-indigo-400 font-bold ml-1">({pct}%)</span></span>
                                                 </div>
                                                 <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden border border-gray-50 shadow-inner">
                                                     <div className="bg-gradient-to-r from-indigo-600 to-purple-500 h-full rounded-full transition-all duration-700 ease-out" style={{width: `${Math.min(pct,100)}%`}}></div>
@@ -855,14 +855,14 @@ const App: React.FC = () => {
                                 
                                 <div className="text-center mb-8">
                                     <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Tổng tích lũy</div>
-                                    <div className="text-3xl font-black text-rose-600">{formatCurrency(totalAccumulatedSavings)} đ</div>
+                                    <div className="text-3xl font-black text-rose-600">{formatCurrency(totalAccumulatedSavings)} VNĐ</div>
                                 </div>
 
                                 <div className="space-y-4">
                                     {savingsSummary.map((item) => (
                                         <div key={item.category} className="bg-gradient-to-r from-rose-50 to-pink-50 p-4 rounded-2xl border border-rose-100 flex justify-between items-center">
                                             <span className="text-[11px] font-black text-gray-600 uppercase tracking-tight">{item.category}</span>
-                                            <span className="font-black text-rose-600 text-sm">{formatCurrency(item.total)} đ</span>
+                                            <span className="font-black text-rose-600 text-sm">{formatCurrency(item.total)} VNĐ</span>
                                         </div>
                                     ))}
                                 </div>
@@ -979,7 +979,7 @@ const App: React.FC = () => {
                 <div onClick={()=>setShowReloadConfirm(true)} className="fixed bottom-8 right-4 z-50">
                     <div className={`shadow-2xl rounded-[24px] px-6 py-4 flex items-center gap-4 border-2 border-white/40 transform active:scale-90 transition-all ring-8 ${balance>=0?'bg-gradient-to-r from-blue-700 to-indigo-600 ring-blue-500/10':'bg-gradient-to-r from-red-700 to-orange-600 ring-red-500/10'}`}>
                         <div className="bg-white/20 p-2 rounded-xl"><Wallet size={22} className="text-white"/></div>
-                        <div className="flex flex-col items-start text-white font-black text-xl leading-none tracking-tight">{formatCurrency(balance)} đ</div>
+                        <div className="flex flex-col items-start text-white font-black text-xl leading-none tracking-tight">{formatCurrency(balance)} VNĐ</div>
                     </div>
                 </div>
 
@@ -999,7 +999,7 @@ const App: React.FC = () => {
                                 <div className="flex gap-3">
                                     <div className="flex-1">
                                         <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Số tiền:</label>
-                                        <input type="text" value={savingAmount} onChange={e=>handleAmountInput(e.target.value, setSavingAmount)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-black text-lg text-rose-600 outline-none shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="0 đ"/>
+                                        <input type="text" value={savingAmount} onChange={e=>handleAmountInput(e.target.value, setSavingAmount)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-black text-lg text-rose-600 outline-none shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="0 VNĐ"/>
                                     </div>
                                     <div className="flex-1">
                                          <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ngày:</label>
@@ -1186,7 +1186,7 @@ const App: React.FC = () => {
                                 {categories.map(cat => (
                                     <div key={cat} className="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl border border-gray-100 group">
                                         <span className="flex-1 text-[10px] font-black text-gray-500 uppercase truncate tracking-tighter">{cat}</span>
-                                        <input type="text" inputMode="numeric" value={tempFixedList[cat] ? formatCurrency(tempFixedList[cat]) : (fixedTemplate.find(f => f.category === cat)?.amount ? formatCurrency(fixedTemplate.find(f => f.category === cat)!.amount) : '')} onChange={(e) => handleAmountInput(e.target.value, (v)=>setTempFixedList(p=>({...p, [cat]: parseAmount(v)})))} className="w-24 p-2 bg-white border-2 border-gray-300 rounded-xl text-[11px] font-black text-right text-purple-700 outline-none focus:border-purple-300 transition-all" placeholder="0 đ"/>
+                                        <input type="text" inputMode="numeric" value={tempFixedList[cat] ? formatCurrency(tempFixedList[cat]) : (fixedTemplate.find(f => f.category === cat)?.amount ? formatCurrency(fixedTemplate.find(f => f.category === cat)!.amount) : '')} onChange={(e) => handleAmountInput(e.target.value, (v)=>setTempFixedList(p=>({...p, [cat]: parseAmount(v)})))} className="w-24 p-2 bg-white border-2 border-gray-300 rounded-xl text-[11px] font-black text-right text-purple-700 outline-none focus:border-purple-300 transition-all" placeholder="0 VNĐ"/>
                                     </div>
                                 ))}
                             </div>
