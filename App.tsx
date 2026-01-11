@@ -319,8 +319,8 @@ const App: React.FC = () => {
         const amt = parseAmount(expenseAmount); if(!expenseCategory || amt <= 0) return;
         let updatedDebts = debts; let finalNote = expenseNote; let linkedDebtId = null; let actionType: any = null;
         
-        // Logic xử lý Tiền Cá Nhân - Thêm người chi vào ghi chú
-        if (expenseCategory === "Tiền Cá Nhân") {
+        // Logic xử lý Cá Nhân (Ba-Mẹ - Thêm người chi vào ghi chú
+        if (expenseCategory === "Cá Nhân (Ba-Mẹ") {
             finalNote = `[${whoSpent}] ${expenseNote}`.trim();
         }
 
@@ -620,8 +620,8 @@ const App: React.FC = () => {
                                         <CustomDatePicker value={expenseDate} onChange={e=>setExpenseDate(e.target.value)} className="flex-1" />
                                     </div>
 
-                                    {/* Lựa chọn Ba/Mẹ cho Tiền Cá Nhân */}
-                                    {expenseCategory === "Tiền Cá Nhân" && (
+                                    {/* Lựa chọn Ba/Mẹ cho Cá Nhân (Ba-Mẹ */}
+                                    {expenseCategory === "Cá Nhân (Ba-Mẹ" && (
                                         <div className="flex gap-2 animate-fadeIn">
                                             <button 
                                                 onClick={() => setWhoSpent('Ba')} 
