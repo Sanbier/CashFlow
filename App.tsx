@@ -4,54 +4,34 @@ import {
   DEBT_CATEGORY_NAME, 
   SAVING_CATEGORIES, 
   DEFAULT_CATEGORIES, 
-  Plus, 
-  Trash2, 
   Wallet, 
   TrendingUp, 
   TrendingDown, 
   CalendarIcon, 
-  PieChart, 
-  History, 
-  Save, 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronUp, 
-  ChevronDown, 
   RefreshCw, 
   SettingsIcon, 
-  Download, 
-  Upload, 
-  Edit2, 
-  Search, 
   AlertTriangle, 
   X, 
   Cloud, 
   CloudOff, 
-  FileSpreadsheet, 
-  BookOpen, 
   PiggyBank, 
-  Users, 
   MessageCircle, 
   Clock,
-  Activity,
-  Check
+  ChevronLeft,
+  ChevronRight
 } from './constants';
 import { Income, Expense, Debt, FixedTemplateItem, TabType } from './types';
+import { formatCurrency, formatDate, parseAmount, handleAmountInput, getCombinedDate, handleTextInput } from './utils';
+import CustomDatePicker from './components/CustomDatePicker';
+import TabAdd from './components/TabAdd';
+import TabDebt from './components/TabDebt';
+import TabHistory from './components/TabHistory';
+import TabReport from './components/TabReport';
+import TabSavings from './components/TabSavings';
+import TabSettings from './components/TabSettings';
 
 declare const firebase: any;
 declare const XLSX: any;
-
-const CustomDatePicker: React.FC<{ value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; className?: string }> = ({ value, onChange, className="" }) => {
-    const displayDate = value ? value.split('-').reverse().join('/') : '';
-    return (
-        <div className={`relative h-12 ${className}`}> 
-            <input type="date" value={value} onChange={onChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"/>
-            <div className="w-full h-full p-3 bg-white border border-gray-300 rounded-xl text-sm font-medium text-gray-700 flex items-center justify-center pointer-events-none gap-2 shadow-sm transition-all duration-200"> 
-                <span>{displayDate}</span><CalendarIcon size={16} className="opacity-70 text-gray-500"/>
-            </div>
-        </div>
-    );
-};
 
 const App: React.FC = () => {
     const getLocalToday = () => {
@@ -76,37 +56,14 @@ const App: React.FC = () => {
         return today;
     });
     
-    const [incomeSource, setIncomeSource] = useState(''); 
-    const [incomeAmount, setIncomeAmount] = useState(''); 
-    const [incomeDate, setIncomeDate] = useState(getLocalToday()); 
-    const [incomeNote, setIncomeNote] = useState('');
-    
-    const [expenseCategory, setExpenseCategory] = useState(''); 
-    const [expenseAmount, setExpenseAmount] = useState(''); 
-    const [expenseDate, setExpenseDate] = useState(getLocalToday()); 
-    const [expenseNote, setExpenseNote] = useState('');
-    const [selectedDebtorId, setSelectedDebtorId] = useState('');
-    const [whoSpent, setWhoSpent] = useState<'Ba' | 'Mẹ'>('Ba'); // State mới cho việc chọn Ba hoặc Mẹ
-    
     const [activeTab, setActiveTab] = useState<TabType>('add');
-    const [editingId, setEditingId] = useState<number | null>(null); 
-    const [editingType, setEditingType] = useState<'income' | 'expense' | null>(null);
-    const [searchTerm, setSearchTerm] = useState(''); 
-    const [filterCategory, setFilterCategory] = useState('all');
     const [showReloadConfirm, setShowReloadConfirm] = useState(false);
     const [showFixedConfig, setShowFixedConfig] = useState(false);
     const [showFixedTrackingModal, setShowFixedTrackingModal] = useState(false); 
     const [tempFixedList, setTempFixedList] = useState<Record<string, number>>({});
     const [fixedPaymentInputs, setFixedPaymentInputs] = useState<Record<string, string>>({});
 
-    // Editing Note States
-    const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
-    const [tempNoteValue, setTempNoteValue] = useState('');
-
-    // Debt Expansion State
-    const [expandedDebtIds, setExpandedDebtIds] = useState<number[]>([]);
-
-    // Saving States
+    // Saving States for Modal
     const [showSavingForm, setShowSavingForm] = useState(false);
     const [savingAmount, setSavingAmount] = useState('');
     const [savingCategory, setSavingCategory] = useState(SAVING_CATEGORIES[0]);
@@ -121,16 +78,6 @@ const App: React.FC = () => {
     const [showCloudForm, setShowCloudForm] = useState(false);
     const [syncError, setSyncError] = useState<string | null>(null);
     const [projectId, setProjectId] = useState<string>('');
-
-    const [isCategoryManageMode, setIsCategoryManageMode] = useState(false);
-    const [debtName, setDebtName] = useState('');
-    const [debtTotal, setDebtTotal] = useState('');
-    const [debtPaid, setDebtPaid] = useState('');
-    const [debtNote, setDebtNote] = useState('');
-    const [debtType, setDebtType] = useState<'payable' | 'receivable'>('payable');
-    const [isEditingDebt, setIsEditingDebt] = useState<number | null>(null);
-    const [showDebtForm, setShowDebtForm] = useState(false);
-    const [activeDebtTab, setActiveDebtTab] = useState<'payable' | 'receivable'>('payable');
     const [autoCreateTransaction, setAutoCreateTransaction] = useState(true);
 
     const dbRef = useRef<any>(null);
@@ -172,12 +119,9 @@ const App: React.FC = () => {
                 setIsSyncing(true);
                 setSyncError(null);
 
-                // Quan trọng: Sử dụng onSnapshot với includeMetadataChanges để bắt kịp mọi thay đổi
                 const unsubscribe = db.collection('families').doc(familyCode).onSnapshot((doc: any) => {
                     if (doc.exists) { 
                         const data = doc.data(); 
-                        
-                        // CẬP NHẬT GIAO DIỆN TỪ CLOUD
                         setIncomes(data.incomes || []); 
                         setExpenses(data.expenses || []); 
                         setFixedTemplate(data.fixedTemplate || []);
@@ -185,17 +129,14 @@ const App: React.FC = () => {
                         setDebts(data.debts || []);
                         setFixedTracking(data.fixedTracking || {});
 
-                        // CẬP NHẬT LOCALSTORAGE
                         localStorage.setItem('family_incomes', JSON.stringify(data.incomes || []));
                         localStorage.setItem('family_expenses', JSON.stringify(data.expenses || []));
                         localStorage.setItem('family_fixed_template', JSON.stringify(data.fixedTemplate || []));
                         localStorage.setItem('family_categories', JSON.stringify(data.categories || DEFAULT_CATEGORIES));
                         localStorage.setItem('family_debts', JSON.stringify(data.debts || []));
                         localStorage.setItem('family_fixed_tracking', JSON.stringify(data.fixedTracking || {}));
-                        
                         setSyncError(null);
                     } else { 
-                        // Nếu chưa có tài liệu, ĐẨY DỮ LIỆU LOCAL LÊN (Chỉ thực hiện nếu local có dữ liệu)
                         if (localData.incomes.length > 0 || localData.expenses.length > 0 || localData.debts.length > 0) {
                             db.collection('families').doc(familyCode).set({ 
                                 incomes: localData.incomes, 
@@ -223,9 +164,7 @@ const App: React.FC = () => {
         }
     }, [firebaseConfigStr, familyCode]);
 
-    // Save Data Handler (Atomic Updates)
     const saveData = (newIncomes: Income[], newExpenses: Expense[], newFixed = fixedTemplate, newCats = categories, newDebts = debts, newTracking = fixedTracking) => {
-        // Cập nhật State tức thì để UI không bị delay
         setIncomes(newIncomes); 
         setExpenses(newExpenses); 
         setFixedTemplate(newFixed); 
@@ -233,7 +172,6 @@ const App: React.FC = () => {
         setDebts(newDebts); 
         setFixedTracking(newTracking);
 
-        // Lưu Local dự phòng
         localStorage.setItem('family_incomes', JSON.stringify(newIncomes));
         localStorage.setItem('family_expenses', JSON.stringify(newExpenses));
         localStorage.setItem('family_fixed_template', JSON.stringify(newFixed));
@@ -241,7 +179,6 @@ const App: React.FC = () => {
         localStorage.setItem('family_debts', JSON.stringify(newDebts));
         localStorage.setItem('family_fixed_tracking', JSON.stringify(newTracking));
         
-        // Đồng bộ Cloud
         if (isConnected && dbRef.current && familyCode) {
             setIsSyncing(true);
             dbRef.current.collection('families').doc(familyCode).set({ 
@@ -261,100 +198,74 @@ const App: React.FC = () => {
         }
     };
 
-    // Helper Functions
-    const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN').format(amount);
-    const formatDate = (date: string) => { if(!date) return ''; const d = new Date(date); return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; };
-    
-    // CẬP NHẬT LOGIC TÍNH THÁNG TÀI CHÍNH
     const getFiscalRange = (date: Date) => { 
         const year = date.getFullYear(), month = date.getMonth(); 
-        
-        // Ngày bắt đầu: Ngày cuối cùng của tháng trước (Ví dụ view Tháng 1 -> Ngày 31/12)
-        // new Date(year, month, 0) trả về ngày cuối cùng của tháng (month - 1)
         const startDate = new Date(year, month, 0); 
         startDate.setHours(0,0,0,0); 
-        
-        // Ngày kết thúc: Ngày kế cuối (áp chót) của tháng hiện tại (Ví dụ view Tháng 1 -> Ngày 30/1)
-        // new Date(year, month + 1, 0) trả về ngày cuối cùng của tháng hiện tại
         const endDate = new Date(year, month + 1, 0); 
-        endDate.setDate(endDate.getDate() - 1); // Trừ 1 ngày để lấy ngày kế cuối
+        endDate.setDate(endDate.getDate() - 1); 
         endDate.setHours(23,59,59,999); 
-        
         return { startDate, endDate }; 
     };
     
     const { startDate, endDate } = useMemo(() => getFiscalRange(viewDate), [viewDate]);
 
     const { filteredIncomes, filteredExpenses } = useMemo(() => {
-        const filter = (items: any[], type: 'income' | 'expense') => items.filter(item => {
+        const filter = (items: any[]) => items.filter(item => {
             const d = new Date(item.date);
-            if (!(d >= startDate && d <= endDate)) return false;
-            const searchLower = searchTerm.toLowerCase();
-            const itemText = (type === 'income' ? item.source : item.category).toLowerCase();
-            const itemNote = (item.note || '').toLowerCase();
-            const itemAmount = item.amount.toString();
-            return (searchTerm === '' || itemText.includes(searchLower) || itemNote.includes(searchLower) || itemAmount.includes(searchLower)) && (filterCategory === 'all' || (type === 'expense' && item.category === filterCategory) || (type === 'income' && filterCategory === 'income_type'));
+            return (d >= startDate && d <= endDate);
         });
-        return { filteredIncomes: filter(incomes, 'income'), filteredExpenses: filter(expenses, 'expense') };
-    }, [incomes, expenses, startDate, endDate, searchTerm, filterCategory]);
+        return { filteredIncomes: filter(incomes), filteredExpenses: filter(expenses) };
+    }, [incomes, expenses, startDate, endDate]);
 
     const sumIncomeMonth = useMemo(() => filteredIncomes.reduce((a, c) => a + c.amount, 0), [filteredIncomes]);
     const sumExpenseMonth = useMemo(() => filteredExpenses.reduce((a, c) => a + c.amount, 0), [filteredExpenses]);
     const balance = sumIncomeMonth - sumExpenseMonth;
     const isOverBudget = sumIncomeMonth > 0 && (sumExpenseMonth / sumIncomeMonth) > 0.9;
+    
+    const totalAccumulatedSavings = useMemo(() => SAVING_CATEGORIES.map(cat => expenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0)).reduce((acc, curr) => acc + curr, 0), [expenses]);
 
-    const parseAmount = (val: string) => val ? parseInt(val.replace(/\./g,''), 10) : 0;
-    const handleAmountInput = (val: string, setter: (v: string) => void) => { const raw = val.replace(/\D/g,''); setter(raw === '' ? '' : Number(raw).toLocaleString('vi-VN')); };
-    const getCombinedDate = (dateInput: string) => { const d = new Date(dateInput); const now = new Date(); d.setHours(now.getHours(), now.getMinutes(), now.getSeconds()); return d.toISOString(); };
-
-    // New Helper: Convert Text to Title Case
-    const toTitleCase = (str: string) => {
-        return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    const getMonthlyPaidForCategory = (catName: string) => {
+        return filteredExpenses.filter(e => e.category === catName).reduce((acc, item) => acc + item.amount, 0);
     };
 
-    const handleTextInput = (val: string, setter: (v: string) => void) => {
-        setter(toTitleCase(val));
+    // Handlers passed to Tabs
+    const onAddIncome = (source: string, amount: number, dateInput: string, note: string) => {
+         const newItem: Income = { id: Date.now(), source, amount, date: getCombinedDate(dateInput), note };
+         saveData([newItem, ...incomes], expenses);
     };
 
-    // Action Handlers
-    const handleAddIncome = () => {
-        const amt = parseAmount(incomeAmount); if(!incomeSource || amt <= 0) return;
-        const newItem: Income = { id: editingId || Date.now(), source: incomeSource, amount: amt, date: getCombinedDate(incomeDate), note: incomeNote };
-        const newIncomes = editingId && editingType === 'income' ? incomes.map(i => i.id === editingId ? newItem : i) : [newItem, ...incomes];
-        saveData(newIncomes, expenses); resetForm();
-    };
-
-    const handleAddExpense = () => {
-        const amt = parseAmount(expenseAmount); if(!expenseCategory || amt <= 0) return;
-        let updatedDebts = debts; let finalNote = expenseNote; let linkedDebtId = null; let actionType: any = null;
+    const onAddExpense = (category: string, amount: number, dateInput: string, note: string, whoSpent: 'Ba' | 'Mẹ', selectedDebtorId: string) => {
+        let updatedDebts = debts; 
+        let finalNote = note; 
+        let linkedDebtId = null; 
+        let actionType: any = null;
         
-        // Logic xử lý Cá Nhân (Ba-Mẹ) - Thêm người chi vào ghi chú
-        if (expenseCategory === "Cá Nhân (Ba-Mẹ)") {
-            finalNote = `[${whoSpent}] ${expenseNote}`.trim();
+        if (category === "Cá Nhân (Ba-Mẹ)") {
+            finalNote = `[${whoSpent}] ${note}`.trim();
         }
 
-        if (expenseCategory === DEBT_CATEGORY_NAME) {
+        if (category === DEBT_CATEGORY_NAME) {
             if (!selectedDebtorId) { alert("Vui lòng chọn người liên quan!"); return; }
             const debtItem = debts.find(d => d.id === Number(selectedDebtorId));
             if (debtItem) {
                 linkedDebtId = debtItem.id;
                 if (debtItem.type === 'receivable') {
-                    const newPaid = debtItem.paid + amt;
+                    const newPaid = debtItem.paid + amount;
                     updatedDebts = debts.map(d => d.id === debtItem.id ? { ...d, paid: newPaid, updatedAt: new Date().toISOString() } : d);
-                    const newItem: Income = { id: Date.now(), source: `Thu nợ: ${debtItem.name}`, amount: amt, date: getCombinedDate(expenseDate), note: `Nhận lại nợ: ${debtItem.name} ${expenseNote ? '- ' + expenseNote : ''}`, relatedDebtId: linkedDebtId, debtAction: 'collect' }; 
+                    const newItem: Income = { id: Date.now(), source: `Thu nợ: ${debtItem.name}`, amount: amount, date: getCombinedDate(dateInput), note: `Nhận lại nợ: ${debtItem.name} ${note ? '- ' + note : ''}`, relatedDebtId: linkedDebtId, debtAction: 'collect' }; 
                     saveData([newItem, ...incomes], expenses, fixedTemplate, categories, updatedDebts);
-                    alert("Đã ghi nhận thu nhập từ thu nợ!"); resetForm(); return;
+                    alert("Đã ghi nhận thu nhập từ thu nợ!"); return;
                 } else {
-                    const newPaid = debtItem.paid + amt;
+                    const newPaid = debtItem.paid + amount;
                     updatedDebts = debts.map(d => d.id === debtItem.id ? { ...d, paid: newPaid, updatedAt: new Date().toISOString() } : d);
-                    finalNote = `Trả nợ: ${debtItem.name} ${expenseNote ? '- ' + expenseNote : ''}`;
+                    finalNote = `Trả nợ: ${debtItem.name} ${note ? '- ' + note : ''}`;
                     actionType = 'repay';
                 }
             }
         }
-        const newItem: Expense = { id: editingId || Date.now(), category: expenseCategory, amount: amt, date: getCombinedDate(expenseDate), note: finalNote, relatedDebtId: linkedDebtId, debtAction: actionType };
-        const newExpenses = editingId && editingType === 'expense' ? expenses.map(e => e.id === editingId ? newItem : e) : [newItem, ...expenses];
-        saveData(incomes, newExpenses, fixedTemplate, categories, updatedDebts); resetForm();
+        const newItem: Expense = { id: Date.now(), category: category, amount: amount, date: getCombinedDate(dateInput), note: finalNote, relatedDebtId: linkedDebtId, debtAction: actionType };
+        saveData(incomes, [newItem, ...expenses], fixedTemplate, categories, updatedDebts);
     };
 
     const handleAddSavings = () => {
@@ -367,14 +278,52 @@ const App: React.FC = () => {
             date: getCombinedDate(savingDate),
             note: savingNote
         };
-        // Tiết kiệm thực chất là một khoản chi (Expenses) trong hệ thống
         saveData(incomes, [newItem, ...expenses], fixedTemplate, categories, debts);
         setSavingAmount(''); setSavingNote(''); setShowSavingForm(false);
     };
 
-    const resetForm = () => { setIncomeSource(''); setIncomeAmount(''); setIncomeNote(''); setExpenseCategory(''); setExpenseAmount(''); setExpenseNote(''); setEditingId(null); setEditingType(null); setSelectedDebtorId(''); };
+    // Callback from TabDebt logic
+    // We overload onUpdateDebts slightly to pass signals from TabDebt
+    const handleUpdateDebts = (newDebts: Debt[] | null, newItem?: Debt, isEditId?: number | null) => {
+        if (newDebts) {
+            // This is a delete action or direct update
+            saveData(incomes, expenses, fixedTemplate, categories, newDebts);
+            return;
+        }
 
-    const getMonthlyPaidForCategory = (cat: string) => filteredExpenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0);
+        if (newItem) {
+            // Logic for Saving/Creating Debt Item and AutoSync
+            let currentIncomes = [...incomes]; 
+            let currentExpenses = [...expenses];
+            
+            if (autoCreateTransaction) {
+                const old = isEditId ? debts.find(d => d.id === isEditId) : null;
+                const oldPaid = old ? old.paid : 0; 
+                const oldTotal = old ? old.total : 0;
+                
+                if (newItem.type === 'receivable') {
+                    if (newItem.total > oldTotal) currentExpenses.unshift({ id: Date.now(), category: DEBT_CATEGORY_NAME, amount: newItem.total - oldTotal, date: new Date().toISOString(), note: `Cho vay thêm: ${newItem.name}`, debtAction: 'lend' });
+                    if (newItem.paid > oldPaid) currentIncomes.unshift({ id: Date.now() + 1, source: `Thu nợ: ${newItem.name}`, amount: newItem.paid - oldPaid, date: new Date().toISOString(), debtAction: 'collect' });
+                } else if (newItem.paid > oldPaid) {
+                    currentExpenses.unshift({ id: Date.now(), category: DEBT_CATEGORY_NAME, amount: newItem.paid - oldPaid, date: new Date().toISOString(), note: `Trả nợ: ${newItem.name}`, debtAction: 'repay' });
+                }
+            }
+
+            const finalDebts = isEditId ? debts.map(d => d.id === isEditId ? newItem : d) : [newItem, ...debts];
+            saveData(currentIncomes, currentExpenses, fixedTemplate, categories, finalDebts);
+        }
+    };
+
+    const deleteItem = (id: number, type: 'income' | 'expense') => {
+        if (!confirm('Xóa giao dịch này?')) return;
+        if (type === 'income') saveData(incomes.filter(i => i.id !== id), expenses);
+        else saveData(incomes, expenses.filter(e => e.id !== id));
+    };
+
+    const updateNote = (id: number, type: 'income' | 'expense', newNote: string) => {
+        if (type === 'income') saveData(incomes.map(i => i.id === id ? { ...i, note: newNote } : i), expenses);
+        else saveData(incomes, expenses.map(e => e.id === id ? { ...e, note: newNote } : e));
+    };
 
     const handleConfirmFixedItem = (item: FixedTemplateItem, confirmedAmount: number) => {
         if (!confirmedAmount || confirmedAmount <= 0) return;
@@ -388,94 +337,6 @@ const App: React.FC = () => {
         setFixedPaymentInputs(prev => ({...prev, [item.category]: ''}));
     };
 
-    const handleSaveDebt = () => {
-        const total = parseAmount(debtTotal); const paid = parseAmount(debtPaid);
-        if (!debtName || total <= 0) { alert("Nhập tên và tổng nợ hợp lệ."); return; }
-        
-        if (!isEditingDebt) {
-            const existing = debts.find(d => d.name.trim().toLowerCase() === debtName.trim().toLowerCase() && d.type === debtType);
-            if (existing && confirm(`Cộng dồn vào hồ sơ "${existing.name}"?`)) {
-                saveData(incomes, expenses, fixedTemplate, categories, debts.map(d => d.id === existing.id ? { ...d, total: d.total + total, paid: d.paid + paid, updatedAt: new Date().toISOString() } : d));
-                setShowDebtForm(false); return;
-            }
-        }
-
-        let currentIncomes = [...incomes]; let currentExpenses = [...expenses];
-        if (autoCreateTransaction) {
-            const old = isEditingDebt ? debts.find(d => d.id === isEditingDebt) : null;
-            const oldPaid = old ? old.paid : 0; const oldTotal = old ? old.total : 0;
-            if (debtType === 'receivable') {
-                if (total > oldTotal) currentExpenses.unshift({ id: Date.now(), category: DEBT_CATEGORY_NAME, amount: total - oldTotal, date: new Date().toISOString(), note: `Cho vay thêm: ${debtName}`, debtAction: 'lend' });
-                if (paid > oldPaid) currentIncomes.unshift({ id: Date.now() + 1, source: `Thu nợ: ${debtName}`, amount: paid - oldPaid, date: new Date().toISOString(), debtAction: 'collect' });
-            } else if (paid > oldPaid) {
-                currentExpenses.unshift({ id: Date.now(), category: DEBT_CATEGORY_NAME, amount: paid - oldPaid, date: new Date().toISOString(), note: `Trả nợ: ${debtName}`, debtAction: 'repay' });
-            }
-        }
-
-        const newItem: Debt = { id: isEditingDebt || Date.now(), name: debtName, total, paid, note: debtNote, type: debtType, updatedAt: new Date().toISOString() };
-        saveData(currentIncomes, currentExpenses, fixedTemplate, categories, isEditingDebt ? debts.map(d => d.id === isEditingDebt ? newItem : d) : [newItem, ...debts]);
-        setShowDebtForm(false); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote('');
-    };
-
-    const handleMoveCategory = (index: number, direction: 'up' | 'down' | 'left' | 'right') => {
-        let targetIndex = index;
-        if (direction === 'left') targetIndex = index - 1;
-        else if (direction === 'right') targetIndex = index + 1;
-        else if (direction === 'up') targetIndex = index - 3;
-        else if (direction === 'down') targetIndex = index + 3;
-
-        if (targetIndex >= 0 && targetIndex < categories.length) {
-            const newCats = [...categories];
-            [newCats[index], newCats[targetIndex]] = [newCats[targetIndex], newCats[index]];
-            saveData(incomes, expenses, fixedTemplate, newCats);
-        }
-    };
-
-    const handleDeleteCategory = (catToDelete: string) => {
-        if (!confirm(`Xác nhận xóa danh mục "${catToDelete}"?`)) return;
-        saveData(incomes, expenses, fixedTemplate, categories.filter(c => c !== catToDelete));
-    };
-
-    const handleRenameCategory = (oldName: string) => {
-        const rawName = prompt(`Sửa tên danh mục:`, oldName);
-        if (rawName) {
-            const newName = toTitleCase(rawName);
-            if (newName !== oldName) {
-                saveData(incomes, expenses, fixedTemplate, categories.map(c => c === oldName ? newName : c));
-            }
-        }
-    };
-
-    const handleAddCustomCategory = () => {
-        const rawName = prompt("Nhập tên danh mục mới:");
-        if (rawName) {
-            const name = toTitleCase(rawName);
-            if (!categories.includes(name)) saveData(incomes, expenses, fixedTemplate, [...categories, name]);
-        }
-    };
-
-    const deleteItem = (id: number, type: 'income' | 'expense') => {
-        if (!confirm('Xóa giao dịch này?')) return;
-        if (type === 'income') saveData(incomes.filter(i => i.id !== id), expenses);
-        else saveData(incomes, expenses.filter(e => e.id !== id));
-    };
-
-    const handleSaveNote = (id: number, type: 'income' | 'expense') => {
-        if (type === 'income') {
-            const newIncomes = incomes.map(i => i.id === id ? { ...i, note: tempNoteValue } : i);
-            saveData(newIncomes, expenses);
-        } else {
-            const newExpenses = expenses.map(e => e.id === id ? { ...e, note: tempNoteValue } : e);
-            saveData(incomes, newExpenses);
-        }
-        setEditingNoteId(null);
-        setTempNoteValue('');
-    };
-
-    const toggleDebtExpansion = (id: number) => {
-        setExpandedDebtIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
-    };
-
     const handleExportExcel = () => {
         if (typeof XLSX === 'undefined') { alert("Lỗi tải thư viện"); return; }
         const wb = XLSX.utils.book_new();
@@ -486,19 +347,12 @@ const App: React.FC = () => {
         XLSX.writeFile(wb, `BaoCao_${viewDate.getMonth()+1}.xlsx`);
     };
 
-    // Calculate total savings from ALL TIME (not just current view month)
-    const savingsSummary = useMemo(() => SAVING_CATEGORIES.map(cat => ({ 
-        category: cat, 
-        total: expenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0) 
-    })), [expenses]);
-    
-    const totalAccumulatedSavings = useMemo(() => savingsSummary.reduce((acc, curr) => acc + curr.total, 0), [savingsSummary]);
-
     return (
         <div className="min-h-screen pb-24 md:pb-0 relative font-sans overflow-x-hidden">
             <div className="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative">
                 {isOverBudget && <div className="bg-red-50 text-red-600 px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 animate-pulse-red border-b border-red-100"><AlertTriangle size={16} /> CHI TIÊU QUÁ HẠN MỨC 90%!</div>}
                 
+                {/* Header Section */}
                 <div className={`bg-gradient-to-r ${isConnected ? 'from-blue-800 to-indigo-900' : 'from-slate-700 to-gray-800'} p-6 pb-6 text-white rounded-b-3xl shadow-lg relative`}>
                     <div className="flex items-center justify-between mb-4">
                         <button onClick={()=>setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 15))} className="p-2 text-white/70 hover:text-white btn-effect"><ChevronLeft size={24}/></button>
@@ -550,423 +404,12 @@ const App: React.FC = () => {
                 </div>
 
                 <div className="p-4 pb-32">
-                    {activeTab === 'add' && (
-                        <div className="space-y-6 animate-fadeIn mt-2">
-                            {/* Nhập Thu Nhập */}
-                            <div className="bg-white border border-green-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-green-400 to-green-600"></div>
-                                <div className="flex items-center gap-2 text-green-700 font-bold mb-3 uppercase text-xs tracking-widest"><TrendingUp size={16}/> 1. Thu Nhập</div>
-                                <div className="space-y-3 pl-2">
-                                    <input type="text" placeholder="Nguồn thu (Lương, Thưởng...)" value={incomeSource} onChange={e=>handleTextInput(e.target.value, setIncomeSource)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"/>
-                                    <div className="flex gap-3">
-                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={incomeAmount} onChange={e=>handleAmountInput(e.target.value, setIncomeAmount)} className="w-1/2 p-3 bg-white border border-gray-300 rounded-xl font-black text-gray-700 text-lg input-effect focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"/>
-                                        <CustomDatePicker value={incomeDate} onChange={e=>setIncomeDate(e.target.value)} className="flex-1" />
-                                    </div>
-                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={incomeNote} onChange={e=>handleTextInput(e.target.value, setIncomeNote)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none transition-all"/>
-                                    <button onClick={handleAddIncome} disabled={!incomeSource || !incomeAmount} className="w-full py-3.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black rounded-xl shadow-lg shadow-green-200 btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Thu Nhập</button>
-                                </div>
-                            </div>
-                            
-                            {/* Nhập Chi Tiêu */}
-                            <div className="bg-white border border-red-100 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-                                <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-red-400 to-red-600"></div>
-                                <div className="flex items-center justify-between mb-3 pl-2">
-                                    <div className="flex items-center gap-2 text-red-700 font-bold uppercase text-xs tracking-widest"><TrendingDown size={16}/> 2. Chi Tiêu</div>
-                                    <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[10px] font-bold px-3 py-1 rounded-lg border transition-all ${isCategoryManageMode ? 'bg-gray-800 text-white border-gray-700 shadow-md' : 'bg-gradient-to-r from-red-500 to-pink-600 text-white border-transparent shadow-md shadow-red-200'}`}>{isCategoryManageMode ? 'Xong' : 'Quản Lý Mục'}</button>
-                                </div>
-                                <div className="space-y-4 pl-2">
-                                    <div className="grid grid-cols-3 gap-2 pr-1">
-                                        {categories.map((cat, idx) => (
-                                            <div key={cat} className="relative h-[72px]">
-                                                {isCategoryManageMode ? (
-                                                    <div className="absolute inset-0 bg-white border border-gray-200 rounded-lg flex flex-col items-center justify-between p-1 z-20 shadow-sm animate-fadeIn">
-                                                        <span className="text-[7px] font-extrabold text-gray-400 truncate w-full text-center uppercase tracking-tighter">{cat}</span>
-                                                        <div className="grid grid-cols-3 gap-0.5 w-full place-items-center">
-                                                            <button onClick={() => handleMoveCategory(idx, 'up')} className="p-0.5 text-gray-400"><ChevronUp size={12}/></button>
-                                                            <button onClick={() => handleRenameCategory(cat)} className="p-0.5 text-blue-500"><Edit2 size={10}/></button>
-                                                            <button onClick={() => handleMoveCategory(idx, 'down')} className="p-0.5 text-gray-400"><ChevronDown size={12}/></button>
-                                                            <button onClick={() => handleMoveCategory(idx, 'left')} className="p-0.5 text-gray-400"><ChevronLeft size={12}/></button>
-                                                            <button onClick={() => handleDeleteCategory(cat)} className="p-0.5 text-red-500"><Trash2 size={12}/></button>
-                                                            <button onClick={() => handleMoveCategory(idx, 'right')} className="p-0.5 text-gray-400"><ChevronRight size={12}/></button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    <button onClick={() => setExpenseCategory(cat)} className={`category-btn w-full h-full text-[10px] font-bold rounded-lg border transition-all ${expenseCategory === cat ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white border-red-600 shadow-lg scale-105 z-10 [text-shadow:0_0_5px_rgba(255,255,255,1)]' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}>{cat}</button>
-                                                )}
-                                            </div>
-                                        ))}
-                                        {!isCategoryManageMode && <button onClick={handleAddCustomCategory} className="category-btn h-[72px] text-[10px] font-bold rounded-lg border border-dashed border-gray-400 text-gray-400 hover:bg-gray-50"><Plus size={20}/></button>}
-                                    </div>
-                                    
-                                    {expenseCategory && !isCategoryManageMode && (
-                                        <div className="bg-indigo-50 border border-indigo-100 p-3 rounded-xl animate-fadeIn flex items-center justify-between shadow-sm">
-                                            <div className="flex items-center gap-2">
-                                                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-1.5 rounded-lg text-white shadow-sm"><Clock size={12}/></div>
-                                                <span className="text-[10px] font-black text-indigo-700 uppercase tracking-tight">Đã tiêu tháng này :</span>
-                                            </div>
-                                            <span className="text-sm font-black text-indigo-800">{formatCurrency(getMonthlyPaidForCategory(expenseCategory))} VNĐ</span>
-                                        </div>
-                                    )}
-
-                                    {expenseCategory === DEBT_CATEGORY_NAME && (
-                                        <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl animate-fadeIn shadow-inner">
-                                            <label className="text-[9px] font-black text-blue-700 uppercase mb-1 block tracking-widest pl-1">Người liên quan:</label>
-                                            <select value={selectedDebtorId} onChange={(e) => setSelectedDebtorId(e.target.value)} className="w-full p-2.5 bg-white border border-blue-300 rounded-lg text-xs font-black outline-none shadow-sm focus:ring-2 focus:ring-blue-100 transition-all">
-                                                <option value="">-- Chọn Sổ Nợ --</option>
-                                               {[...debts]
-                                                                    .filter(d => d.total - d.paid > 0)
-                                                                    .sort((a, b) => {
-                                                                        if (a.type === 'payable' && b.type !== 'payable') return -1;
-                                                                        if (a.type !== 'payable' && b.type === 'payable') return 1;
-                                                                        return 0;
-                                                                    })
-                                                                    .map(d => (
-                                                                        <option key={d.id} value={d.id}>
-                                                                            {d.type === 'receivable' ? 'THU: ' : 'TRẢ: '}{d.name} (Còn: {formatCurrency(d.total - d.paid)} VNĐ)
-                                                                        </option>
-                                                                    ))
-                                                                }
-                                            </select>
-                                        </div>
-                                    )}
-
-                                    <div className="flex gap-3">
-                                        <input type="text" inputMode="numeric" placeholder="Số tiền..." value={expenseAmount} onChange={e=>handleAmountInput(e.target.value, setExpenseAmount)} className="w-1/2 p-3 bg-white border border-gray-300 rounded-xl font-black text-gray-700 text-lg input-effect focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all"/>
-                                        <CustomDatePicker value={expenseDate} onChange={e=>setExpenseDate(e.target.value)} className="flex-1" />
-                                    </div>
-
-                                    {/* Lựa chọn Ba/Mẹ cho Cá Nhân (Ba-Mẹ) */}
-                                    {expenseCategory === "Cá Nhân (Ba-Mẹ)" && (
-                                        <div className="flex gap-2 animate-fadeIn">
-                                            <button 
-                                                onClick={() => setWhoSpent('Ba')} 
-                                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase border transition-all ${whoSpent === 'Ba' ? 'bg-blue-100 text-blue-700 border-blue-300 shadow-sm' : 'bg-gray-50 text-gray-400 border-gray-200'}`}
-                                            >
-                                                Ba Chi
-                                            </button>
-                                            <button 
-                                                onClick={() => setWhoSpent('Mẹ')} 
-                                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase border transition-all ${whoSpent === 'Mẹ' ? 'bg-pink-100 text-pink-700 border-pink-300 shadow-sm' : 'bg-gray-50 text-gray-400 border-gray-200'}`}
-                                            >
-                                                Mẹ Chi
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    <input type="text" placeholder="Ghi chú (tùy chọn)..." value={expenseNote} onChange={e=>handleTextInput(e.target.value, setExpenseNote)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-medium input-effect text-sm focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none transition-all"/>
-                                    <button onClick={handleAddExpense} disabled={!expenseCategory || !expenseAmount} className="w-full py-3.5 bg-gradient-to-r from-red-500 to-rose-600 text-white font-black rounded-xl shadow-lg shadow-red-200 btn-effect uppercase text-xs tracking-[0.2em] transition-all disabled:opacity-30">Lưu Chi Tiêu</button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    
-                    {activeTab === 'debt' && (
-                        <div className="space-y-6 animate-fadeIn mt-2">
-                             {!showDebtForm ? (
-                                <>
-                                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
-                                        <div className="flex justify-between items-center mb-4">
-                                            <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-sm tracking-widest"><Users className="text-blue-600" size={18}/> Quản Lý Vay Mượn</h3>
-                                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-blue-100">Mới</button>
-                                        </div>
-                                        <div className="flex p-1 bg-gray-100 rounded-xl mb-2">
-                                            <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-white text-red-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Mình nợ</button>
-                                            <button onClick={()=>setActiveDebtTab('receivable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='receivable' ? 'bg-white text-blue-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Họ nợ</button>
-                                        </div>
-                                        
-                                        {/* STATS SUMMARY for Active Debt Tab */}
-                                        {(() => {
-                                            const currentDebts = debts.filter(d => d.type === activeDebtTab);
-                                            const sumTotal = currentDebts.reduce((acc, d) => acc + d.total, 0);
-                                            const sumPaid = currentDebts.reduce((acc, d) => acc + d.paid, 0);
-                                            const sumRemaining = sumTotal - sumPaid;
-                                            const isPayable = activeDebtTab === 'payable';
-
-                                            return (
-                                                <div className={`mb-4 p-4 rounded-2xl text-white shadow-lg bg-gradient-to-r ${isPayable ? 'from-red-500 to-rose-600 shadow-red-200' : 'from-blue-400 to-indigo-500 shadow-blue-200'} relative overflow-hidden`}>
-                                                    {/* Animation Layer */}
-                                                    <div className="absolute inset-0 z-0 pointer-events-none">
-                                                        {[...Array(15)].map((_, i) => (
-                                                            <div
-                                                                key={i}
-                                                                className="absolute text-white/20 font-bold animate-money-fall"
-                                                                style={{
-                                                                    left: `${Math.random() * 100}%`,
-                                                                    top: `-${Math.random() * 20}%`,
-                                                                    animationDuration: `${3 + Math.random() * 4}s`,
-                                                                    animationDelay: `${Math.random() * 2}s`,
-                                                                    fontSize: `${10 + Math.random() * 14}px`
-                                                                }}
-                                                            >
-                                                                $
-                                                            </div>
-                                                        ))}
-                                                    </div>
-
-                                                    <div className="flex justify-between items-end mb-2 relative z-10">
-                                                        <div>
-                                                            <div className="text-[10px] font-black uppercase opacity-80 mb-1">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
-                                                            <div className="text-2xl font-black">{formatCurrency(sumTotal)} VNĐ</div>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <div className="text-[10px] font-black uppercase opacity-80 mb-1">Còn lại</div>
-                                                            <div className="text-lg font-black">{formatCurrency(sumRemaining)} VNĐ</div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="bg-white/20 p-2 rounded-xl flex justify-between items-center backdrop-blur-sm relative z-10">
-                                                        <span className="text-[10px] font-black uppercase">{isPayable ? 'Đã trả được' : 'Đã thu hồi'}</span>
-                                                        <span className="text-sm font-black">{formatCurrency(sumPaid)} VNĐ</span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })()}
-                                    </div>
-                                    <div className="flex flex-wrap gap-3">
-                                        {debts.filter(d => d.type === activeDebtTab).sort((a,b) => {
-                                            const aDone = a.total - a.paid <= 0;
-                                            const bDone = b.total - b.paid <= 0;
-                                            if (aDone === bDone) return 0;
-                                            return aDone ? 1 : -1;
-                                        }).map(item => {
-                                            let progressBarColor = activeDebtTab === 'receivable' ? 'bg-gradient-to-r from-blue-400 to-indigo-500' : 'bg-gradient-to-r from-red-500 to-rose-500';
-                                            if (activeDebtTab === 'payable') {
-                                                const percentage = (item.paid / item.total) * 100;
-                                                if (item.total - item.paid <= 0) progressBarColor = 'bg-gradient-to-r from-green-400 to-emerald-500';
-                                                else if (percentage >= 50) progressBarColor = 'bg-gradient-to-r from-yellow-400 to-amber-500';
-                                                else progressBarColor = 'bg-gradient-to-r from-red-500 to-rose-500';
-                                            } else {
-                                                if (item.total - item.paid <= 0) progressBarColor = 'bg-gradient-to-r from-green-400 to-emerald-500';
-                                            }
-
-                                            const isDone = item.total - item.paid <= 0;
-                                            const isExpanded = expandedDebtIds.includes(item.id);
-
-                                            // Render Compact Card for Completed Debts (if not expanded)
-                                            if (isDone && !isExpanded) {
-                                                return (
-                                                    <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow-0 aspect-square bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:from-green-100 hover:to-emerald-200 transition-all shadow-sm active:scale-95">
-                                                        <Check size={20} className="text-green-600 mb-1"/>
-                                                        <span className="text-[9px] font-black text-green-700 uppercase truncate w-full text-center px-1">{item.name}</span>
-                                                        <span className="text-[8px] font-bold text-green-500 uppercase mt-0.5">Xong</span>
-                                                    </div>
-                                                );
-                                            }
-
-                                            // Render Full Card
-                                            return (
-                                                <div key={item.id} className="w-full bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
-                                                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${isDone ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500')}`}></div>
-                                                    <div className="pl-3 flex-1 mr-2">
-                                                        <div className="flex justify-between items-center cursor-pointer" onClick={() => isDone && toggleDebtExpansion(item.id)}>
-                                                            <p className="font-black text-gray-800 text-sm uppercase flex items-center gap-2">
-                                                                {item.name}
-                                                                {isDone && <span className="bg-green-100 text-green-600 px-1.5 py-0.5 rounded text-[8px]">ĐÃ XONG</span>}
-                                                            </p>
-                                                            <span className="text-[9px] font-black text-gray-400">{Math.round((item.paid/item.total)*100)}%</span>
-                                                        </div>
-                                                        
-                                                        <div className="w-full bg-gray-100 rounded-full h-1.5 my-1.5 overflow-hidden">
-                                                            <div className={`h-full rounded-full transition-all duration-500 ${progressBarColor}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
-                                                        </div>
-
-                                                        <div className="flex justify-between items-center text-[10px] font-bold">
-                                                            <span className="text-gray-400">ĐÃ TRẢ: <span className="text-gray-600">{formatCurrency(item.paid)} VNĐ</span></span>
-                                                            <span className={isDone ? "text-green-500" : "text-gray-400"}>
-                                                                {isDone ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)} VNĐ`}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <button onClick={()=>{if(confirm('Xóa sổ nợ?')) saveData(incomes, expenses, fixedTemplate, categories, debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-gradient-to-br from-red-50 to-red-100 rounded-xl hover:from-red-100 hover:to-red-200 transition-colors"><Trash2 size={16}/></button>
-                                                        {isDone && (
-                                                            <button onClick={() => toggleDebtExpansion(item.id)} className="text-gray-400 p-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-gray-100 hover:to-gray-200 transition-colors"><ChevronUp size={16}/></button>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-12 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50 rounded-3xl border border-dashed border-gray-200 w-full">Danh sách trống</div>}
-                                    </div>
-                                </>
-                             ) : (
-                                <div className="bg-white p-6 rounded-[32px] shadow-xl border border-gray-100 animate-fadeIn space-y-5">
-                                    <div className="flex gap-2 mb-2">
-                                        <button onClick={()=>setDebtType('payable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='payable'?'bg-red-100 text-red-700 border-red-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Mình nợ</button>
-                                        <button onClick={()=>setDebtType('receivable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='receivable'?'bg-blue-100 text-blue-700 border-blue-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Họ nợ</button>
-                                    </div>
-                                    <input type="text" value={debtName} onChange={e=>handleTextInput(e.target.value, setDebtName)} className="w-full p-4 bg-white border border-gray-300 rounded-2xl font-black outline-none text-sm placeholder:text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="TÊN NGƯỜI LIÊN QUAN..."/>
-                                    <div className="flex gap-3">
-                                        <div className="flex-1">
-                                            <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Tổng nợ</label>
-                                            <input type="text" value={debtTotal} onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} className={`w-full p-3 bg-white border border-gray-300 rounded-xl font-black ${debtType==='payable' ? 'text-red-600' : 'text-blue-600'} outline-none text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all`} />
-                                        </div>
-                                        <div className="flex-1">
-                                            <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Đã trả/thu</label>
-                                            <input type="text" value={debtPaid} onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-black text-gray-700 outline-none text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
-                                        </div>
-                                    </div>
-                                    <input type="text" value={debtNote} onChange={e=>handleTextInput(e.target.value, setDebtNote)} className="w-full p-4 bg-white border border-gray-300 rounded-2xl font-medium outline-none text-sm placeholder:text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Ghi chú (tùy chọn)..."/>
-                                    <div className="flex items-center gap-2 px-2">
-                                        <input type="checkbox" checked={autoCreateTransaction} onChange={e=>setAutoCreateTransaction(e.target.checked)} id="autoSync" className="w-4 h-4 rounded-md accent-blue-600"/>
-                                        <label htmlFor="autoSync" className="text-[10px] text-gray-500 font-black uppercase tracking-tighter">Đồng bộ vào sổ thu chi</label>
-                                    </div>
-                                    <div className="flex gap-3 pt-2">
-                                        <button onClick={()=>setShowDebtForm(false)} className="flex-1 py-4 bg-gray-100 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest btn-effect">Hủy</button>
-                                        <button onClick={handleSaveDebt} className="flex-1 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black rounded-2xl shadow-lg shadow-blue-100 text-[10px] uppercase tracking-widest btn-effect">Lưu Sổ</button>
-                                    </div>
-                                </div>
-                             )}
-                        </div>
-                    )}
-
-                    {activeTab === 'report' && (
-                        <div className="space-y-6 animate-fadeIn mt-2">
-                            <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100">
-                                <h3 className="font-black text-gray-800 mb-6 flex items-center gap-2 border-b border-gray-50 pb-4 uppercase text-sm tracking-widest"><PieChart size={18} className="text-indigo-600"/> Phân tích chi tiêu</h3>
-                                <div className="space-y-6">
-                                    {Object.entries(filteredExpenses.reduce((a,c)=>{a[c.category]=(a[c.category]||0)+c.amount; return a;}, {} as any)).sort(([,a],[,b]) => (b as number)-(a as number)).map(([cat, amt]) => {
-                                        const pct = sumIncomeMonth > 0 ? Math.round(((amt as number)/sumIncomeMonth)*100) : 0;
-                                        return (
-                                            <div key={cat} className="animate-fadeIn">
-                                                <div className="flex justify-between text-[11px] font-black mb-2 uppercase tracking-tight">
-                                                    <span className="text-gray-500">{cat}</span>
-                                                    <span className="text-gray-900">{formatCurrency(amt as number)} VNĐ <span className="text-indigo-400 font-bold ml-1">({pct}%)</span></span>
-                                                </div>
-                                                <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden border border-gray-50 shadow-inner">
-                                                    <div className="bg-gradient-to-r from-indigo-600 to-purple-500 h-full rounded-full transition-all duration-700 ease-out" style={{width: `${Math.min(pct,100)}%`}}></div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                    {filteredExpenses.length === 0 && <div className="text-center py-12 text-gray-400 text-[10px] font-black uppercase tracking-widest">Không có dữ liệu</div>}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    
-                    {activeTab === 'savings' && (
-                        <div className="space-y-6 animate-fadeIn mt-2">
-                            {/* Heo Đất - Hiển thị tích lũy trọn đời (không reset theo tháng) */}
-                            <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100">
-                                <div className="flex justify-between items-center mb-6 border-b border-gray-50 pb-4">
-                                    <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-sm tracking-widest"><PiggyBank size={18} className="text-rose-500"/> Heo Đất Tiết Kiệm</h3>
-                                    <button onClick={()=>setShowSavingForm(true)} className="bg-gradient-to-r from-rose-400 to-pink-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-rose-200">Nạp Heo</button>
-                                </div>
-                                
-                                <div className="text-center mb-8">
-                                    <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Tổng tích lũy</div>
-                                    <div className="text-3xl font-black text-rose-600">{formatCurrency(totalAccumulatedSavings)} VNĐ</div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    {savingsSummary.map((item) => (
-                                        <div key={item.category} className="bg-gradient-to-r from-rose-50 to-pink-50 p-4 rounded-2xl border border-rose-100 flex justify-between items-center">
-                                            <span className="text-[11px] font-black text-gray-600 uppercase tracking-tight">{item.category}</span>
-                                            <span className="font-black text-rose-600 text-sm">{formatCurrency(item.total)} VNĐ</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'history' && (
-                        <div className="animate-fadeIn mt-2 space-y-3">
-                            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-50 flex gap-3 items-center group focus-within:ring-2 ring-blue-500/10 transition-all">
-                                <Search size={18} className="text-gray-300 group-focus-within:text-blue-500"/>
-                                <input type="text" placeholder="Tìm kiếm giao dịch..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 outline-none text-xs font-black uppercase tracking-widest placeholder:text-gray-200"/>
-                            </div>
-                            <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-50">
-                                {[...filteredIncomes.map(i=>({...i,type:'income'})), ...filteredExpenses.map(e=>({...e,type:'expense'}))].sort((a,b)=>new Date(b.date).getTime() - new Date(a.date).getTime()).map(item => {
-                                    const isEditing = editingNoteId === item.id;
-                                    return (
-                                        <div key={item.id} className="p-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-all group">
-                                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 ${item.type==='income'?'bg-gradient-to-br from-green-50 to-emerald-100 text-green-600 shadow-green-100':'bg-gradient-to-br from-red-50 to-rose-100 text-red-600 shadow-red-100'}`}>
-                                                    {item.type==='income'?<TrendingUp size={22}/>:<TrendingDown size={22}/>}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="font-black text-gray-800 text-[11px] truncate uppercase tracking-tight">{(item as any).source || (item as any).category}</p>
-                                                    {isEditing ? (
-                                                        <div className="flex items-center gap-2 mt-1" onClick={e => e.stopPropagation()}>
-                                                            <input
-                                                                type="text"
-                                                                value={tempNoteValue}
-                                                                onChange={e => handleTextInput(e.target.value, setTempNoteValue)}
-                                                                className="flex-1 p-1.5 text-[10px] bg-white border border-gray-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100"
-                                                                autoFocus
-                                                                placeholder="Nhập ghi chú..."
-                                                            />
-                                                            <button onClick={() => handleSaveNote(item.id, item.type as any)} className="p-1.5 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"><Check size={12}/></button>
-                                                            <button onClick={() => setEditingNoteId(null)} className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200"><X size={12}/></button>
-                                                        </div>
-                                                    ) : (
-                                                        <>
-                                                            {item.note && <p className="text-[10px] text-gray-500 font-medium truncate italic my-0.5">{item.note}</p>}
-                                                            <p className="text-[9px] text-gray-300 font-black uppercase tracking-widest mt-0.5">{formatDate(item.date)}</p>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="text-right pl-2">
-                                                <p className={`font-black text-[13px] ${item.type==='income'?'text-green-600':'text-red-600'}`}>{item.type==='income'?'+':'-'}{formatCurrency(item.amount)}</p>
-                                                <div className="flex justify-end gap-2 mt-1 opacity-0 group-hover:opacity-100 transition-all">
-                                                    <button onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setEditingNoteId(item.id);
-                                                        setTempNoteValue(item.note || '');
-                                                    }} className="text-[9px] text-blue-400 font-black uppercase tracking-widest hover:text-blue-600 p-1 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg"><Edit2 size={12}/></button>
-                                                    <button onClick={()=>deleteItem(item.id, item.type as any)} className="text-[9px] text-red-400 font-black uppercase tracking-widest hover:text-red-600 p-1 bg-gradient-to-br from-red-50 to-red-100 rounded-lg"><Trash2 size={12}/></button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                {(filteredIncomes.length === 0 && filteredExpenses.length === 0) && <div className="p-16 text-center text-gray-300 text-[10px] font-black uppercase tracking-[0.3em]">Lịch sử trống</div>}
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === 'settings' && (
-                        <div className="space-y-6 animate-fadeIn mt-2">
-                            {/* SYNC STATUS / DEBUG INFO */}
-                            {isConnected && (
-                                <div className="bg-gradient-to-br from-slate-800 to-gray-900 p-6 rounded-[32px] text-white shadow-xl space-y-3">
-                                    <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                                        <h4 className="text-[10px] font-black uppercase tracking-widest text-blue-400">Trạng thái Cloud</h4>
-                                        <span className="text-[9px] bg-green-500/20 text-green-400 px-2 py-0.5 rounded font-black">ACTIVE</span>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-[9px] font-black">
-                                            <span className="text-white/40 uppercase">Project ID:</span>
-                                            <span className="text-white/80">{projectId}</span>
-                                        </div>
-                                        <div className="flex justify-between text-[9px] font-black">
-                                            <span className="text-white/40 uppercase">Document:</span>
-                                            <span className="text-white/80">{familyCode}</span>
-                                        </div>
-                                        <div className="flex justify-between text-[9px] font-black">
-                                            <span className="text-white/40 uppercase">Máy chủ:</span>
-                                            <span className="text-blue-300">Firestore Google</span>
-                                        </div>
-                                    </div>
-                                    <button onClick={()=>window.location.reload()} className="w-full py-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border border-white/10 transition-all flex items-center justify-center gap-2"><RefreshCw size={12}/> Buộc đồng bộ lại</button>
-                                </div>
-                            )}
-
-                            <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 space-y-4">
-                                <h3 className="font-black text-gray-800 border-b border-gray-50 pb-4 flex items-center gap-2 uppercase text-xs tracking-widest"><SettingsIcon size={20} className="text-slate-500"/> Thiết lập hệ thống</h3>
-                                <div className="grid grid-cols-1 gap-3">
-                                    <button onClick={()=>setShowFixedConfig(true)} className="w-full p-4 bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Chi Tiêu Cố Định <Clock size={18}/></button>
-                                    <button onClick={handleExportExcel} className="w-full p-4 bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Xuất Báo Cáo Excel <FileSpreadsheet size={18}/></button>
-                                    <button onClick={()=>setShowCloudForm(true)} className="w-full p-4 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Cấu Hình Đám Mây <Cloud size={18}/></button>
-                                </div>
-                                <div className="pt-6 border-t border-gray-50 text-center">
-                                    <p className="text-[8px] text-gray-300 font-black uppercase tracking-[0.4em]">CashFlow v2.5 • Private Cloud</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {activeTab === 'add' && <TabAdd categories={categories} debts={debts} onAddIncome={onAddIncome} onAddExpense={onAddExpense} getMonthlyPaid={(cat) => filteredExpenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0)} onUpdateCategories={(cats) => saveData(incomes, expenses, fixedTemplate, cats)} />}
+                    {activeTab === 'debt' && <TabDebt debts={debts} onUpdateDebts={handleUpdateDebts as any} autoCreateTransaction={autoCreateTransaction} setAutoCreateTransaction={setAutoCreateTransaction} />}
+                    {activeTab === 'report' && <TabReport expenses={filteredExpenses} sumIncome={sumIncomeMonth} />}
+                    {activeTab === 'savings' && <TabSavings totalAccumulated={totalAccumulatedSavings} expenses={expenses} onOpenSavingForm={()=>setShowSavingForm(true)} />}
+                    {activeTab === 'history' && <TabHistory incomes={filteredIncomes} expenses={filteredExpenses} onDelete={deleteItem} onUpdateNote={updateNote} />}
+                    {activeTab === 'settings' && <TabSettings isConnected={isConnected} projectId={projectId} familyCode={familyCode} onReload={()=>window.location.reload()} onOpenFixedConfig={()=>setShowFixedConfig(true)} onExportExcel={handleExportExcel} onOpenCloudForm={()=>setShowCloudForm(true)} />}
                 </div>
 
                 {/* FAB & Bottom Overlays */}
