@@ -17,14 +17,23 @@ const TabReport: React.FC<TabReportProps> = ({ expenses, sumIncome }) => {
                 <div className="space-y-6">
                     {Object.entries(expenses.reduce((a,c)=>{a[c.category]=(a[c.category]||0)+c.amount; return a;}, {} as any)).sort(([,a],[,b]) => (b as number)-(a as number)).map(([cat, amt]) => {
                         const pct = sumIncome > 0 ? Math.round(((amt as number)/sumIncome)*100) : 0;
+                        
+                        // Logic màu sắc: > 30% là mức cảnh báo (Vàng -> Đỏ), ngược lại là bình thường (Indigo -> Purple)
+                        const isHighUsage = pct > 30;
+                        const progressBarColor = isHighUsage 
+                            ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 shadow-red-200' 
+                            : 'bg-gradient-to-r from-indigo-400 to-purple-500 shadow-indigo-200';
+                        
+                        const textColor = isHighUsage ? 'text-red-500' : 'text-indigo-400';
+
                         return (
                             <div key={cat} className="animate-fadeIn">
                                 <div className="flex justify-between text-[11px] font-black mb-2 uppercase tracking-tight">
                                     <span className="text-gray-500">{cat}</span>
-                                    <span className="text-gray-900">{formatCurrency(amt as number)} VNĐ <span className="text-indigo-400 font-bold ml-1">({pct}%)</span></span>
+                                    <span className="text-gray-900">{formatCurrency(amt as number)} VNĐ <span className={`${textColor} font-bold ml-1`}>({pct}%)</span></span>
                                 </div>
                                 <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden border border-gray-50 shadow-inner">
-                                    <div className="bg-gradient-to-r from-indigo-600 to-purple-500 h-full rounded-full transition-all duration-700 ease-out" style={{width: `${Math.min(pct,100)}%`}}></div>
+                                    <div className={`${progressBarColor} h-full rounded-full transition-all duration-700 ease-out shadow-sm`} style={{width: `${Math.min(pct,100)}%`}}></div>
                                 </div>
                             </div>
                         );
