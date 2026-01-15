@@ -6,19 +6,25 @@ import { formatCurrency } from '../utils';
 
 interface TabReportProps {
     expenses: Expense[];
-    sumIncome: number;
+    sumExpense: number; // Đổi từ sumIncome sang sumExpense
 }
 
-const TabReport: React.FC<TabReportProps> = ({ expenses, sumIncome }) => {
+const TabReport: React.FC<TabReportProps> = ({ expenses, sumExpense }) => {
     return (
         <div className="space-y-6 animate-fadeIn mt-2">
             <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100">
                 <h3 className="font-black text-gray-800 mb-6 flex items-center gap-2 border-b border-gray-50 pb-4 uppercase text-sm tracking-widest"><PieChart size={18} className="text-indigo-600"/> Phân tích chi tiêu</h3>
                 <div className="space-y-6">
+                    {/* Tính tổng chi tiêu theo danh mục */}
                     {Object.entries(expenses.reduce((a,c)=>{a[c.category]=(a[c.category]||0)+c.amount; return a;}, {} as any)).sort(([,a],[,b]) => (b as number)-(a as number)).map(([cat, amt]) => {
-                        const pct = sumIncome > 0 ? Math.round(((amt as number)/sumIncome)*100) : 0;
+                        // Logic cũ: Dựa vào sumIncome
+                        // const pct = sumIncome > 0 ? Math.round(((amt as number)/sumIncome)*100) : 0;
+                        
+                        // Logic mới: Dựa vào sumExpense (Tổng chi tiêu)
+                        const pct = sumExpense > 0 ? Math.round(((amt as number)/sumExpense)*100) : 0;
                         
                         // Logic màu sắc: > 30% là mức cảnh báo (Vàng -> Đỏ), ngược lại là bình thường (Indigo -> Purple)
+                        // Vì tính trên tổng chi tiêu nên các mục lớn sẽ chiếm % cao hơn, giữ nguyên logic cảnh báo > 30% là hợp lý
                         const isHighUsage = pct > 30;
                         const progressBarColor = isHighUsage 
                             ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 shadow-red-200' 

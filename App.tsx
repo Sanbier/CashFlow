@@ -124,7 +124,8 @@ const App: React.FC = () => {
         >
             {activeTab === 'add' && <TabAdd categories={categories} debts={debts} onAddIncome={addIncome} onAddExpense={addExpense} getMonthlyPaid={(cat) => filteredExpenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0)} onUpdateCategories={updateCategories} />}
             {activeTab === 'debt' && <TabDebt debts={debts} onUpdateDebts={handleUpdateDebtsWrapper} autoCreateTransaction={autoCreateTransaction} setAutoCreateTransaction={setAutoCreateTransaction} />}
-            {activeTab === 'report' && <TabReport expenses={filteredExpenses} sumIncome={sumIncomeMonth} />}
+            {/* Đã sửa prop từ sumIncome sang sumExpense */}
+            {activeTab === 'report' && <TabReport expenses={filteredExpenses} sumExpense={sumExpenseMonth} />}
             {activeTab === 'savings' && <TabSavings totalAccumulated={totalAccumulatedSavings} expenses={expenses} onOpenSavingForm={()=>setShowSavingForm(true)} />}
             {activeTab === 'history' && <TabHistory incomes={filteredIncomes} expenses={filteredExpenses} onDelete={deleteItem} onUpdateNote={updateNote} />}
             {activeTab === 'settings' && <TabSettings isConnected={isConnected} projectId={projectId} familyCode={familyCode} onReload={()=>window.location.reload()} onOpenFixedConfig={()=>setShowFixedConfig(true)} onExportExcel={handleExportExcel} onOpenCloudForm={()=>setShowCloudForm(true)} />}
