@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Search, TrendingUp, TrendingDown, Edit2, Trash2, Check, X } from '../constants';
 import { Expense, Income } from '../types';
-import { formatCurrency, formatDate, handleTextInput } from '../utils';
+import { formatCurrency, formatDateTime, handleTextInput } from '../utils';
 
 interface TabHistoryProps {
     incomes: Income[];
@@ -65,7 +65,8 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, onDelete, on
                                     ) : (
                                         <>
                                             {item.note && <p className="text-[10px] text-gray-500 font-medium truncate italic my-0.5">{item.note}</p>}
-                                            <p className="text-[9px] text-gray-300 font-black uppercase tracking-widest mt-0.5">{formatDate(item.date)}</p>
+                                            {/* Sửa formatDate thành formatDateTime */}
+                                            <p className="text-[9px] text-gray-300 font-black uppercase tracking-widest mt-0.5">{formatDateTime(item.date)}</p>
                                         </>
                                     )}
                                 </div>

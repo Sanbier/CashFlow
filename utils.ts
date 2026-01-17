@@ -7,6 +7,14 @@ export const formatDate = (date: string) => {
     return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; 
 };
 
+export const formatDateTime = (date: string) => { 
+    if(!date) return ''; 
+    const d = new Date(date); 
+    const time = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+    const day = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+    return `${time} • ${day}`; 
+};
+
 export const toTitleCase = (str: string) => {
     return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
