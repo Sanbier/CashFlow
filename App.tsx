@@ -127,7 +127,7 @@ const App: React.FC = () => {
             {/* Đã sửa prop từ sumIncome sang sumExpense */}
             {activeTab === 'report' && <TabReport expenses={filteredExpenses} sumExpense={sumExpenseMonth} />}
             {activeTab === 'savings' && <TabSavings totalAccumulated={totalAccumulatedSavings} expenses={expenses} onOpenSavingForm={()=>setShowSavingForm(true)} />}
-            {activeTab === 'history' && <TabHistory incomes={filteredIncomes} expenses={filteredExpenses} onDelete={deleteItem} onUpdateNote={updateNote} />}
+            {activeTab === 'history' && <TabHistory incomes={filteredIncomes} expenses={filteredExpenses} onDelete={deleteItem} onUpdateNote={updateNote} categories={categories} />}
             {activeTab === 'settings' && <TabSettings isConnected={isConnected} projectId={projectId} familyCode={familyCode} onReload={()=>window.location.reload()} onOpenFixedConfig={()=>setShowFixedConfig(true)} onExportExcel={handleExportExcel} onOpenCloudForm={()=>setShowCloudForm(true)} />}
         </AppLayout>
     );

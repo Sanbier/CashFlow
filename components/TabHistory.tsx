@@ -1,29 +1,44 @@
 
 import React, { useState } from 'react';
-import { Search, TrendingUp, TrendingDown, Edit2, Trash2, Check, X } from '../constants';
+import { Search, TrendingUp, TrendingDown, Edit2, Trash2, Check, X, Users } from '../constants';
 import { Expense, Income } from '../types';
 import { formatCurrency, formatDateTime, handleTextInput } from '../utils';
 
 interface TabHistoryProps {
     incomes: Income[];
     expenses: Expense[];
+    categories: string[];
     onDelete: (id: number, type: 'income' | 'expense') => void;
     onUpdateNote: (id: number, type: 'income' | 'expense', newNote: string) => void;
 }
 
-const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, onDelete, onUpdateNote }) => {
+const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, onDelete, onUpdateNote }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterCategory, setFilterCategory] = useState('all');
     const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
     const [tempNoteValue, setTempNoteValue] = useState('');
 
     const combinedList = [...incomes.map(i=>({...i,type:'income'})), ...expenses.map(e=>({...e,type:'expense'}))]
         .sort((a,b)=>new Date(b.date).getTime() - new Date(a.date).getTime())
         .filter(item => {
+            // Logic lọc theo từ khóa tìm kiếm
             const searchLower = searchTerm.toLowerCase();
             const text = ((item as any).source || (item as any).category).toLowerCase();
             const note = (item.note || '').toLowerCase();
             const amt = item.amount.toString();
-            return searchTerm === '' || text.includes(searchLower) || note.includes(searchLower) || amt.includes(searchLower);
+            const matchesSearch = searchTerm === '' || text.includes(searchLower) || note.includes(searchLower) || amt.includes(searchLower);
+
+            // Logic lọc theo danh mục (Dropdown)
+            let matchesCategory = true;
+            if (filterCategory !== 'all') {
+                if (filterCategory === 'income') {
+                    matchesCategory = item.type === 'income';
+                } else {
+                    matchesCategory = item.type === 'expense' && (item as any).category === filterCategory;
+                }
+            }
+
+            return matchesSearch && matchesCategory;
         });
 
     const handleSaveNote = (id: number, type: 'income' | 'expense') => {
@@ -34,9 +49,26 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, onDelete, on
 
     return (
         <div className="animate-fadeIn mt-2 space-y-4">
-            <div className="glass-panel p-2 rounded-2xl flex gap-3 items-center group focus-within:bg-white/60 transition-all">
-                <div className="p-2 text-slate-400"><Search size={18}/></div>
-                <input type="text" placeholder="Tìm kiếm..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 bg-transparent outline-none text-xs font-bold uppercase tracking-widest placeholder:text-slate-400 text-slate-700 h-full py-2"/>
+            <div className="flex gap-2 items-stretch">
+                <div className="glass-panel p-2 rounded-2xl flex gap-3 items-center group focus-within:bg-white/60 transition-all flex-1">
+                    <div className="p-2 text-slate-400"><Search size={18}/></div>
+                    <input type="text" placeholder="Tìm kiếm..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 bg-transparent outline-none text-xs font-bold uppercase tracking-widest placeholder:text-slate-400 text-slate-700 h-full py-2"/>
+                </div>
+                
+                <div className="glass-panel rounded-2xl flex items-center bg-white/40">
+                    <select 
+                        value={filterCategory} 
+                        onChange={(e) => setFilterCategory(e.target.value)} 
+                        className="h-full px-3 py-2 bg-transparent outline-none text-[10px] font-black uppercase text-slate-600 border-none rounded-2xl cursor-pointer min-w-[100px] max-w-[140px] truncate"
+                    >
+                        <option value="all">🔍 Tất cả</option>
+                        <option value="income">💰 Thu nhập</option>
+                        <option disabled>──────────</option>
+                        {categories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                    </select>
+                </div>
             </div>
             
             <div className="space-y-3 pb-8">
@@ -85,7 +117,7 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, onDelete, on
                         </div>
                     );
                 })}
-                {combinedList.length === 0 && <div className="p-12 text-center text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] glass-panel rounded-3xl">Lịch sử trống</div>}
+                {combinedList.length === 0 && <div className="p-12 text-center text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] glass-panel rounded-3xl">Không tìm thấy giao dịch</div>}
             </div>
         </div>
     );
