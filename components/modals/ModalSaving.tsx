@@ -31,7 +31,6 @@ const ModalSaving: React.FC<ModalSavingProps> = ({ isOpen, onClose, onSave }) =>
             return;
         }
         onSave(category, parsedAmt, date, note);
-        // Reset form
         setAmount('');
         setNote('');
         setDate(getLocalToday());
@@ -41,32 +40,32 @@ const ModalSaving: React.FC<ModalSavingProps> = ({ isOpen, onClose, onSave }) =>
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-[110] flex items-center justify-center p-6 backdrop-blur-md animate-fadeIn">
-            <div className="bg-white rounded-[32px] w-full max-w-sm p-6 shadow-2xl relative border border-gray-100">
-                <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full text-gray-400"><X size={20}/></button>
-                <h3 className="font-black text-rose-600 text-lg mb-6 uppercase tracking-tighter flex items-center gap-2"><PiggyBank size={24}/> Nạp Heo Đất</h3>
-                <div className="space-y-4">
+        <div className="fixed inset-0 bg-slate-900/40 z-[110] flex items-center justify-center p-6 backdrop-blur-lg animate-fadeIn">
+            <div className="glass-panel bg-white/70 rounded-[40px] w-full max-w-sm p-8 shadow-2xl relative border-white/50">
+                <button onClick={onClose} className="absolute top-5 right-5 p-2 bg-white/50 rounded-full text-slate-400 hover:bg-white hover:text-slate-600 transition-all"><X size={20}/></button>
+                <h3 className="font-black text-rose-500 text-lg mb-8 uppercase tracking-tighter flex items-center gap-2"><PiggyBank size={24}/> Nạp Heo Đất</h3>
+                <div className="space-y-5">
                     <div>
-                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Chọn Hũ:</label>
-                        <select value={category} onChange={e=>setCategory(e.target.value)} className="w-full p-3 bg-white border border-gray-300 rounded-xl text-xs font-black outline-none shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all">
+                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 pl-2">Chọn Hũ:</label>
+                        <select value={category} onChange={e=>setCategory(e.target.value)} className="w-full p-4 bg-white/60 border border-white rounded-2xl text-xs font-black outline-none shadow-sm focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all text-slate-700">
                             {SAVING_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                     <div className="flex gap-3">
                         <div className="flex-1">
-                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Số tiền:</label>
-                            <input type="text" value={amount} onChange={e=>handleAmountInput(e.target.value, setAmount)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-black text-lg text-rose-600 outline-none shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="0 VNĐ"/>
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 pl-2">Số tiền:</label>
+                            <input type="text" value={amount} onChange={e=>handleAmountInput(e.target.value, setAmount)} className="w-full p-4 bg-white/60 border border-white rounded-2xl font-black text-lg text-rose-500 outline-none shadow-sm focus:border-rose-400 transition-all" placeholder="0"/>
                         </div>
                         <div className="flex-1">
-                            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ngày:</label>
-                            <CustomDatePicker value={date} onChange={e=>setDate(e.target.value)} />
+                            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 pl-2">Ngày:</label>
+                            <CustomDatePicker value={date} onChange={e=>setDate(e.target.value)} className="glass-input rounded-2xl border-white" />
                         </div>
                     </div>
                     <div>
-                        <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1 pl-2">Ghi chú:</label>
-                        <input type="text" value={note} onChange={e=>handleTextInput(e.target.value, setNote)} className="w-full p-3 bg-white border border-gray-300 rounded-xl text-sm font-medium outline-none shadow-sm focus:border-rose-500 focus:ring-2 focus:ring-rose-100 transition-all" placeholder="Ví dụ: Tiền thưởng tết..."/>
+                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-2 pl-2">Ghi chú:</label>
+                        <input type="text" value={note} onChange={e=>handleTextInput(e.target.value, setNote)} className="w-full p-4 bg-white/60 border border-white rounded-2xl text-sm font-medium outline-none shadow-sm focus:border-rose-400 transition-all" placeholder="Ví dụ: Tiền thưởng tết..."/>
                     </div>
-                    <button onClick={handleSubmit} className="w-full py-4 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-black rounded-2xl shadow-lg shadow-rose-200 uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-2">Xác Nhận Nạp</button>
+                    <button onClick={handleSubmit} className="w-full py-4 bg-gradient-to-r from-rose-400 to-pink-600 text-white font-black rounded-2xl shadow-lg shadow-rose-200/50 uppercase text-xs tracking-[0.2em] active:scale-95 transition-all mt-4 border border-white/20">Xác Nhận</button>
                 </div>
             </div>
         </div>
