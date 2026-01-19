@@ -145,7 +145,7 @@ const TabAdd: React.FC<TabAddProps> = ({ categories, debts, onAddIncome, onAddEx
                         <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[10px] font-bold px-3 py-1.5 rounded-xl border backdrop-blur-sm transition-all ${isCategoryManageMode ? 'bg-slate-800 text-white border-slate-700 shadow-md' : 'bg-white/50 text-slate-600 border-white/60 hover:bg-white/80'}`}>{isCategoryManageMode ? 'Xong' : 'Sửa Mục'}</button>
                     </div>
                     <div className="space-y-5 relative z-10">
-                        <div className="grid grid-cols-3 gap-2.5">
+                        <div className="grid grid-cols-3 gap-1.5">
                             {categories.map((cat, idx) => (
                                 <div key={cat} className="relative h-[72px]">
                                     {isCategoryManageMode ? (

@@ -72,14 +72,14 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                     
                     {/* Summary Cards (Liquid Style) */}
                     <div className="grid grid-cols-2 gap-4 mt-4">
-                        <div className="bg-white/40 backdrop-blur-md p-4 rounded-3xl border border-white/60 shadow-lg shadow-green-100/50 relative overflow-hidden group">
+                        <div className="bg-white/40 backdrop-blur-md p-4 rounded-3xl border border-white/60 shadow-lg shadow-green-100/50 relative overflow-hidden group flex flex-col items-center justify-center text-center">
                             <div className="absolute -right-6 -top-6 w-16 h-16 bg-green-200/50 rounded-full blur-xl group-hover:scale-150 transition-all duration-700"></div>
-                            <div className="text-green-600 text-[10px] font-black uppercase mb-1 flex items-center gap-1 relative z-10"><TrendingUp size={12}/> Thu Nhập</div>
+                            <div className="text-green-600 text-[10px] font-black uppercase mb-1 flex items-center justify-center gap-1 relative z-10"><TrendingUp size={12}/> Thu Nhập</div>
                             <div className="font-black text-lg text-slate-700 relative z-10">{formatCurrency(sumIncome)}</div>
                         </div>
-                        <div className="bg-white/40 backdrop-blur-md p-4 rounded-3xl border border-white/60 shadow-lg shadow-red-100/50 relative overflow-hidden group">
+                        <div className="bg-white/40 backdrop-blur-md p-4 rounded-3xl border border-white/60 shadow-lg shadow-red-100/50 relative overflow-hidden group flex flex-col items-center justify-center text-center">
                              <div className="absolute -right-6 -top-6 w-16 h-16 bg-red-200/50 rounded-full blur-xl group-hover:scale-150 transition-all duration-700"></div>
-                            <div className="text-red-500 text-[10px] font-black uppercase mb-1 flex items-center gap-1 relative z-10"><TrendingDown size={12}/> Chi Tiêu</div>
+                            <div className="text-red-500 text-[10px] font-black uppercase mb-1 flex items-center justify-center gap-1 relative z-10"><TrendingDown size={12}/> Chi Tiêu</div>
                             <div className="font-black text-lg text-slate-700 relative z-10">{formatCurrency(sumExpense)}</div>
                         </div>
                     </div>
