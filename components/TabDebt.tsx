@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Users, Trash2, ChevronUp, Check } from '../constants';
+import { Users, Trash2, ChevronUp, Check, Edit2 } from '../constants';
 import { Debt } from '../types';
 import { formatCurrency, handleAmountInput, handleTextInput, parseAmount } from '../utils';
 
@@ -28,57 +28,31 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
         setExpandedDebtIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
     };
 
-    const handleSave = () => {
-        const total = parseAmount(debtTotal); const paid = parseAmount(debtPaid);
-        if (!debtName || total <= 0) { alert("Nhập tên và tổng nợ hợp lệ."); return; }
-        
-        // Check duplicate if new
-        if (!isEditingDebt) {
-            const existing = debts.find(d => d.name.trim().toLowerCase() === debtName.trim().toLowerCase() && d.type === debtType);
-            if (existing && confirm(`Cộng dồn vào hồ sơ "${existing.name}"?`)) {
-                onUpdateDebts(debts.map(d => d.id === existing.id ? { ...d, total: d.total + total, paid: d.paid + paid, updatedAt: new Date().toISOString() } : d));
-                setShowDebtForm(false); return;
-            }
-        }
-        
-        // Pass data up to App to handle Transaction Sync logic there, or better:
-        // Since we are decoupling, we will pass the "Intent" to App via onUpdateDebts logic wrapper?
-        // Actually, to keep it simple, we construct the object here and let App handle strict "Save" of Debt array.
-        // But the Auto-Sync logic affects Incomes/Expenses.
-        // We will pass a specific event "onSaveDebt" back to parent is better, but to follow interface:
-        // We will construct the New Debt Item here and pass it.
-        // The parent `onUpdateDebts` in App.tsx needs to handle the logic of Incomes/Expenses sync if we pass the `autoCreateTransaction` flag? 
-        // No, let's keep it simple: We call a prop `onSaveDebtItem` that handles everything.
-        
-        // REFACTOR: We'll modify the interface slightly in App.tsx to accept the save request.
-        // But for now, to fit `TabDebtProps` above, we will do the logic in App.tsx? 
-        // No, let's move the UI logic here and calls back.
-        
-        // Since I cannot change App.tsx logic easily without moving the whole function, I will trigger the update via prop.
-        // Let's assume the parent passes a handler that accepts (debtItem, isEdit, autoSyncData)
-        
-        // For now, let's implement the `handleSaveDebt` logic fully in `App.tsx` and pass it down as `onSaveDebt`.
-        // Wait, the previous `TabDebt` implementation had `handleSaveDebt` inside.
-        // I will change the prop `onUpdateDebts` to `onSaveDebt` which takes the payload.
+    const handleEdit = (item: Debt) => {
+        setDebtName(item.name);
+        setDebtTotal(item.total.toLocaleString('vi-VN'));
+        setDebtPaid(item.paid.toLocaleString('vi-VN'));
+        setDebtNote(item.note || '');
+        setDebtType(item.type);
+        setIsEditingDebt(item.id);
+        setShowDebtForm(true);
     };
-
-    // To properly support the logic, we need to lift the "Logic of saving" to App.tsx or duplicate it.
-    // Let's use the `onSaveDebt` prop approach.
-    // I will redefine `handleSave` to just call the prop.
-    // BUT the prop needs the form data.
 
     return (
         <div className="space-y-6 animate-fadeIn mt-2">
              {!showDebtForm ? (
                 <>
-                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-black text-gray-800 flex items-center gap-2 uppercase text-sm tracking-widest"><Users className="text-blue-600" size={18}/> Quản Lý Vay Mượn</h3>
-                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter btn-effect shadow-md shadow-blue-100">Mới</button>
+                    <div className="glass-panel p-5 rounded-3xl shadow-sm border border-white/50 overflow-hidden relative group">
+                         {/* Decor Background */}
+                         <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-200/30 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
+
+                        <div className="flex justify-between items-center mb-4 relative z-10">
+                            <h3 className="font-black text-slate-700 flex items-center gap-2 uppercase text-xs tracking-widest"><Users className="text-blue-600" size={18}/> Quản Lý Vay Mượn</h3>
+                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest btn-effect shadow-lg shadow-blue-200/50 hover:shadow-blue-300 transition-all">Mới</button>
                         </div>
-                        <div className="flex p-1 bg-gray-100 rounded-xl mb-2">
-                            <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-white text-red-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Mình nợ</button>
-                            <button onClick={()=>setActiveDebtTab('receivable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='receivable' ? 'bg-white text-blue-600 shadow-sm scale-[1.02]' : 'text-gray-400'}`}>Họ nợ</button>
+                        <div className="flex p-1 bg-white/40 border border-white/60 rounded-xl mb-4 backdrop-blur-sm">
+                            <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-md shadow-red-200' : 'text-slate-400 hover:bg-white/50'}`}>Mình nợ</button>
+                            <button onClick={()=>setActiveDebtTab('receivable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='receivable' ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-200' : 'text-slate-400 hover:bg-white/50'}`}>Họ nợ</button>
                         </div>
                         
                         {/* STATS SUMMARY */}
@@ -90,31 +64,30 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                             const isPayable = activeDebtTab === 'payable';
 
                             return (
-                                <div className={`mb-4 p-4 rounded-2xl text-white shadow-lg bg-gradient-to-r ${isPayable ? 'from-red-500 to-rose-600 shadow-red-200' : 'from-blue-400 to-indigo-500 shadow-blue-200'} relative overflow-hidden`}>
-                                    <div className="absolute inset-0 z-0 pointer-events-none">
-                                        {[...Array(15)].map((_, i) => (
-                                            <div key={i} className="absolute text-white/20 font-bold animate-money-fall" style={{ left: `${Math.random() * 100}%`, top: `-${Math.random() * 20}%`, animationDuration: `${3 + Math.random() * 4}s`, animationDelay: `${Math.random() * 2}s`, fontSize: `${10 + Math.random() * 14}px` }}>$</div>
-                                        ))}
+                                <div className={`mb-4 p-5 rounded-2xl text-white shadow-xl bg-gradient-to-br ${isPayable ? 'from-red-500 to-pink-600 shadow-red-200/50' : 'from-blue-500 to-indigo-600 shadow-blue-200/50'} relative overflow-hidden`}>
+                                    <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay opacity-20">
+                                        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" /></svg>
                                     </div>
-                                    <div className="flex justify-between items-end mb-2 relative z-10">
+                                    <div className="flex justify-between items-end mb-3 relative z-10">
                                         <div>
-                                            <div className="text-[10px] font-black uppercase opacity-80 mb-1">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
-                                            <div className="text-2xl font-black">{formatCurrency(sumTotal)} VNĐ</div>
+                                            <div className="text-[9px] font-black uppercase opacity-80 mb-1 tracking-widest">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
+                                            <div className="text-2xl font-black tracking-tight">{formatCurrency(sumTotal)}</div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[10px] font-black uppercase opacity-80 mb-1">Còn lại</div>
-                                            <div className="text-lg font-black">{formatCurrency(sumRemaining)} VNĐ</div>
+                                            <div className="text-[9px] font-black uppercase opacity-80 mb-1 tracking-widest">Còn lại</div>
+                                            <div className="text-lg font-black">{formatCurrency(sumRemaining)}</div>
                                         </div>
                                     </div>
-                                    <div className="bg-white/20 p-2 rounded-xl flex justify-between items-center backdrop-blur-sm relative z-10">
-                                        <span className="text-[10px] font-black uppercase">{isPayable ? 'Đã trả được' : 'Đã thu hồi'}</span>
-                                        <span className="text-sm font-black">{formatCurrency(sumPaid)} VNĐ</span>
+                                    <div className="bg-white/20 p-2.5 rounded-xl flex justify-between items-center backdrop-blur-md relative z-10 border border-white/20">
+                                        <span className="text-[9px] font-black uppercase tracking-wider">{isPayable ? 'Đã trả được' : 'Đã thu hồi'}</span>
+                                        <span className="text-sm font-black">{formatCurrency(sumPaid)}</span>
                                     </div>
                                 </div>
                             );
                         })()}
                     </div>
-                    <div className="flex flex-wrap gap-3">
+
+                    <div className="flex flex-wrap gap-3 pb-8">
                         {debts.filter(d => d.type === activeDebtTab).sort((a,b) => {
                             const aDone = a.total - a.paid <= 0;
                             const bDone = b.total - b.paid <= 0;
@@ -135,90 +108,104 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
 
                             if (isDone && !isExpanded) {
                                 return (
-                                    <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow-0 aspect-square bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:from-green-100 hover:to-emerald-200 transition-all shadow-sm active:scale-95">
-                                        <Check size={20} className="text-green-600 mb-1"/>
-                                        <span className="text-[9px] font-black text-green-700 uppercase truncate w-full text-center px-1">{item.name}</span>
-                                        <span className="text-[8px] font-bold text-green-500 uppercase mt-0.5">Xong</span>
+                                    <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow-0 aspect-square glass-panel bg-green-50/50 border-green-200/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-green-100/50 transition-all shadow-sm active:scale-95 group relative">
+                                        <div className="absolute inset-0 bg-green-400/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <Check size={20} className="text-green-600 mb-1 relative z-10"/>
+                                        <span className="text-[9px] font-black text-green-700 uppercase truncate w-full text-center px-1 relative z-10">{item.name}</span>
+                                        <span className="text-[8px] font-bold text-green-500 uppercase mt-0.5 relative z-10">Xong</span>
                                     </div>
                                 );
                             }
 
                             return (
-                                <div key={item.id} className="w-full bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden group">
+                                <div key={item.id} className="w-full glass-panel p-5 rounded-3xl shadow-sm border border-white/60 flex items-center justify-between relative overflow-hidden group hover:bg-white/60 transition-all">
                                     <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${isDone ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500')}`}></div>
-                                    <div className="pl-3 flex-1 mr-2">
+                                    <div className="pl-3 flex-1 mr-2 min-w-0">
                                         <div className="flex justify-between items-center cursor-pointer" onClick={() => isDone && toggleDebtExpansion(item.id)}>
-                                            <p className="font-black text-gray-800 text-sm uppercase flex items-center gap-2">
+                                            <p className="font-black text-slate-700 text-sm uppercase flex items-center gap-2 truncate pr-2">
                                                 {item.name}
-                                                {isDone && <span className="bg-green-100 text-green-600 px-1.5 py-0.5 rounded text-[8px]">ĐÃ XONG</span>}
+                                                {isDone && <span className="bg-green-100 text-green-600 px-1.5 py-0.5 rounded text-[8px]">XONG</span>}
                                             </p>
-                                            <span className="text-[9px] font-black text-gray-400">{Math.round((item.paid/item.total)*100)}%</span>
+                                            <span className="text-[9px] font-black text-slate-400 flex-shrink-0">{Math.round((item.paid/item.total)*100)}%</span>
                                         </div>
-                                        <div className="w-full bg-gray-100 rounded-full h-1.5 my-1.5 overflow-hidden">
-                                            <div className={`h-full rounded-full transition-all duration-500 ${progressBarColor}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
+                                        <div className="w-full bg-slate-100/50 rounded-full h-1.5 my-2 overflow-hidden border border-white/50">
+                                            <div className={`h-full rounded-full transition-all duration-700 ease-out ${progressBarColor}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
                                         </div>
                                         <div className="flex justify-between items-center text-[10px] font-bold">
-                                            <span className="text-gray-400">ĐÃ TRẢ: <span className="text-gray-600">{formatCurrency(item.paid)} VNĐ</span></span>
-                                            <span className={isDone ? "text-green-500" : "text-gray-400"}>
-                                                {isDone ? 'XONG' : `CÒN: ${formatCurrency(item.total - item.paid)} VNĐ`}
+                                            <span className="text-slate-400">ĐÃ TRẢ: <span className="text-slate-600">{formatCurrency(item.paid)}</span></span>
+                                            <span className={isDone ? "text-green-600" : "text-slate-400"}>
+                                                {isDone ? 'HOÀN TẤT' : `CÒN: ${formatCurrency(item.total - item.paid)}`}
                                             </span>
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
-                                        <button onClick={()=>{if(confirm('Xóa sổ nợ?')) onUpdateDebts(debts.filter(d => d.id !== item.id));}} className="text-red-400 p-2 bg-gradient-to-br from-red-50 to-red-100 rounded-xl hover:from-red-100 hover:to-red-200 transition-colors"><Trash2 size={16}/></button>
+                                    <div className="flex gap-2 flex-shrink-0">
+                                        <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="text-blue-500 p-2 bg-blue-50/50 hover:bg-blue-100/80 rounded-xl transition-colors backdrop-blur-sm border border-blue-100"><Edit2 size={16}/></button>
+                                        <button onClick={(e)=>{ e.stopPropagation(); if(confirm('Xóa sổ nợ?')) onUpdateDebts(debts.filter(d => d.id !== item.id));}} className="text-red-500 p-2 bg-red-50/50 hover:bg-red-100/80 rounded-xl transition-colors backdrop-blur-sm border border-red-100"><Trash2 size={16}/></button>
                                         {isDone && (
-                                            <button onClick={() => toggleDebtExpansion(item.id)} className="text-gray-400 p-2 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:from-gray-100 hover:to-gray-200 transition-colors"><ChevronUp size={16}/></button>
+                                            <button onClick={() => toggleDebtExpansion(item.id)} className="text-slate-400 p-2 bg-slate-50/50 hover:bg-slate-100/80 rounded-xl transition-colors backdrop-blur-sm border border-slate-200"><ChevronUp size={16}/></button>
                                         )}
                                     </div>
                                 </div>
                             );
                         })}
-                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-12 text-gray-400 text-[10px] font-black uppercase tracking-widest bg-gray-50 rounded-3xl border border-dashed border-gray-200 w-full">Danh sách trống</div>}
+                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-12 text-slate-400 text-[10px] font-black uppercase tracking-widest glass-panel rounded-3xl w-full border-dashed">Danh sách trống</div>}
                     </div>
                 </>
              ) : (
-                <div className="bg-white p-6 rounded-[32px] shadow-xl border border-gray-100 animate-fadeIn space-y-5">
-                    <div className="flex gap-2 mb-2">
-                        <button onClick={()=>setDebtType('payable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='payable'?'bg-red-100 text-red-700 border-red-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Mình nợ</button>
-                        <button onClick={()=>setDebtType('receivable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='receivable'?'bg-blue-100 text-blue-700 border-blue-300 shadow-inner scale-105':'bg-gray-50 text-gray-400 border-transparent'}`}>Họ nợ</button>
+                <div className="glass-panel p-6 rounded-[32px] shadow-xl border border-white/60 animate-fadeIn space-y-5 relative">
+                     {/* Form Header */}
+                     <div className="text-center mb-6">
+                        <h3 className="text-lg font-black text-slate-700 uppercase tracking-tight">{isEditingDebt ? 'Cập Nhật Hồ Sơ Nợ' : 'Tạo Hồ Sơ Nợ Mới'}</h3>
+                        <div className="w-12 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 mx-auto rounded-full mt-2"></div>
+                     </div>
+
+                    <div className="flex gap-3 mb-4">
+                        <button disabled={!!isEditingDebt} onClick={()=>setDebtType('payable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='payable'?'bg-red-100/80 text-red-700 border-red-200 shadow-inner':'bg-white/40 text-slate-400 border-white/50'} ${isEditingDebt ? 'opacity-50 cursor-not-allowed' : ''}`}>Mình nợ</button>
+                        <button disabled={!!isEditingDebt} onClick={()=>setDebtType('receivable')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-2xl border transition-all ${debtType==='receivable'?'bg-blue-100/80 text-blue-700 border-blue-200 shadow-inner':'bg-white/40 text-slate-400 border-white/50'} ${isEditingDebt ? 'opacity-50 cursor-not-allowed' : ''}`}>Họ nợ</button>
                     </div>
-                    <input type="text" value={debtName} onChange={e=>handleTextInput(e.target.value, setDebtName)} className="w-full p-4 bg-white border border-gray-300 rounded-2xl font-black outline-none text-sm placeholder:text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="TÊN NGƯỜI LIÊN QUAN..."/>
+                    <input type="text" value={debtName} onChange={e=>handleTextInput(e.target.value, setDebtName)} className="w-full p-4 glass-input rounded-2xl font-black outline-none text-sm placeholder:text-slate-400 focus:bg-white/80 transition-all text-slate-700" placeholder="TÊN NGƯỜI LIÊN QUAN..."/>
                     <div className="flex gap-3">
                         <div className="flex-1">
-                            <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Tổng nợ</label>
-                            <input type="text" value={debtTotal} onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} className={`w-full p-3 bg-white border border-gray-300 rounded-xl font-black ${debtType==='payable' ? 'text-red-600' : 'text-blue-600'} outline-none text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all`} />
+                            <label className="text-[9px] text-slate-400 font-black uppercase block mb-1 tracking-widest pl-2">Tổng nợ</label>
+                            <input 
+                                type="text" 
+                                value={debtTotal} 
+                                onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} 
+                                disabled={!!isEditingDebt}
+                                className={`w-full p-3 glass-input rounded-2xl font-black ${debtType==='payable' ? 'text-red-600' : 'text-blue-600'} outline-none text-lg focus:bg-white/80 transition-all ${isEditingDebt ? 'opacity-60 cursor-not-allowed bg-gray-50/50 text-slate-500' : ''}`} 
+                            />
                         </div>
                         <div className="flex-1">
-                            <label className="text-[9px] text-gray-400 font-black uppercase block mb-1 tracking-widest pl-2">Đã trả/thu</label>
-                            <input type="text" value={debtPaid} onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} className="w-full p-3 bg-white border border-gray-300 rounded-xl font-black text-gray-700 outline-none text-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" />
+                            <label className="text-[9px] text-slate-400 font-black uppercase block mb-1 tracking-widest pl-2">Đã trả/thu</label>
+                            <input 
+                                type="text" 
+                                value={debtPaid} 
+                                onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} 
+                                disabled={!!isEditingDebt}
+                                className={`w-full p-3 glass-input rounded-2xl font-black text-slate-700 outline-none text-lg focus:bg-white/80 transition-all ${isEditingDebt ? 'opacity-60 cursor-not-allowed bg-gray-50/50 text-slate-500' : ''}`} 
+                            />
                         </div>
                     </div>
-                    <input type="text" value={debtNote} onChange={e=>handleTextInput(e.target.value, setDebtNote)} className="w-full p-4 bg-white border border-gray-300 rounded-2xl font-medium outline-none text-sm placeholder:text-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all" placeholder="Ghi chú (tùy chọn)..."/>
-                    <div className="flex items-center gap-2 px-2">
-                        <input type="checkbox" checked={autoCreateTransaction} onChange={e=>setAutoCreateTransaction(e.target.checked)} id="autoSync" className="w-4 h-4 rounded-md accent-blue-600"/>
-                        <label htmlFor="autoSync" className="text-[10px] text-gray-500 font-black uppercase tracking-tighter">Đồng bộ vào sổ thu chi</label>
-                    </div>
-                    <div className="flex gap-3 pt-2">
-                        <button onClick={()=>setShowDebtForm(false)} className="flex-1 py-4 bg-gray-100 text-gray-500 font-black rounded-2xl text-[10px] uppercase tracking-widest btn-effect">Hủy</button>
+                    <input type="text" value={debtNote} onChange={e=>handleTextInput(e.target.value, setDebtNote)} className="w-full p-4 glass-input rounded-2xl font-medium outline-none text-sm placeholder:text-slate-400 focus:bg-white/80 transition-all text-slate-600" placeholder="Ghi chú (tùy chọn)..."/>
+                    
+                    {!isEditingDebt && (
+                        <div className="flex items-center gap-2 px-2 bg-blue-50/50 p-3 rounded-xl border border-blue-100/50">
+                            <input type="checkbox" checked={autoCreateTransaction} onChange={e=>setAutoCreateTransaction(e.target.checked)} id="autoSync" className="w-4 h-4 rounded-md accent-blue-600 cursor-pointer"/>
+                            <label htmlFor="autoSync" className="text-[10px] text-blue-800 font-bold uppercase tracking-tight cursor-pointer select-none">Tự động tạo giao dịch thu/chi tương ứng</label>
+                        </div>
+                    )}
+
+                    <div className="flex gap-3 pt-4">
+                        <button onClick={()=>setShowDebtForm(false)} className="flex-1 py-4 bg-white/40 border border-white/60 text-slate-500 font-black rounded-2xl text-[10px] uppercase tracking-widest btn-effect hover:bg-white/60">Hủy</button>
                         <button onClick={() => {
-                            // Call Parent Handler via props
-                            // NOTE: Since I can't modify App.tsx to export specific handlers easily without huge diffs, 
-                            // I am copying the Logic back to App.tsx via a specialized Handler called `onSaveDebtItem`
-                            // BUT wait, I can just pass the data up!
-                            
-                            // To make this work with minimal changes to App.tsx structure:
-                            // I will use a callback prop that App.tsx will implement.
-                            // See App.tsx update.
                             const total = parseAmount(debtTotal);
                             const paid = parseAmount(debtPaid);
                              if (!debtName || total <= 0) { alert("Nhập tên và tổng nợ hợp lệ."); return; }
                             
-                            // Trigger callback
                             const newItem = { id: isEditingDebt || Date.now(), name: debtName, total, paid, note: debtNote, type: debtType, updatedAt: new Date().toISOString() };
-                            // We pass a custom event handler prop down from App
-                            (onUpdateDebts as any)(null, newItem, isEditingDebt); // HACK: Overloading the prop to pass signal
+                            (onUpdateDebts as any)(null, newItem, isEditingDebt);
                             setShowDebtForm(false); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote('');
-                        }} className="flex-1 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black rounded-2xl shadow-lg shadow-blue-100 text-[10px] uppercase tracking-widest btn-effect">Lưu Sổ</button>
+                        }} className="flex-1 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black rounded-2xl shadow-lg shadow-blue-200/50 text-[10px] uppercase tracking-widest btn-effect hover:shadow-blue-300">{isEditingDebt ? 'Cập Nhật' : 'Lưu Hồ Sơ'}</button>
                     </div>
                 </div>
              )}
