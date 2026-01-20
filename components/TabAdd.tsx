@@ -96,7 +96,7 @@ const TabAdd: React.FC<TabAddProps> = ({ categories, debts, onAddIncome, onAddEx
     };
 
     return (
-        <div className="space-y-6 animate-fadeIn">
+        <div className="space-y-5 animate-fadeIn">
             {/* Tab Switcher */}
             <div className="glass-panel p-1.5 rounded-2xl flex mb-2 relative z-20">
                 <button 

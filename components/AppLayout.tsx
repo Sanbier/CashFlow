@@ -47,7 +47,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     children, modals
 }) => {
     return (
-        <div className="min-h-screen pb-24 md:pb-0 relative font-sans overflow-x-hidden overflow-y-auto selection:bg-pink-200 selection:text-pink-900">
+        // SỬ DỤNG h-[100dvh] thay vì min-h-screen để fix lỗi thanh địa chỉ trên mobile
+        <div className="h-[100dvh] w-full pb-24 md:pb-0 relative font-sans overflow-x-hidden overflow-y-auto selection:bg-pink-200 selection:text-pink-900 overscroll-y-contain">
             {/* Background Blobs Animation */}
             <div className="fixed inset-0 w-full h-full pointer-events-none z-[-1]">
                 <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -55,7 +56,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                 <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
             </div>
 
-            <div className="max-w-md mx-auto min-h-screen relative glass-panel rounded-none sm:rounded-[40px] sm:my-4 sm:min-h-[95vh] sm:border-t flex flex-col">
+            <div className="max-w-md mx-auto min-h-full relative glass-panel rounded-none sm:rounded-[40px] sm:my-4 sm:min-h-[95vh] sm:border-t flex flex-col">
                 {/* 1. Cảnh báo vượt hạn mức (Glass Style) */}
                 {isOverBudget && <div className="bg-red-500/10 backdrop-blur-md text-red-600 px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 border-b border-red-200"><AlertTriangle size={16} /> CHI TIÊU QUÁ HẠN MỨC 90%!</div>}
                 
@@ -63,7 +64,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                 <div className="p-6 pb-2 relative z-10">
                     <div className="flex items-center justify-between mb-4">
                         <button onClick={onPrevMonth} className="p-3 bg-white/40 hover:bg-white/60 rounded-2xl text-slate-600 btn-effect backdrop-blur-sm border border-white/40"><ChevronLeft size={20}/></button>
-                        <div className="text-center">
+                        <div className="flex flex-col items-center justify-center text-center">
                             <span className="text-[10px] font-bold text-slate-500 block mb-0.5 tracking-wider uppercase">{formatDate(startDate.toISOString())} - {formatDate(endDate.toISOString())}</span>
                             <div className="font-black text-xl text-slate-800 flex items-center gap-2 justify-center uppercase tracking-wide drop-shadow-sm"><CalendarIcon size={18} className="text-purple-600"/> Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</div>
                         </div>
