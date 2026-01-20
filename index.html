@@ -44,11 +44,6 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        html {
-            overscroll-behavior-y: none; /* Ngăn chặn hiệu ứng kéo nảy (rubber-banding) */
-            height: 100%;
-        }
-
         body {
             -webkit-tap-highlight-color: transparent;
             /* Background nền gradient cố định */
@@ -59,18 +54,7 @@
             font-family: 'Quicksand', sans-serif;
             font-weight: 600;
             color: #1e293b;
-            
-            /* Fix layout Full Height */
-            height: 100%;
-            overflow: hidden; /* Vô hiệu hóa thanh cuộn của body */
-            overscroll-behavior-y: none;
         }
-
-        #root {
-            height: 100%; /* Root chiếm toàn bộ chiều cao body */
-            overflow: hidden;
-        }
-
         .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
         .btn-effect:active { transform: scale(0.95); }
         .input-effect:focus { transform: scale(1.01); border-color: rgba(255,255,255,0.8); box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
