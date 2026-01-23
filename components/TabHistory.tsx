@@ -15,26 +15,39 @@ interface TabHistoryProps {
 const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, onDelete, onUpdateNote }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
+    const [viewType, setViewType] = useState<'all' | 'income' | 'expense'>('all'); // State phân nhánh Thu/Chi
     const [editingNoteId, setEditingNoteId] = useState<number | null>(null);
     const [tempNoteValue, setTempNoteValue] = useState('');
+
+    // Hàm xử lý khi chuyển Tab loại giao dịch
+    const handleViewTypeChange = (type: 'all' | 'income' | 'expense') => {
+        setViewType(type);
+        setFilterCategory('all'); // Reset bộ lọc danh mục khi chuyển tab để tránh nhầm lẫn
+    };
 
     const combinedList = [...incomes.map(i=>({...i,type:'income'})), ...expenses.map(e=>({...e,type:'expense'}))]
         .sort((a,b)=>new Date(b.date).getTime() - new Date(a.date).getTime())
         .filter(item => {
-            // Logic lọc theo từ khóa tìm kiếm
+            // 1. Lọc theo Tab (Phân nhánh)
+            if (viewType === 'income' && item.type !== 'income') return false;
+            if (viewType === 'expense' && item.type !== 'expense') return false;
+
+            // 2. Lọc theo Từ khóa tìm kiếm
             const searchLower = searchTerm.toLowerCase();
             const text = ((item as any).source || (item as any).category).toLowerCase();
             const note = (item.note || '').toLowerCase();
             const amt = item.amount.toString();
             const matchesSearch = searchTerm === '' || text.includes(searchLower) || note.includes(searchLower) || amt.includes(searchLower);
 
-            // Logic lọc theo danh mục (Dropdown)
+            // 3. Lọc theo Dropdown Danh mục (Chỉ áp dụng cho Chi tiêu hoặc khi ở chế độ All)
             let matchesCategory = true;
             if (filterCategory !== 'all') {
-                if (filterCategory === 'income') {
-                    matchesCategory = item.type === 'income';
+                // Nếu item là expense thì so sánh category
+                if (item.type === 'expense') {
+                    matchesCategory = (item as any).category === filterCategory;
                 } else {
-                    matchesCategory = item.type === 'expense' && (item as any).category === filterCategory;
+                    // Nếu item là income mà đang lọc danh mục -> loại bỏ (vì Income ko có category này)
+                    matchesCategory = false; 
                 }
             }
 
@@ -49,26 +62,50 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, 
 
     return (
         <div className="animate-fadeIn mt-2 space-y-4">
+            {/* THANH CHUYỂN ĐỔI TAB THU / CHI */}
+            <div className="flex p-1 bg-white/40 border border-white/60 rounded-2xl backdrop-blur-sm shadow-sm">
+                <button 
+                    onClick={() => handleViewTypeChange('all')} 
+                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'all' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-500 hover:bg-white/50'}`}
+                >
+                    Tất cả
+                </button>
+                <button 
+                    onClick={() => handleViewTypeChange('income')} 
+                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'income' ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-md shadow-green-200' : 'text-slate-500 hover:bg-white/50'}`}
+                >
+                    Thu Nhập
+                </button>
+                <button 
+                    onClick={() => handleViewTypeChange('expense')} 
+                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'expense' ? 'bg-gradient-to-r from-red-400 to-pink-500 text-white shadow-md shadow-red-200' : 'text-slate-500 hover:bg-white/50'}`}
+                >
+                    Chi Tiêu
+                </button>
+            </div>
+
             <div className="flex gap-2 items-stretch">
                 <div className="glass-panel p-2 rounded-2xl flex gap-3 items-center group focus-within:bg-white/60 transition-all flex-1">
                     <div className="p-2 text-slate-400"><Search size={18}/></div>
                     <input type="text" placeholder="Tìm kiếm..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 bg-transparent outline-none text-xs font-bold uppercase tracking-widest placeholder:text-slate-400 text-slate-700 h-full py-2"/>
                 </div>
                 
-                <div className="glass-panel rounded-2xl flex items-center bg-white/40">
-                    <select 
-                        value={filterCategory} 
-                        onChange={(e) => setFilterCategory(e.target.value)} 
-                        className="h-full px-3 py-2 bg-transparent outline-none text-[10px] font-black uppercase text-slate-600 border-none rounded-2xl cursor-pointer min-w-[100px] max-w-[140px] truncate"
-                    >
-                        <option value="all">🔍 Tất cả</option>
-                        <option value="income">💰 Thu nhập</option>
-                        <option disabled>──────────</option>
-                        {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
-                </div>
+                {/* Chỉ hiện Dropdown danh mục khi KHÔNG PHẢI là tab Thu Nhập */}
+                {viewType !== 'income' && (
+                    <div className="glass-panel rounded-2xl flex items-center bg-white/40 animate-fadeIn">
+                        <select 
+                            value={filterCategory} 
+                            onChange={(e) => setFilterCategory(e.target.value)} 
+                            className="h-full px-3 py-2 bg-transparent outline-none text-[10px] font-black uppercase text-slate-600 border-none rounded-2xl cursor-pointer min-w-[100px] max-w-[140px] truncate"
+                        >
+                            <option value="all">🔍 Tất cả danh mục</option>
+                            <option disabled>──────────</option>
+                            {categories.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
             </div>
             
             <div className="space-y-3 pb-8">
