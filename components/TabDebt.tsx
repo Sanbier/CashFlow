@@ -171,8 +171,8 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                                 type="text" 
                                 value={debtTotal} 
                                 onChange={e=>handleAmountInput(e.target.value, setDebtTotal)} 
-                                disabled={!!isEditingDebt}
-                                className={`w-full p-3 glass-input rounded-2xl font-black ${debtType==='payable' ? 'text-red-600' : 'text-blue-600'} outline-none text-lg focus:bg-white/80 transition-all ${isEditingDebt ? 'opacity-60 cursor-not-allowed bg-gray-50/50 text-slate-500' : ''}`} 
+                                disabled={!!isEditingDebt && debtType === 'receivable'}
+                                className={`w-full p-3 glass-input rounded-2xl font-black ${debtType==='payable' ? 'text-red-600' : 'text-blue-600'} outline-none text-lg focus:bg-white/80 transition-all ${(!!isEditingDebt && debtType === 'receivable') ? 'opacity-60 cursor-not-allowed bg-gray-50/50 text-slate-500' : ''}`} 
                             />
                         </div>
                         <div className="flex-1">
@@ -181,8 +181,8 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                                 type="text" 
                                 value={debtPaid} 
                                 onChange={e=>handleAmountInput(e.target.value, setDebtPaid)} 
-                                disabled={!!isEditingDebt}
-                                className={`w-full p-3 glass-input rounded-2xl font-black text-slate-700 outline-none text-lg focus:bg-white/80 transition-all ${isEditingDebt ? 'opacity-60 cursor-not-allowed bg-gray-50/50 text-slate-500' : ''}`} 
+                                disabled={!!isEditingDebt && debtType === 'receivable'}
+                                className={`w-full p-3 glass-input rounded-2xl font-black text-slate-700 outline-none text-lg focus:bg-white/80 transition-all ${(!!isEditingDebt && debtType === 'receivable') ? 'opacity-60 cursor-not-allowed bg-gray-50/50 text-slate-500' : ''}`} 
                             />
                         </div>
                     </div>
