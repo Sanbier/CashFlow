@@ -47,7 +47,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     children, modals
 }) => {
     return (
-        <div className="min-h-screen pb-24 md:pb-0 relative font-sans overflow-x-hidden overflow-y-auto selection:bg-pink-200 selection:text-pink-900">
+        // SỬ DỤNG h-[100dvh] thay vì min-h-screen để fix lỗi thanh địa chỉ trên mobile
+        <div className="h-[100dvh] w-full pb-24 md:pb-0 relative font-sans overflow-x-hidden overflow-y-auto selection:bg-pink-200 selection:text-pink-900 overscroll-y-contain">
             {/* Background Blobs Animation */}
             <div className="fixed inset-0 w-full h-full pointer-events-none z-[-1]">
                 <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
@@ -55,7 +56,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                 <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
             </div>
 
-            <div className="max-w-md mx-auto min-h-screen relative glass-panel rounded-none sm:rounded-[40px] sm:my-4 sm:min-h-[95vh] sm:border-t flex flex-col">
+            <div className="max-w-md mx-auto min-h-full relative glass-panel rounded-none sm:rounded-[40px] sm:my-4 sm:min-h-[95vh] sm:border-t flex flex-col">
                 {/* 1. Cảnh báo vượt hạn mức (Glass Style) */}
                 {isOverBudget && <div className="bg-red-500/10 backdrop-blur-md text-red-600 px-4 py-2 text-xs font-bold flex items-center justify-center gap-2 border-b border-red-200"><AlertTriangle size={16} /> CHI TIÊU QUÁ HẠN MỨC 90%!</div>}
                 
@@ -63,7 +64,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                 <div className="p-6 pb-2 relative z-10">
                     <div className="flex items-center justify-between mb-4">
                         <button onClick={onPrevMonth} className="p-3 bg-white/40 hover:bg-white/60 rounded-2xl text-slate-600 btn-effect backdrop-blur-sm border border-white/40"><ChevronLeft size={20}/></button>
-                        <div className="text-center">
+                        <div className="flex flex-col items-center justify-center text-center">
                             <span className="text-[10px] font-bold text-slate-500 block mb-0.5 tracking-wider uppercase">{formatDate(startDate.toISOString())} - {formatDate(endDate.toISOString())}</span>
                             <div className="font-black text-xl text-slate-800 flex items-center gap-2 justify-center uppercase tracking-wide drop-shadow-sm"><CalendarIcon size={18} className="text-purple-600"/> Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</div>
                         </div>
@@ -121,8 +122,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
 
                 {/* 5. Floating Action Buttons (Liquid Bubbles) */}
                 <div className="fixed bottom-8 left-6 z-50 flex flex-col gap-3">
-                    <button onClick={onOpenFixedTracking} className="bg-white/80 backdrop-blur-md text-slate-700 p-4 rounded-full shadow-lg shadow-purple-200 border border-white transform hover:scale-110 transition-all hover:rotate-12 group">
-                        <MessageCircle size={22} className="group-hover:text-purple-600 transition-colors"/>
+                    {/* Nút bấm hình giọt nước cầu vồng Liquid Glass */}
+                    <button onClick={onOpenFixedTracking} className="relative w-14 h-14 rounded-full bg-white/40 backdrop-blur-md border border-white/60 shadow-[0_8px_32px_rgba(31,38,135,0.2)] flex items-center justify-center transform hover:scale-110 active:scale-95 transition-all duration-300 group overflow-hidden">
+                        {/* Background Liquid Gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-400/20 via-purple-400/20 to-pink-400/20 animate-pulse"></div>
+                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-white/60 rounded-full blur-md"></div>
+                        <MessageCircle size={24} className="text-indigo-600 relative z-10 drop-shadow-sm group-hover:text-purple-600 transition-colors"/>
                     </button>
                 </div>
 
