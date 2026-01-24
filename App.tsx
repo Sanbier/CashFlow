@@ -21,8 +21,6 @@ import ModalReloadConfirm from './components/modals/ModalReloadConfirm';
 import ModalFixedTracking from './components/modals/ModalFixedTracking';
 import ModalFixedConfig from './components/modals/ModalFixedConfig';
 
-declare const XLSX: any;
-
 const App: React.FC = () => {
     // 1. View & UI States (Chỉ giữ lại State liên quan đến View)
     const [viewDate, setViewDate] = useState(() => {
@@ -82,16 +80,6 @@ const App: React.FC = () => {
         updateDebts(newDebts, newItem, isEditId, autoCreateTransaction);
     };
 
-    const handleExportExcel = () => {
-        if (typeof XLSX === 'undefined') { alert("Lỗi tải thư viện"); return; }
-        const wb = XLSX.utils.book_new();
-        const incData = filteredIncomes.map(i => ({ "Ngày": formatDate(i.date), "Nguồn": i.source, "Số tiền": i.amount, "Ghi chú": i.note }));
-        const expData = filteredExpenses.map(e => ({ "Ngày": formatDate(e.date), "Danh mục": e.category, "Số tiền": e.amount, "Ghi chú": e.note }));
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(incData), "Thu Nhập");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(expData), "Chi Tiêu");
-        XLSX.writeFile(wb, `BaoCao_${viewDate.getMonth()+1}.xlsx`);
-    };
-
     return (
         <AppLayout
             viewDate={viewDate}
@@ -128,7 +116,7 @@ const App: React.FC = () => {
             {activeTab === 'report' && <TabReport expenses={filteredExpenses} sumExpense={sumExpenseMonth} />}
             {activeTab === 'savings' && <TabSavings totalAccumulated={totalAccumulatedSavings} expenses={expenses} onOpenSavingForm={()=>setShowSavingForm(true)} />}
             {activeTab === 'history' && <TabHistory incomes={filteredIncomes} expenses={filteredExpenses} onDelete={deleteItem} onUpdateNote={updateNote} categories={categories} />}
-            {activeTab === 'settings' && <TabSettings isConnected={isConnected} projectId={projectId} familyCode={familyCode} onReload={()=>window.location.reload()} onOpenFixedConfig={()=>setShowFixedConfig(true)} onExportExcel={handleExportExcel} onOpenCloudForm={()=>setShowCloudForm(true)} />}
+            {activeTab === 'settings' && <TabSettings isConnected={isConnected} projectId={projectId} familyCode={familyCode} onReload={()=>window.location.reload()} onOpenFixedConfig={()=>setShowFixedConfig(true)} onOpenCloudForm={()=>setShowCloudForm(true)} />}
         </AppLayout>
     );
 };
