@@ -119,31 +119,31 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                 <div className="p-6 pb-32 flex-1">
                     {children}
                 </div>
+            </div>
 
-                {/* 5. Floating Action Buttons (Liquid Bubbles) */}
-                <div className="fixed bottom-8 left-6 z-50 flex flex-col gap-3">
-                    {/* Nút bấm hình giọt nước cầu vồng Liquid Glass */}
-                    <button onClick={onOpenFixedTracking} className="relative w-14 h-14 rounded-full bg-white/40 backdrop-blur-md border border-white/60 shadow-[0_8px_32px_rgba(31,38,135,0.2)] flex items-center justify-center transform hover:scale-110 active:scale-95 transition-all duration-300 group overflow-hidden">
-                        {/* Background Liquid Gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-400/20 via-purple-400/20 to-pink-400/20 animate-pulse"></div>
-                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-white/60 rounded-full blur-md"></div>
-                        <MessageCircle size={24} className="text-indigo-600 relative z-10 drop-shadow-sm group-hover:text-purple-600 transition-colors"/>
-                    </button>
-                </div>
+            {/* 5. Floating Action Buttons (Liquid Bubbles) - MOVED OUTSIDE FOR FIXED POSITION FIX */}
+            <div className="fixed bottom-8 left-6 z-50 flex flex-col gap-3">
+                {/* Nút bấm hình giọt nước cầu vồng Liquid Glass */}
+                <button onClick={onOpenFixedTracking} className="relative w-14 h-14 rounded-full bg-white/40 backdrop-blur-md border border-white/60 shadow-[0_8px_32px_rgba(31,38,135,0.2)] flex items-center justify-center transform hover:scale-110 active:scale-95 transition-all duration-300 group overflow-hidden">
+                    {/* Background Liquid Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-400/20 via-purple-400/20 to-pink-400/20 animate-pulse"></div>
+                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-white/60 rounded-full blur-md"></div>
+                    <MessageCircle size={24} className="text-indigo-600 relative z-10 drop-shadow-sm group-hover:text-purple-600 transition-colors"/>
+                </button>
+            </div>
 
-                <div onClick={onReload} className="fixed bottom-8 right-6 z-50 cursor-pointer">
-                    <div className={`shadow-xl shadow-blue-200/50 rounded-[28px] pl-2 pr-6 py-2 flex items-center gap-3 border border-white/60 backdrop-blur-xl transform active:scale-95 transition-all ${balance>=0?'bg-white/70':'bg-red-50/80'}`}>
-                        <div className={`p-3 rounded-full ${balance>=0 ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}><Wallet size={20}/></div>
-                        <div className="flex flex-col items-start">
-                            <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Số dư</span>
-                            <span className={`font-black text-lg leading-none tracking-tight ${balance>=0 ? 'text-slate-700' : 'text-red-500'}`}>{formatCurrency(balance)}</span>
-                        </div>
+            <div onClick={onReload} className="fixed bottom-8 right-6 z-50 cursor-pointer">
+                <div className={`shadow-xl shadow-blue-200/50 rounded-[28px] pl-2 pr-6 py-2 flex items-center gap-3 border border-white/60 backdrop-blur-xl transform active:scale-95 transition-all ${balance>=0?'bg-white/70':'bg-red-50/80'}`}>
+                    <div className={`p-3 rounded-full ${balance>=0 ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'}`}><Wallet size={20}/></div>
+                    <div className="flex flex-col items-start">
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Số dư</span>
+                        <span className={`font-black text-lg leading-none tracking-tight ${balance>=0 ? 'text-slate-700' : 'text-red-500'}`}>{formatCurrency(balance)}</span>
                     </div>
                 </div>
-
-                {/* 6. Modals Container */}
-                {modals}
             </div>
+
+            {/* 6. Modals Container - MOVED OUTSIDE FOR FIXED POSITION FIX */}
+            {modals}
         </div>
     );
 };
