@@ -145,7 +145,7 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                         <div className="pb-8 animate-fadeIn">
                              <button 
                                 onClick={() => setShowHistory(!showHistory)} 
-                                className="w-full py-3 glass-panel rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase text-slate-500 hover:bg-white/60 transition-all mb-2 shadow-sm border-dashed"
+                                className="w-full py-2.5 glass-panel rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase text-slate-500 hover:bg-white/60 transition-all mb-2 shadow-sm border-dashed"
                              >
                                 <History size={14}/> {showHistory ? 'Thu gọn lịch sử' : `Xem khoản đã hoàn thành (${doneDebts.length})`} 
                                 {showHistory ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}
@@ -156,7 +156,7 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                                     {doneDebts.map(item => {
                                         const isExpanded = expandedDebtIds.includes(item.id);
                                         
-                                        // Nếu bấm vào thì hiển thị chi tiết (Card)
+                                        // Nếu bấm vào thì hiển thị chi tiết (Card đầy đủ)
                                         if (isExpanded) {
                                             return (
                                                 <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-full glass-panel p-3 rounded-2xl border border-green-200 bg-green-50/30 flex flex-col gap-2 relative group hover:bg-green-50/60 transition-all cursor-pointer">
@@ -179,12 +179,13 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                                             );
                                         }
 
-                                        // Mặc định hiển thị Compact Box
+                                        // Mặc định hiển thị CHIP/TAG SIÊU NHỎ GỌN (Thay vì ô vuông to)
                                         return (
-                                            <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow aspect-square glass-panel bg-green-50/50 border-green-200/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-green-100/50 transition-all shadow-sm active:scale-95 group relative">
-                                                <div className="absolute inset-0 bg-green-400/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                                <Check size={18} className="text-green-600 mb-1 relative z-10"/>
-                                                <span className="text-[8px] font-black text-green-700 uppercase truncate w-full text-center px-1 relative z-10">{item.name}</span>
+                                            <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[48%] sm:w-[32%] flex-grow glass-panel bg-green-50/40 border-green-100 rounded-xl p-2 flex items-center gap-2 cursor-pointer hover:bg-green-100 transition-all shadow-sm active:scale-95 group">
+                                                <div className="w-5 h-5 rounded-full bg-green-200/50 flex items-center justify-center text-green-700 flex-shrink-0">
+                                                    <Check size={10} strokeWidth={4} />
+                                                </div>
+                                                <span className="text-[9px] font-black text-green-800 uppercase truncate flex-1 leading-none pt-0.5">{item.name}</span>
                                             </div>
                                         );
                                     })}
