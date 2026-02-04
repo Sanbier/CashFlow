@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Users, Trash2, ChevronUp, Check, Edit2 } from '../constants';
+import { Users, Trash2, ChevronUp, ChevronDown, Check, Edit2, History } from '../constants';
 import { Debt } from '../types';
 import { formatCurrency, handleAmountInput, handleTextInput, parseAmount } from '../utils';
 
@@ -15,6 +15,7 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
     const [showDebtForm, setShowDebtForm] = useState(false);
     const [activeDebtTab, setActiveDebtTab] = useState<'payable' | 'receivable'>('payable');
     const [expandedDebtIds, setExpandedDebtIds] = useState<number[]>([]);
+    const [showHistory, setShowHistory] = useState(false); // State để toggle phần lịch sử
     
     // Form State
     const [debtName, setDebtName] = useState('');
@@ -38,6 +39,11 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
         setShowDebtForm(true);
     };
 
+    // Phân loại active và done
+    const currentList = debts.filter(d => d.type === activeDebtTab);
+    const activeDebts = currentList.filter(d => d.total - d.paid > 0);
+    const doneDebts = currentList.filter(d => d.total - d.paid <= 0);
+
     return (
         <div className="space-y-4 animate-fadeIn mt-2">
              {!showDebtForm ? (
@@ -57,9 +63,8 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                         
                         {/* STATS SUMMARY COMPACT */}
                         {(() => {
-                            const currentDebts = debts.filter(d => d.type === activeDebtTab);
-                            const sumTotal = currentDebts.reduce((acc, d) => acc + d.total, 0);
-                            const sumPaid = currentDebts.reduce((acc, d) => acc + d.paid, 0);
+                            const sumTotal = currentList.reduce((acc, d) => acc + d.total, 0);
+                            const sumPaid = currentList.reduce((acc, d) => acc + d.paid, 0);
                             const sumRemaining = sumTotal - sumPaid;
                             const isPayable = activeDebtTab === 'payable';
 
@@ -83,40 +88,19 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                         })()}
                     </div>
 
-                    <div className="flex flex-wrap gap-2 pb-8">
-                        {debts.filter(d => d.type === activeDebtTab).sort((a,b) => {
-                            const aDone = a.total - a.paid <= 0;
-                            const bDone = b.total - b.paid <= 0;
-                            if (aDone === bDone) return 0;
-                            return aDone ? 1 : -1;
-                        }).map(item => {
+                    {/* DANH SÁCH ĐANG NỢ (ACTIVE) */}
+                    <div className="flex flex-col gap-2 pb-4">
+                        {activeDebts.map(item => {
                             let progressBarColor = activeDebtTab === 'receivable' ? 'bg-gradient-to-r from-blue-400 to-indigo-500' : 'bg-gradient-to-r from-red-500 to-rose-500';
                             if (activeDebtTab === 'payable') {
                                 const percentage = (item.paid / item.total) * 100;
-                                if (item.total - item.paid <= 0) progressBarColor = 'bg-gradient-to-r from-green-400 to-emerald-500';
-                                else if (percentage >= 50) progressBarColor = 'bg-gradient-to-r from-yellow-400 to-amber-500';
+                                if (percentage >= 50) progressBarColor = 'bg-gradient-to-r from-yellow-400 to-amber-500';
                                 else progressBarColor = 'bg-gradient-to-r from-red-500 to-rose-500';
-                            } else {
-                                if (item.total - item.paid <= 0) progressBarColor = 'bg-gradient-to-r from-green-400 to-emerald-500';
-                            }
-                            const isDone = item.total - item.paid <= 0;
-                            const isExpanded = expandedDebtIds.includes(item.id);
-
-                            // COMPACT GRID FOR DONE ITEMS
-                            if (isDone && !isExpanded) {
-                                return (
-                                    <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow aspect-square glass-panel bg-green-50/50 border-green-200/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-green-100/50 transition-all shadow-sm active:scale-95 group relative">
-                                        <div className="absolute inset-0 bg-green-400/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        <Check size={18} className="text-green-600 mb-1 relative z-10"/>
-                                        <span className="text-[8px] font-black text-green-700 uppercase truncate w-full text-center px-1 relative z-10">{item.name}</span>
-                                    </div>
-                                );
                             }
 
-                            // COMPACT LIST FOR ACTIVE ITEMS
                             return (
                                 <div key={item.id} className="w-full glass-panel p-3 rounded-2xl border border-white/60 flex items-center gap-3 relative overflow-hidden group hover:bg-white/60 transition-all min-h-[64px]">
-                                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${isDone ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500')}`}></div>
+                                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
                                     
                                     {/* Icon Percent Box */}
                                     <div className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center flex-shrink-0 shadow-sm text-white ${progressBarColor.replace('to-r', 'to-br')}`}>
@@ -124,13 +108,12 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                                     </div>
 
                                     {/* Content */}
-                                    <div className="flex-1 min-w-0 flex flex-col justify-center gap-1" onClick={() => isDone && toggleDebtExpansion(item.id)}>
+                                    <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
                                         <div className="flex justify-between items-center">
                                             <p className="font-black text-slate-700 text-[11px] uppercase truncate pr-2 leading-tight">
                                                 {item.name}
-                                                {isDone && <span className="ml-1 bg-green-100 text-green-600 px-1 py-0.5 rounded-[4px] text-[8px]">XONG</span>}
                                             </p>
-                                            <span className={`text-[10px] font-black ${isDone ? "text-green-600" : "text-slate-600"}`}>
+                                            <span className="text-[10px] font-black text-slate-600">
                                                 {formatCurrency(item.total - item.paid)}
                                             </span>
                                         </div>
@@ -150,15 +133,65 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                                     <div className="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all transform scale-95 group-hover:scale-100">
                                         <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="p-1.5 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-100 border border-blue-100"><Edit2 size={12}/></button>
                                         <button onClick={(e)=>{ e.stopPropagation(); if(confirm('Xóa sổ nợ?')) onUpdateDebts(debts.filter(d => d.id !== item.id));}} className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 border border-red-100"><Trash2 size={12}/></button>
-                                        {isDone && (
-                                            <button onClick={() => toggleDebtExpansion(item.id)} className="p-1.5 bg-slate-50 text-slate-400 rounded-lg hover:bg-slate-100 border border-slate-200"><ChevronUp size={12}/></button>
-                                        )}
                                     </div>
                                 </div>
                             );
                         })}
-                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-8 text-slate-400 text-[9px] font-black uppercase tracking-widest glass-panel rounded-2xl w-full border-dashed">Danh sách trống</div>}
+                        {activeDebts.length === 0 && <div className="text-center py-8 text-slate-400 text-[9px] font-black uppercase tracking-widest glass-panel rounded-2xl w-full border-dashed">Không có khoản nợ đang hoạt động</div>}
                     </div>
+
+                    {/* DANH SÁCH ĐÃ XONG (DONE - HISTORY) */}
+                    {doneDebts.length > 0 && (
+                        <div className="pb-8 animate-fadeIn">
+                             <button 
+                                onClick={() => setShowHistory(!showHistory)} 
+                                className="w-full py-3 glass-panel rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase text-slate-500 hover:bg-white/60 transition-all mb-2 shadow-sm border-dashed"
+                             >
+                                <History size={14}/> {showHistory ? 'Thu gọn lịch sử' : `Xem khoản đã hoàn thành (${doneDebts.length})`} 
+                                {showHistory ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}
+                             </button>
+
+                             {showHistory && (
+                                <div className="flex flex-wrap gap-2 animate-fadeIn">
+                                    {doneDebts.map(item => {
+                                        const isExpanded = expandedDebtIds.includes(item.id);
+                                        
+                                        // Nếu bấm vào thì hiển thị chi tiết (Card)
+                                        if (isExpanded) {
+                                            return (
+                                                <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-full glass-panel p-3 rounded-2xl border border-green-200 bg-green-50/30 flex flex-col gap-2 relative group hover:bg-green-50/60 transition-all cursor-pointer">
+                                                    <div className="flex justify-between items-center">
+                                                         <div className="flex items-center gap-2">
+                                                            <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600"><Check size={14}/></div>
+                                                            <p className="font-black text-slate-700 text-[11px] uppercase">{item.name}</p>
+                                                         </div>
+                                                         <div className="flex gap-1">
+                                                            <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="p-1.5 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-100"><Edit2 size={10}/></button>
+                                                            <button onClick={(e)=>{ e.stopPropagation(); if(confirm('Xóa sổ nợ?')) onUpdateDebts(debts.filter(d => d.id !== item.id));}} className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100"><Trash2 size={10}/></button>
+                                                            <button className="p-1.5 bg-slate-50 text-slate-400 rounded-lg"><ChevronUp size={10}/></button>
+                                                         </div>
+                                                    </div>
+                                                    <div className="flex justify-between text-[9px] font-bold text-slate-500 px-1">
+                                                        <span>Tổng: {formatCurrency(item.total)}</span>
+                                                        <span>Đã hoàn tất 100%</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+
+                                        // Mặc định hiển thị Compact Box
+                                        return (
+                                            <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow aspect-square glass-panel bg-green-50/50 border-green-200/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-green-100/50 transition-all shadow-sm active:scale-95 group relative">
+                                                <div className="absolute inset-0 bg-green-400/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                <Check size={18} className="text-green-600 mb-1 relative z-10"/>
+                                                <span className="text-[8px] font-black text-green-700 uppercase truncate w-full text-center px-1 relative z-10">{item.name}</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                             )}
+                        </div>
+                    )}
                 </>
              ) : (
                 <div className="glass-panel p-6 rounded-[32px] shadow-xl border border-white/60 animate-fadeIn space-y-5 relative">
