@@ -39,23 +39,23 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
     };
 
     return (
-        <div className="space-y-6 animate-fadeIn mt-2">
+        <div className="space-y-4 animate-fadeIn mt-2">
              {!showDebtForm ? (
                 <>
-                    <div className="glass-panel p-5 rounded-3xl shadow-sm border border-white/50 overflow-hidden relative group">
+                    <div className="glass-panel p-4 rounded-3xl shadow-sm border border-white/50 overflow-hidden relative group">
                          {/* Decor Background */}
                          <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-200/30 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700"></div>
 
-                        <div className="flex justify-between items-center mb-4 relative z-10">
-                            <h3 className="font-black text-slate-700 flex items-center gap-2 uppercase text-xs tracking-widest"><Users className="text-blue-600" size={18}/> Quản Lý Vay Mượn</h3>
-                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest btn-effect shadow-lg shadow-blue-200/50 hover:shadow-blue-300 transition-all">Mới</button>
+                        <div className="flex justify-between items-center mb-3 relative z-10">
+                            <h3 className="font-black text-slate-700 flex items-center gap-2 uppercase text-[11px] tracking-widest"><Users className="text-blue-600" size={16}/> Quản Lý Vay Mượn</h3>
+                            <button onClick={() => { setShowDebtForm(true); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote(''); }} className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest btn-effect shadow-lg shadow-blue-200/50 hover:shadow-blue-300 transition-all">Mới</button>
                         </div>
-                        <div className="flex p-1 bg-white/40 border border-white/60 rounded-xl mb-4 backdrop-blur-sm">
-                            <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-md shadow-red-200' : 'text-slate-400 hover:bg-white/50'}`}>Mình nợ</button>
-                            <button onClick={()=>setActiveDebtTab('receivable')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='receivable' ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-200' : 'text-slate-400 hover:bg-white/50'}`}>Họ nợ</button>
+                        <div className="flex p-1 bg-white/40 border border-white/60 rounded-xl mb-3 backdrop-blur-sm">
+                            <button onClick={()=>setActiveDebtTab('payable')} className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='payable' ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-md shadow-red-200' : 'text-slate-400 hover:bg-white/50'}`}>Mình nợ</button>
+                            <button onClick={()=>setActiveDebtTab('receivable')} className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${activeDebtTab==='receivable' ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-md shadow-blue-200' : 'text-slate-400 hover:bg-white/50'}`}>Họ nợ</button>
                         </div>
                         
-                        {/* STATS SUMMARY */}
+                        {/* STATS SUMMARY COMPACT */}
                         {(() => {
                             const currentDebts = debts.filter(d => d.type === activeDebtTab);
                             const sumTotal = currentDebts.reduce((acc, d) => acc + d.total, 0);
@@ -64,30 +64,26 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                             const isPayable = activeDebtTab === 'payable';
 
                             return (
-                                <div className={`mb-4 p-5 rounded-2xl text-white shadow-xl bg-gradient-to-br ${isPayable ? 'from-red-500 to-pink-600 shadow-red-200/50' : 'from-blue-500 to-indigo-600 shadow-blue-200/50'} relative overflow-hidden`}>
+                                <div className={`p-4 rounded-2xl text-white shadow-lg bg-gradient-to-br ${isPayable ? 'from-red-500 to-pink-600 shadow-red-200/50' : 'from-blue-500 to-indigo-600 shadow-blue-200/50'} relative overflow-hidden`}>
                                     <div className="absolute inset-0 z-0 pointer-events-none mix-blend-overlay opacity-20">
                                         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" /></svg>
                                     </div>
-                                    <div className="flex justify-between items-end mb-3 relative z-10">
+                                    <div className="flex justify-between items-end relative z-10">
                                         <div>
-                                            <div className="text-[9px] font-black uppercase opacity-80 mb-1 tracking-widest">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
-                                            <div className="text-2xl font-black tracking-tight">{formatCurrency(sumTotal)}</div>
+                                            <div className="text-[8px] font-black uppercase opacity-80 mb-0.5 tracking-widest">{isPayable ? 'Tổng tiền nợ' : 'Tổng cho vay'}</div>
+                                            <div className="text-xl font-black tracking-tight leading-none">{formatCurrency(sumTotal)}</div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-[9px] font-black uppercase opacity-80 mb-1 tracking-widest">Còn lại</div>
-                                            <div className="text-lg font-black">{formatCurrency(sumRemaining)}</div>
+                                            <div className="text-[8px] font-black uppercase opacity-80 mb-0.5 tracking-widest">Còn lại</div>
+                                            <div className="text-sm font-black leading-none">{formatCurrency(sumRemaining)}</div>
                                         </div>
-                                    </div>
-                                    <div className="bg-white/20 p-2.5 rounded-xl flex justify-between items-center backdrop-blur-md relative z-10 border border-white/20">
-                                        <span className="text-[9px] font-black uppercase tracking-wider">{isPayable ? 'Đã trả được' : 'Đã thu hồi'}</span>
-                                        <span className="text-sm font-black">{formatCurrency(sumPaid)}</span>
                                     </div>
                                 </div>
                             );
                         })()}
                     </div>
 
-                    <div className="flex flex-wrap gap-3 pb-8">
+                    <div className="flex flex-wrap gap-2 pb-8">
                         {debts.filter(d => d.type === activeDebtTab).sort((a,b) => {
                             const aDone = a.total - a.paid <= 0;
                             const bDone = b.total - b.paid <= 0;
@@ -106,49 +102,62 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                             const isDone = item.total - item.paid <= 0;
                             const isExpanded = expandedDebtIds.includes(item.id);
 
+                            // COMPACT GRID FOR DONE ITEMS
                             if (isDone && !isExpanded) {
                                 return (
-                                    <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow-0 aspect-square glass-panel bg-green-50/50 border-green-200/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-green-100/50 transition-all shadow-sm active:scale-95 group relative">
+                                    <div key={item.id} onClick={() => toggleDebtExpansion(item.id)} className="w-[31%] grow aspect-square glass-panel bg-green-50/50 border-green-200/50 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-green-100/50 transition-all shadow-sm active:scale-95 group relative">
                                         <div className="absolute inset-0 bg-green-400/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        <Check size={20} className="text-green-600 mb-1 relative z-10"/>
-                                        <span className="text-[9px] font-black text-green-700 uppercase truncate w-full text-center px-1 relative z-10">{item.name}</span>
-                                        <span className="text-[8px] font-bold text-green-500 uppercase mt-0.5 relative z-10">Xong</span>
+                                        <Check size={18} className="text-green-600 mb-1 relative z-10"/>
+                                        <span className="text-[8px] font-black text-green-700 uppercase truncate w-full text-center px-1 relative z-10">{item.name}</span>
                                     </div>
                                 );
                             }
 
+                            // COMPACT LIST FOR ACTIVE ITEMS
                             return (
-                                <div key={item.id} className="w-full glass-panel p-5 rounded-3xl shadow-sm border border-white/60 flex items-center justify-between relative overflow-hidden group hover:bg-white/60 transition-all">
-                                    <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${isDone ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500')}`}></div>
-                                    <div className="pl-3 flex-1 mr-2 min-w-0">
-                                        <div className="flex justify-between items-center cursor-pointer" onClick={() => isDone && toggleDebtExpansion(item.id)}>
-                                            <p className="font-black text-slate-700 text-sm uppercase flex items-center gap-2 truncate pr-2">
+                                <div key={item.id} className="w-full glass-panel p-3 rounded-2xl border border-white/60 flex items-center gap-3 relative overflow-hidden group hover:bg-white/60 transition-all min-h-[64px]">
+                                    <div className={`absolute left-0 top-0 bottom-0 w-1 ${isDone ? 'bg-green-500' : (activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500')}`}></div>
+                                    
+                                    {/* Icon Percent Box */}
+                                    <div className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center flex-shrink-0 shadow-sm text-white ${progressBarColor.replace('to-r', 'to-br')}`}>
+                                        <span className="text-[10px] font-black leading-none">{Math.round((item.paid/item.total)*100)}%</span>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0 flex flex-col justify-center gap-1" onClick={() => isDone && toggleDebtExpansion(item.id)}>
+                                        <div className="flex justify-between items-center">
+                                            <p className="font-black text-slate-700 text-[11px] uppercase truncate pr-2 leading-tight">
                                                 {item.name}
-                                                {isDone && <span className="bg-green-100 text-green-600 px-1.5 py-0.5 rounded text-[8px]">XONG</span>}
+                                                {isDone && <span className="ml-1 bg-green-100 text-green-600 px-1 py-0.5 rounded-[4px] text-[8px]">XONG</span>}
                                             </p>
-                                            <span className="text-[9px] font-black text-slate-400 flex-shrink-0">{Math.round((item.paid/item.total)*100)}%</span>
-                                        </div>
-                                        <div className="w-full bg-slate-100/50 rounded-full h-1.5 my-2 overflow-hidden border border-white/50">
-                                            <div className={`h-full rounded-full transition-all duration-700 ease-out ${progressBarColor}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
-                                        </div>
-                                        <div className="flex justify-between items-center text-[10px] font-bold">
-                                            <span className="text-slate-400">ĐÃ TRẢ: <span className="text-slate-600">{formatCurrency(item.paid)}</span></span>
-                                            <span className={isDone ? "text-green-600" : "text-slate-400"}>
-                                                {isDone ? 'HOÀN TẤT' : `CÒN: ${formatCurrency(item.total - item.paid)}`}
+                                            <span className={`text-[10px] font-black ${isDone ? "text-green-600" : "text-slate-600"}`}>
+                                                {formatCurrency(item.total - item.paid)}
                                             </span>
                                         </div>
+                                        
+                                        {/* Slim Progress Bar */}
+                                        <div className="w-full bg-slate-100/50 rounded-full h-1 overflow-hidden">
+                                            <div className={`h-full rounded-full ${progressBarColor}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
+                                        </div>
+
+                                        <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 leading-none">
+                                            <span>Đã trả: {formatCurrency(item.paid)}</span>
+                                            <span>Tổng: {formatCurrency(item.total)}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex gap-2 flex-shrink-0">
-                                        <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="text-blue-500 p-2 bg-blue-50/50 hover:bg-blue-100/80 rounded-xl transition-colors backdrop-blur-sm border border-blue-100"><Edit2 size={16}/></button>
-                                        <button onClick={(e)=>{ e.stopPropagation(); if(confirm('Xóa sổ nợ?')) onUpdateDebts(debts.filter(d => d.id !== item.id));}} className="text-red-500 p-2 bg-red-50/50 hover:bg-red-100/80 rounded-xl transition-colors backdrop-blur-sm border border-red-100"><Trash2 size={16}/></button>
+
+                                    {/* Actions */}
+                                    <div className="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all transform scale-95 group-hover:scale-100">
+                                        <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="p-1.5 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-100 border border-blue-100"><Edit2 size={12}/></button>
+                                        <button onClick={(e)=>{ e.stopPropagation(); if(confirm('Xóa sổ nợ?')) onUpdateDebts(debts.filter(d => d.id !== item.id));}} className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 border border-red-100"><Trash2 size={12}/></button>
                                         {isDone && (
-                                            <button onClick={() => toggleDebtExpansion(item.id)} className="text-slate-400 p-2 bg-slate-50/50 hover:bg-slate-100/80 rounded-xl transition-colors backdrop-blur-sm border border-slate-200"><ChevronUp size={16}/></button>
+                                            <button onClick={() => toggleDebtExpansion(item.id)} className="p-1.5 bg-slate-50 text-slate-400 rounded-lg hover:bg-slate-100 border border-slate-200"><ChevronUp size={12}/></button>
                                         )}
                                     </div>
                                 </div>
                             );
                         })}
-                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-12 text-slate-400 text-[10px] font-black uppercase tracking-widest glass-panel rounded-3xl w-full border-dashed">Danh sách trống</div>}
+                        {debts.filter(d => d.type === activeDebtTab).length === 0 && <div className="text-center py-8 text-slate-400 text-[9px] font-black uppercase tracking-widest glass-panel rounded-2xl w-full border-dashed">Danh sách trống</div>}
                     </div>
                 </>
              ) : (
