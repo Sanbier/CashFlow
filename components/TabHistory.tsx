@@ -61,42 +61,42 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, 
     };
 
     return (
-        <div className="animate-fadeIn mt-2 space-y-4">
+        <div className="animate-fadeIn mt-2 space-y-3">
             {/* THANH CHUYỂN ĐỔI TAB THU / CHI */}
             <div className="flex p-1 bg-white/40 border border-white/60 rounded-2xl backdrop-blur-sm shadow-sm">
                 <button 
                     onClick={() => handleViewTypeChange('all')} 
-                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'all' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-500 hover:bg-white/50'}`}
+                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'all' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-500 hover:bg-white/50'}`}
                 >
                     Tất cả
                 </button>
                 <button 
                     onClick={() => handleViewTypeChange('income')} 
-                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'income' ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-md shadow-green-200' : 'text-slate-500 hover:bg-white/50'}`}
+                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'income' ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-md shadow-green-200' : 'text-slate-500 hover:bg-white/50'}`}
                 >
                     Thu Nhập
                 </button>
                 <button 
                     onClick={() => handleViewTypeChange('expense')} 
-                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'expense' ? 'bg-gradient-to-r from-red-400 to-pink-500 text-white shadow-md shadow-red-200' : 'text-slate-500 hover:bg-white/50'}`}
+                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'expense' ? 'bg-gradient-to-r from-red-400 to-pink-500 text-white shadow-md shadow-red-200' : 'text-slate-500 hover:bg-white/50'}`}
                 >
                     Chi Tiêu
                 </button>
             </div>
 
             <div className="flex gap-2 items-stretch">
-                <div className="glass-panel p-2 rounded-2xl flex gap-3 items-center group focus-within:bg-white/60 transition-all flex-1">
-                    <div className="p-2 text-slate-400"><Search size={18}/></div>
-                    <input type="text" placeholder="Tìm kiếm..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 bg-transparent outline-none text-xs font-bold uppercase tracking-widest placeholder:text-slate-400 text-slate-700 h-full py-2"/>
+                <div className="glass-panel p-1.5 rounded-xl flex gap-2 items-center group focus-within:bg-white/60 transition-all flex-1">
+                    <div className="p-1.5 text-slate-400"><Search size={16}/></div>
+                    <input type="text" placeholder="Tìm kiếm..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 bg-transparent outline-none text-[11px] font-bold uppercase tracking-widest placeholder:text-slate-400 text-slate-700 h-full py-1"/>
                 </div>
                 
                 {/* Chỉ hiện Dropdown danh mục khi KHÔNG PHẢI là tab Thu Nhập */}
                 {viewType !== 'income' && (
-                    <div className="glass-panel rounded-2xl flex items-center bg-white/40 animate-fadeIn">
+                    <div className="glass-panel rounded-xl flex items-center bg-white/40 animate-fadeIn">
                         <select 
                             value={filterCategory} 
                             onChange={(e) => setFilterCategory(e.target.value)} 
-                            className="h-full px-3 py-2 bg-transparent outline-none text-[10px] font-black uppercase text-slate-600 border-none rounded-2xl cursor-pointer min-w-[100px] max-w-[140px] truncate"
+                            className="h-full px-2 py-1.5 bg-transparent outline-none text-[10px] font-black uppercase text-slate-600 border-none rounded-xl cursor-pointer min-w-[100px] max-w-[140px] truncate"
                         >
                             <option value="all">🔍 Tất cả danh mục</option>
                             <option disabled>──────────</option>
@@ -108,53 +108,81 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, 
                 )}
             </div>
             
-            <div className="space-y-3 pb-8">
+            <div className="space-y-2 pb-8">
                 {combinedList.map(item => {
                     const isEditing = editingNoteId === item.id;
+                    const isIncome = item.type === 'income';
+                    
                     return (
-                        <div key={`${item.type}-${item.id}`} className="p-4 flex justify-between items-center glass-panel rounded-3xl hover:bg-white/50 transition-all group border-white/40">
-                            <div className="flex items-center gap-4 flex-1 min-w-0">
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 ${item.type==='income'?'bg-gradient-to-br from-green-400 to-emerald-500 text-white shadow-green-200/50':'bg-gradient-to-br from-red-400 to-pink-500 text-white shadow-red-200/50'}`}>
-                                    {item.type==='income'?<TrendingUp size={22}/>:<TrendingDown size={22}/>}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-black text-slate-700 text-[12px] truncate uppercase tracking-tight">{(item as any).source || (item as any).category}</p>
-                                    {isEditing ? (
-                                        <div className="flex items-center gap-2 mt-1" onClick={e => e.stopPropagation()}>
-                                            <input
-                                                type="text"
-                                                value={tempNoteValue}
-                                                onChange={e => handleTextInput(e.target.value, setTempNoteValue)}
-                                                className="flex-1 p-2 text-[10px] bg-white/80 border border-slate-200 rounded-lg outline-none focus:ring-1 focus:ring-blue-300"
-                                                autoFocus
-                                                placeholder="Nhập ghi chú..."
-                                            />
-                                            <button onClick={() => handleSaveNote(item.id, item.type as any)} className="p-1.5 bg-green-100 text-green-600 rounded-lg hover:bg-green-200"><Check size={12}/></button>
-                                            <button onClick={() => setEditingNoteId(null)} className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200"><X size={12}/></button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            {item.note && <p className="text-[11px] text-slate-500 font-bold truncate italic my-0.5 opacity-80">{item.note}</p>}
-                                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">{formatDateTime(item.date)}</p>
-                                        </>
-                                    )}
-                                </div>
+                        <div key={`${item.type}-${item.id}`} className="p-3 flex items-start gap-3 glass-panel rounded-2xl hover:bg-white/60 transition-all group border-white/40 shadow-sm min-h-[64px]">
+                            {/* Icon Compact */}
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 mt-0.5 ${isIncome ? 'bg-gradient-to-br from-green-50 to-emerald-100 text-green-600' : 'bg-gradient-to-br from-red-50 to-pink-100 text-red-500'}`}>
+                                {isIncome ? <TrendingUp size={18}/> : <TrendingDown size={18}/>}
                             </div>
-                            <div className="text-right pl-3">
-                                <p className={`font-black text-[13px] ${item.type==='income'?'text-green-600':'text-red-500'}`}>{item.type==='income'?'+':'-'}{formatCurrency(item.amount)}</p>
-                                <div className="flex justify-end gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100">
-                                    <button onClick={(e) => {
-                                        e.stopPropagation();
-                                        setEditingNoteId(item.id);
-                                        setTempNoteValue(item.note || '');
-                                    }} className="text-[9px] text-blue-500 font-bold uppercase tracking-widest p-1.5 bg-blue-100/50 hover:bg-blue-100 rounded-lg"><Edit2 size={12}/></button>
-                                    <button onClick={()=>onDelete(item.id, item.type as any)} className="text-[9px] text-red-500 font-bold uppercase tracking-widest p-1.5 bg-red-100/50 hover:bg-red-100 rounded-lg"><Trash2 size={12}/></button>
+
+                            {/* Content Area */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                {/* Row 1: Title & Amount */}
+                                <div className="flex justify-between items-start">
+                                    <p className="font-black text-slate-700 text-[11px] uppercase tracking-tight truncate leading-tight pr-2">
+                                        {(item as any).source || (item as any).category}
+                                    </p>
+                                    <p className={`font-black text-[12px] leading-tight whitespace-nowrap ${isIncome ? 'text-green-600' : 'text-red-500'}`}>
+                                        {isIncome ? '+' : '-'}{formatCurrency(item.amount)}
+                                    </p>
+                                </div>
+
+                                {/* Row 2: Note/Date & Actions */}
+                                <div className="flex justify-between items-end mt-1">
+                                    <div className="flex-1 min-w-0 pr-2 relative">
+                                        {isEditing ? (
+                                            <div className="flex items-center gap-1 absolute top-0 left-0 w-full z-10 bg-white/90 p-1 rounded-lg border shadow-sm">
+                                                <input
+                                                    type="text"
+                                                    value={tempNoteValue}
+                                                    onChange={e => handleTextInput(e.target.value, setTempNoteValue)}
+                                                    className="flex-1 text-[10px] bg-transparent outline-none text-slate-700"
+                                                    autoFocus
+                                                    placeholder="Nhập ghi chú..."
+                                                />
+                                                <button onClick={() => handleSaveNote(item.id, item.type as any)} className="text-green-600"><Check size={12}/></button>
+                                                <button onClick={() => setEditingNoteId(null)} className="text-gray-400"><X size={12}/></button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col">
+                                                {item.note && (
+                                                    <p className="text-[10px] text-slate-500 truncate italic leading-tight mb-0.5">
+                                                        {item.note}
+                                                    </p>
+                                                )}
+                                                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">
+                                                    {formatDateTime(item.date)}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Actions Compact */}
+                                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all transform scale-95 group-hover:scale-100">
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); setEditingNoteId(item.id); setTempNoteValue(item.note || ''); }} 
+                                            className="p-1.5 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-100 border border-blue-100"
+                                        >
+                                            <Edit2 size={10}/>
+                                        </button>
+                                        <button 
+                                            onClick={()=>onDelete(item.id, item.type as any)} 
+                                            className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 border border-red-100"
+                                        >
+                                            <Trash2 size={10}/>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     );
                 })}
-                {combinedList.length === 0 && <div className="p-12 text-center text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] glass-panel rounded-3xl">Không tìm thấy giao dịch</div>}
+                {combinedList.length === 0 && <div className="p-8 text-center text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] glass-panel rounded-2xl border-dashed">Không tìm thấy giao dịch</div>}
             </div>
         </div>
     );
