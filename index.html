@@ -37,6 +37,10 @@
                             "100%": { opacity: "1", transform: "translateY(0)" },
                         }
                     },
+                    screens: {
+                        'xs': '375px',
+                        'pro-max': '430px',
+                    }
                 }
             }
         }
@@ -48,12 +52,17 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         /* iOS Optimization & Base Styles */
+        :root {
+            --sat: env(safe-area-inset-top);
+            --sab: env(safe-area-inset-bottom);
+        }
+
         body {
             -webkit-tap-highlight-color: transparent;
             background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
             -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-top: var(--sat);
+            padding-bottom: var(--sab);
             font-family: 'Quicksand', sans-serif;
             font-weight: 600;
             color: #1e293b;
@@ -61,31 +70,41 @@
             -webkit-overflow-scrolling: touch;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overscroll-behavior-y: none; /* Ngăn kéo trang web xuống (pull-to-refresh của browser) */
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
         }
 
-        .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
-        .safe-mb { margin-bottom: env(safe-area-inset-bottom); }
+        /* Fix input zoom trên iOS < 16px text size */
+        input, select, textarea {
+            font-size: 16px !important; 
+        }
+
+        .safe-pb { padding-bottom: var(--sab); }
+        .safe-pt { padding-top: var(--sat); }
 
         .btn-effect:active { transform: scale(0.95); transition-duration: 0.1s; }
         .input-effect:focus { transform: scale(1.005); border-color: rgba(255,255,255,0.9); }
         
         /* Optimized Glass Effect */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.45); /* Tăng độ đục nhẹ để giảm gánh nặng render background */
-            backdrop-filter: blur(12px); /* Giảm blur từ 16px xuống 12px cho mượt hơn trên mobile */
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.55); 
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.65);
-            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
             transform: translateZ(0); /* Kích hoạt hardware acceleration */
         }
         
         /* Input nhẹ hơn */
         .glass-input {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
             -webkit-appearance: none; /* Fix style input mặc định iOS */
             appearance: none;
+            border-radius: 16px;
         }
 
         .category-btn {
@@ -125,3 +144,4 @@
     <script type="module" src="/index.tsx"></script>
 </body>
 </html>
+    
