@@ -66,37 +66,37 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, 
             <div className="flex p-1 bg-white/40 border border-white/60 rounded-2xl backdrop-blur-sm shadow-sm">
                 <button 
                     onClick={() => handleViewTypeChange('all')} 
-                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'all' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-500 hover:bg-white/50'}`}
+                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'all' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-500 hover:bg-white/50'}`}
                 >
                     Tất cả
                 </button>
                 <button 
                     onClick={() => handleViewTypeChange('income')} 
-                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'income' ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white shadow-md shadow-green-200' : 'text-slate-500 hover:bg-white/50'}`}
+                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'income' ? 'bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-md shadow-emerald-200' : 'text-slate-500 hover:bg-white/50'}`}
                 >
                     Thu Nhập
                 </button>
                 <button 
                     onClick={() => handleViewTypeChange('expense')} 
-                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'expense' ? 'bg-gradient-to-r from-red-400 to-pink-500 text-white shadow-md shadow-red-200' : 'text-slate-500 hover:bg-white/50'}`}
+                    className={`flex-1 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewType === 'expense' ? 'bg-gradient-to-r from-rose-400 to-pink-500 text-white shadow-md shadow-rose-200' : 'text-slate-500 hover:bg-white/50'}`}
                 >
                     Chi Tiêu
                 </button>
             </div>
 
             <div className="flex gap-2 items-stretch">
-                <div className="glass-panel p-1.5 rounded-xl flex gap-2 items-center group focus-within:bg-white/60 transition-all flex-1">
-                    <div className="p-1.5 text-slate-400"><Search size={16}/></div>
+                <div className="glass-panel p-2 rounded-xl flex gap-2 items-center group focus-within:bg-white/70 transition-all flex-1 shadow-sm border-white/50">
+                    <div className="p-1 text-slate-400"><Search size={16}/></div>
                     <input type="text" placeholder="Tìm kiếm..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} className="flex-1 bg-transparent outline-none text-[11px] font-bold uppercase tracking-widest placeholder:text-slate-400 text-slate-700 h-full py-1"/>
                 </div>
                 
                 {/* Chỉ hiện Dropdown danh mục khi KHÔNG PHẢI là tab Thu Nhập */}
                 {viewType !== 'income' && (
-                    <div className="glass-panel rounded-xl flex items-center bg-white/40 animate-fadeIn">
+                    <div className="glass-panel rounded-xl flex items-center bg-white/40 animate-fadeIn border-white/50 shadow-sm">
                         <select 
                             value={filterCategory} 
                             onChange={(e) => setFilterCategory(e.target.value)} 
-                            className="h-full px-2 py-1.5 bg-transparent outline-none text-[10px] font-black uppercase text-slate-600 border-none rounded-xl cursor-pointer min-w-[100px] max-w-[140px] truncate"
+                            className="h-full px-3 py-1.5 bg-transparent outline-none text-[10px] font-black uppercase text-slate-600 border-none rounded-xl cursor-pointer min-w-[100px] max-w-[140px] truncate"
                         >
                             <option value="all">🔍 Tất cả danh mục</option>
                             <option disabled>──────────</option>
@@ -108,35 +108,35 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, 
                 )}
             </div>
             
-            <div className="space-y-2 pb-8">
+            <div className="space-y-3 pb-8">
                 {combinedList.map(item => {
                     const isEditing = editingNoteId === item.id;
                     const isIncome = item.type === 'income';
                     
                     return (
-                        <div key={`${item.type}-${item.id}`} className="p-3 flex items-start gap-3 glass-panel rounded-2xl hover:bg-white/60 transition-all group border-white/40 shadow-sm min-h-[64px]">
-                            {/* Icon Compact */}
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 mt-0.5 ${isIncome ? 'bg-gradient-to-br from-green-50 to-emerald-100 text-green-600' : 'bg-gradient-to-br from-red-50 to-pink-100 text-red-500'}`}>
-                                {isIncome ? <TrendingUp size={18}/> : <TrendingDown size={18}/>}
+                        <div key={`${item.type}-${item.id}`} className="p-3.5 flex items-start gap-3.5 glass-panel rounded-2xl hover:bg-white/70 transition-all group border-white/60 shadow-sm min-h-[70px]">
+                            {/* Icon Compact - Premium Colors */}
+                            <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 mt-0.5 border border-white/50 ${isIncome ? 'bg-gradient-to-br from-emerald-50 to-teal-100 text-emerald-600' : 'bg-gradient-to-br from-rose-50 to-pink-100 text-rose-500'}`}>
+                                {isIncome ? <TrendingUp size={20}/> : <TrendingDown size={20}/>}
                             </div>
 
                             {/* Content Area */}
                             <div className="flex-1 min-w-0 flex flex-col justify-center">
                                 {/* Row 1: Title & Amount */}
                                 <div className="flex justify-between items-start">
-                                    <p className="font-black text-slate-700 text-[11px] uppercase tracking-tight truncate leading-tight pr-2">
+                                    <p className="font-bold text-slate-700 text-xs uppercase tracking-tight truncate leading-tight pr-2">
                                         {(item as any).source || (item as any).category}
                                     </p>
-                                    <p className={`font-black text-[12px] leading-tight whitespace-nowrap ${isIncome ? 'text-green-600' : 'text-red-500'}`}>
+                                    <p className={`font-black text-[13px] leading-tight whitespace-nowrap ${isIncome ? 'text-emerald-600' : 'text-rose-500'}`}>
                                         {isIncome ? '+' : '-'}{formatCurrency(item.amount)}
                                     </p>
                                 </div>
 
                                 {/* Row 2: Note/Date & Actions */}
-                                <div className="flex justify-between items-end mt-1">
+                                <div className="flex justify-between items-end mt-1.5">
                                     <div className="flex-1 min-w-0 pr-2 relative">
                                         {isEditing ? (
-                                            <div className="flex items-center gap-1 absolute top-0 left-0 w-full z-10 bg-white/90 p-1 rounded-lg border shadow-sm">
+                                            <div className="flex items-center gap-1 absolute top-0 left-0 w-full z-10 bg-white/95 p-1 rounded-lg border shadow-sm">
                                                 <input
                                                     type="text"
                                                     value={tempNoteValue}
@@ -145,13 +145,13 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, 
                                                     autoFocus
                                                     placeholder="Nhập ghi chú..."
                                                 />
-                                                <button onClick={() => handleSaveNote(item.id, item.type as any)} className="text-green-600"><Check size={12}/></button>
+                                                <button onClick={() => handleSaveNote(item.id, item.type as any)} className="text-emerald-600"><Check size={12}/></button>
                                                 <button onClick={() => setEditingNoteId(null)} className="text-gray-400"><X size={12}/></button>
                                             </div>
                                         ) : (
-                                            <div className="flex flex-col">
+                                            <div className="flex flex-col gap-0.5">
                                                 {item.note && (
-                                                    <p className="text-[10px] text-slate-500 truncate italic leading-tight mb-0.5">
+                                                    <p className="text-[10px] text-slate-500 truncate italic leading-tight">
                                                         {item.note}
                                                     </p>
                                                 )}
@@ -166,15 +166,15 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, 
                                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all transform scale-95 group-hover:scale-100">
                                         <button 
                                             onClick={(e) => { e.stopPropagation(); setEditingNoteId(item.id); setTempNoteValue(item.note || ''); }} 
-                                            className="p-1.5 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-100 border border-blue-100"
+                                            className="p-1.5 bg-indigo-50 text-indigo-500 rounded-lg hover:bg-indigo-100 border border-indigo-100"
                                         >
-                                            <Edit2 size={10}/>
+                                            <Edit2 size={12}/>
                                         </button>
                                         <button 
                                             onClick={()=>onDelete(item.id, item.type as any)} 
-                                            className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 border border-red-100"
+                                            className="p-1.5 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 border border-rose-100"
                                         >
-                                            <Trash2 size={10}/>
+                                            <Trash2 size={12}/>
                                         </button>
                                     </div>
                                 </div>
@@ -182,7 +182,7 @@ const TabHistory: React.FC<TabHistoryProps> = ({ incomes, expenses, categories, 
                         </div>
                     );
                 })}
-                {combinedList.length === 0 && <div className="p-8 text-center text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] glass-panel rounded-2xl border-dashed">Không tìm thấy giao dịch</div>}
+                {combinedList.length === 0 && <div className="p-10 text-center text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] glass-panel rounded-2xl border-dashed">Không tìm thấy giao dịch</div>}
             </div>
         </div>
     );
