@@ -145,7 +145,8 @@ const TabAdd: React.FC<TabAddProps> = ({ categories, debts, onAddIncome, onAddEx
                         <button onClick={() => setIsCategoryManageMode(!isCategoryManageMode)} className={`text-[10px] font-bold px-3 py-1.5 rounded-xl border backdrop-blur-sm transition-all ${isCategoryManageMode ? 'bg-slate-800 text-white border-slate-700 shadow-md' : 'bg-white/50 text-slate-500 border-white/60 hover:bg-white/90'}`}>{isCategoryManageMode ? 'Xong' : 'Sửa Mục'}</button>
                     </div>
                     <div className="space-y-5 relative z-10">
-                        <div className="grid grid-cols-3 gap-2">
+                        {/* 3D Floating Grid */}
+                        <div className="grid grid-cols-3 gap-3">
                             {categories.map((cat, idx) => (
                                 <div key={cat} className="relative h-[72px]">
                                     {isCategoryManageMode ? (
@@ -161,11 +162,21 @@ const TabAdd: React.FC<TabAddProps> = ({ categories, debts, onAddIncome, onAddEx
                                             </div>
                                         </div>
                                     ) : (
-                                        <button onClick={() => setExpenseCategory(cat)} className={`category-btn w-full h-full text-[10px] font-bold rounded-2xl border transition-all duration-300 ${expenseCategory === cat ? 'bg-gradient-to-br from-rose-400 to-pink-500 text-white border-transparent shadow-lg shadow-rose-200 scale-105 z-10' : 'bg-white/50 text-slate-600 border-white/60 hover:bg-white/80 hover:border-white'}`}>{cat}</button>
+                                        <button 
+                                            onClick={() => setExpenseCategory(cat)} 
+                                            className={`category-btn w-full h-full text-[10px] font-bold rounded-2xl border transition-all duration-300 relative overflow-hidden
+                                            ${expenseCategory === cat 
+                                                ? 'bg-gradient-to-br from-rose-500 to-pink-600 text-white border-transparent shadow-xl shadow-rose-300/40 scale-105 z-10 transform -translate-y-1' 
+                                                : 'bg-white/80 backdrop-blur-md text-slate-600 border-white/50 shadow-[0_4px_10px_-2px_rgba(203,213,225,0.4)] hover:bg-white hover:shadow-lg hover:shadow-rose-100 hover:-translate-y-0.5 hover:border-white'}`}
+                                        >
+                                            <span className="relative z-10">{cat}</span>
+                                            {/* Hiệu ứng bóng sáng nhẹ bên trong */}
+                                            {expenseCategory !== cat && <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-transparent opacity-60 pointer-events-none"></div>}
+                                        </button>
                                     )}
                                 </div>
                             ))}
-                            {!isCategoryManageMode && <button onClick={handleAddCustomCategory} className="category-btn h-[72px] text-[10px] font-bold rounded-2xl border-2 border-dashed border-slate-300 text-slate-400 hover:bg-white/40 hover:border-indigo-300 hover:text-indigo-500 transition-all"><Plus size={20}/></button>}
+                            {!isCategoryManageMode && <button onClick={handleAddCustomCategory} className="category-btn h-[72px] text-[10px] font-bold rounded-2xl border-2 border-dashed border-slate-300/60 bg-white/30 text-slate-400 hover:bg-white/60 hover:border-indigo-300 hover:text-indigo-500 hover:shadow-md transition-all"><Plus size={20}/></button>}
                         </div>
                         
                         {expenseCategory && !isCategoryManageMode && (
