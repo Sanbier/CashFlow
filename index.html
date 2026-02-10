@@ -22,38 +22,21 @@
                         sans: ['Quicksand', 'Nunito', 'sans-serif'],
                     },
                     animation: {
-                        blob: "blob 10s infinite",
-                        fadeIn: "fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards",
-                        slideUp: "slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+                        blob: "blob 7s infinite",
+                        fadeIn: "fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards",
                     },
                     keyframes: {
                         blob: {
                             "0%": { transform: "translate(0px, 0px) scale(1)" },
-                            "33%": { transform: "translate(30px, -50px) scale(1.2)" },
-                            "66%": { transform: "translate(-20px, 20px) scale(0.8)" },
+                            "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+                            "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
                             "100%": { transform: "translate(0px, 0px) scale(1)" },
                         },
                         fadeIn: {
-                            "0%": { opacity: "0" },
-                            "100%": { opacity: "1" },
-                        },
-                        slideUp: {
-                            "0%": { opacity: "0", transform: "translateY(20px)" },
+                            "0%": { opacity: "0", transform: "translateY(10px)" },
                             "100%": { opacity: "1", transform: "translateY(0)" },
                         }
                     },
-                    screens: {
-                        'xs': '375px',
-                        'pro-max': '430px',
-                    },
-                    colors: {
-                        glass: {
-                            100: 'rgba(255, 255, 255, 0.1)',
-                            200: 'rgba(255, 255, 255, 0.2)',
-                            300: 'rgba(255, 255, 255, 0.3)',
-                            border: 'rgba(255, 255, 255, 0.5)',
-                        }
-                    }
                 }
             }
         }
@@ -65,72 +48,44 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         /* iOS Optimization & Base Styles */
-        :root {
-            --sat: env(safe-area-inset-top);
-            --sab: env(safe-area-inset-bottom);
-        }
-
         body {
             -webkit-tap-highlight-color: transparent;
-            /* Nền sang trọng hơn: Slate nhạt pha chút xanh */
-            background: #f1f5f9; 
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
             -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
-            padding-top: var(--sat);
-            padding-bottom: var(--sab);
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
             font-family: 'Quicksand', sans-serif;
             font-weight: 600;
-            color: #334155;
+            color: #1e293b;
             /* iOS Smooth Scrolling & Font Rendering */
             -webkit-overflow-scrolling: touch;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            overscroll-behavior-y: none;
-            height: 100dvh;
-            width: 100vw;
-            overflow: hidden;
         }
 
-        /* Fix input zoom trên iOS < 16px text size */
-        input, select, textarea {
-            font-size: 16px !important; 
-        }
+        .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
+        .safe-mb { margin-bottom: env(safe-area-inset-bottom); }
 
-        .safe-pb { padding-bottom: var(--sab); }
-        .safe-pt { padding-top: var(--sat); }
-
-        .btn-effect:active { transform: scale(0.96); transition-duration: 0.1s; }
+        .btn-effect:active { transform: scale(0.95); transition-duration: 0.1s; }
+        .input-effect:focus { transform: scale(1.005); border-color: rgba(255,255,255,0.9); }
         
-        /* MODERN GLASSMORPHISM - Cao cấp hơn */
+        /* Optimized Glass Effect */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.65); /* Trong hơn */
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 
-                0 4px 6px -1px rgba(0, 0, 0, 0.02),
-                0 10px 15px -3px rgba(0, 0, 0, 0.05),
-                inset 0 0 20px rgba(255, 255, 255, 0.5); /* Inner glow */
-            transform: translateZ(0);
+            background: rgba(255, 255, 255, 0.45); /* Tăng độ đục nhẹ để giảm gánh nặng render background */
+            backdrop-filter: blur(12px); /* Giảm blur từ 16px xuống 12px cho mượt hơn trên mobile */
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.08);
+            transform: translateZ(0); /* Kích hoạt hardware acceleration */
         }
         
-        /* Input hiện đại: Nền xám rất nhạt, focus sẽ trắng */
+        /* Input nhẹ hơn */
         .glass-input {
-            background: rgba(241, 245, 249, 0.6); /* Slate-50 transparent */
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-appearance: none; /* Fix style input mặc định iOS */
             appearance: none;
-            border-radius: 16px;
-            color: #1e293b;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.01);
-            transition: all 0.3s ease;
-        }
-
-        .glass-input:focus {
-            background: rgba(255, 255, 255, 0.9);
-            border-color: #a78bfa; /* Light Purple border on focus */
-            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
-            transform: translateY(-1px);
         }
 
         .category-btn {
@@ -148,13 +103,6 @@
         /* Hide Scrollbar but keep functionality */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Custom Gradients for Text */
-        .text-gradient-primary {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
     </style>
 <script type="importmap">
 {
