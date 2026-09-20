@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { TabType, UpdateDebtsHandler, MonthCashFlowRow } from './types';
 import { formatCurrency, formatDate, getMonthDateRange, computeAnnualCashFlow } from './utils';
 import { useFinancialData } from './hooks/useFinancialData';
+import { DEFAULT_FIREBASE_CONFIG_STR, DEFAULT_FAMILY_CODE } from './constants';
 
 // Components
 import TabAdd from './components/TabAdd';
@@ -47,11 +48,24 @@ const App: React.FC = () => {
   const [showFixedTrackingModal, setShowFixedTrackingModal] = useState(false);
   const [showCloudForm, setShowCloudForm] = useState(false);
 
-  // 2. Data Logic (Load from Custom Hook)
-  const [firebaseConfigStr] = useState(() => localStorage.getItem('fb_config') || '');
-  const [familyCode] = useState(() =>
-    (localStorage.getItem('fb_family_code') || '').trim().toUpperCase()
-  );
+  // 2. Data Logic (Load from Custom Hook - Default to Provided Firebase Config)
+  const [firebaseConfigStr] = useState(() => {
+    const saved = (localStorage.getItem('fb_config') || '').trim();
+    if (saved) {
+      try {
+        JSON.parse(saved);
+        return saved;
+      } catch {
+        // Fall back to default if saved value is invalid
+      }
+    }
+    return DEFAULT_FIREBASE_CONFIG_STR;
+  });
+
+  const [familyCode] = useState(() => {
+    const saved = (localStorage.getItem('fb_family_code') || '').trim().toUpperCase();
+    return saved || DEFAULT_FAMILY_CODE;
+  });
 
   const {
     incomes,

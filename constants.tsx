@@ -61,6 +61,18 @@ export const DEFAULT_CHILD_EDUCATION_DATA: ChildEducationData = {
   payments: {},
 };
 
+export const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBmSTUadewx5jgJYJeRz6E1GpsTgf5P08A",
+  authDomain: "moneyflow-7afc4.firebaseapp.com",
+  projectId: "moneyflow-7afc4",
+  storageBucket: "moneyflow-7afc4.firebasestorage.app",
+  messagingSenderId: "641114080056",
+  appId: "1:641114080056:web:e873322a7f4cff4f8ab7cd"
+};
+
+export const DEFAULT_FIREBASE_CONFIG_STR = JSON.stringify(DEFAULT_FIREBASE_CONFIG, null, 2);
+export const DEFAULT_FAMILY_CODE = "CASHFLOW";
+
 export interface IconProps {
   size?: number;
   className?: string;

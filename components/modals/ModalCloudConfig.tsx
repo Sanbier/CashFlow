@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Cloud, X, AlertTriangle, ShieldCheck } from '../../constants';
+import { Cloud, X, AlertTriangle, ShieldCheck, DEFAULT_FIREBASE_CONFIG_STR, DEFAULT_FAMILY_CODE, RefreshCw } from '../../constants';
 
 interface ModalCloudConfigProps {
   isOpen: boolean;
@@ -17,6 +17,11 @@ const ModalCloudConfig: React.FC<ModalCloudConfigProps> = ({
   const [code, setCode] = useState(currentCode);
   const [config, setConfig] = useState(currentConfig);
   const [passphrase, setPassphrase] = useState(() => localStorage.getItem('fb_passphrase') || '');
+
+  const handleResetDefault = () => {
+    setCode(DEFAULT_FAMILY_CODE);
+    setConfig(DEFAULT_FIREBASE_CONFIG_STR);
+  };
 
   const handleSave = () => {
     const finalCode = code.trim().toUpperCase();
@@ -91,9 +96,19 @@ const ModalCloudConfig: React.FC<ModalCloudConfigProps> = ({
           </div>
 
           <div>
-            <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest block mb-1.5 ml-1">
-              Firebase Config JSON
-            </label>
+            <div className="flex items-center justify-between mb-1.5 ml-1 mr-1">
+              <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+                Firebase Config JSON
+              </label>
+              <button
+                type="button"
+                onClick={handleResetDefault}
+                className="text-[9px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 active:scale-95 transition-all"
+                title="Khôi phục về cấu hình Firebase mặc định"
+              >
+                <RefreshCw size={10} /> Khôi phục mặc định
+              </button>
+            </div>
             <textarea
               value={config}
               onChange={(e) => setConfig(e.target.value)}
