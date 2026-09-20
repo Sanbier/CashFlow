@@ -34,6 +34,15 @@ interface TabChildSchoolProps {
 }
 
 const WEEKDAY_NAMES = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+const CALENDAR_HEADERS = [
+  { label: 'T2', isSaturday: false, isSunday: false },
+  { label: 'T3', isSaturday: false, isSunday: false },
+  { label: 'T4', isSaturday: false, isSunday: false },
+  { label: 'T5', isSaturday: false, isSunday: false },
+  { label: 'T6', isSaturday: false, isSunday: false },
+  { label: 'T7', isSaturday: true, isSunday: false },
+  { label: 'CN', isSaturday: false, isSunday: true },
+];
 
 export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
   viewDate,
@@ -133,6 +142,23 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
   const absentDayCount = useMemo(() => {
     return calendarDays.filter((d) => d.status === 'nghi' && !d.isSunday).length;
   }, [calendarDays]);
+
+  // Calculation for Monday-first calendar alignment:
+  // getDay(): 0 is Sunday, 1 is Monday, ..., 6 is Saturday
+  // For Monday as first column (index 0): (dayOfWeek + 6) % 7
+  const leadingEmptyDays = useMemo(() => {
+    const firstDayOfWeek = new Date(selectedYear, selectedMonth - 1, 1).getDay();
+    return (firstDayOfWeek + 6) % 7;
+  }, [selectedYear, selectedMonth]);
+
+  const prevMonthDaysCount = useMemo(() => {
+    return new Date(selectedYear, selectedMonth - 1, 0).getDate();
+  }, [selectedYear, selectedMonth]);
+
+  const trailingEmptyDays = useMemo(() => {
+    const total = leadingEmptyDays + daysInMonth;
+    return (7 - (total % 7)) % 7;
+  }, [leadingEmptyDays, daysInMonth]);
 
   const regularDayTotalFee = regularDayCount * config.regularDayFee;
   const saturdayTotalFee = saturdayCount * config.saturdayFee;
@@ -359,8 +385,44 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
           </div>
         </div>
 
+        {/* Weekday Column Headers: Thứ 2 đầu tiên */}
+        <div className="grid grid-cols-7 gap-1.5 pb-1 border-b border-slate-200/50 text-center">
+          {CALENDAR_HEADERS.map((col) => (
+            <div
+              key={col.label}
+              className={`py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
+                col.isSunday
+                  ? 'text-rose-600 bg-rose-50/70 border border-rose-200/50'
+                  : col.isSaturday
+                  ? 'text-blue-600 bg-blue-50/70 border border-blue-200/50'
+                  : 'text-slate-700 bg-slate-100/60 border border-slate-200/40'
+              }`}
+            >
+              {col.label}
+            </div>
+          ))}
+        </div>
+
         {/* Days Grid */}
         <div className="grid grid-cols-7 gap-1.5 pt-1">
+          {/* Leading Days from Previous Month (Align Thứ 2 đầu tiên) */}
+          {Array.from({ length: leadingEmptyDays }).map((_, i) => {
+            const prevDayNum = prevMonthDaysCount - leadingEmptyDays + 1 + i;
+            return (
+              <div
+                key={`prev-${prevDayNum}`}
+                className="p-1.5 rounded-2xl border border-dashed border-slate-200/50 bg-slate-50/20 flex flex-col items-center justify-between min-h-[58px] opacity-35 pointer-events-none select-none"
+              >
+                <div className="flex items-center justify-between w-full px-1">
+                  <span className="text-[10px] font-bold text-slate-400 leading-none">{prevDayNum}</span>
+                </div>
+                <span className="text-[7.5px] font-medium text-slate-400 italic">tháng trước</span>
+                <span className="text-[7.5px] font-bold text-slate-300">--</span>
+              </div>
+            );
+          })}
+
+          {/* Current Month Active Days */}
           {calendarDays.map((item) => {
             const isAttending = item.status === 'hoc';
 
@@ -385,9 +447,11 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
                 {/* Header: Day Number & Weekday */}
                 <div className="flex items-center justify-between w-full px-1">
                   <span className="text-[10px] font-black leading-none">{item.day}</span>
-                  <span className={`text-[8px] font-bold ${
-                    item.isSunday ? 'text-rose-500' : item.isSaturday ? 'text-blue-500' : 'text-slate-400'
-                  }`}>
+                  <span
+                    className={`text-[8px] font-bold ${
+                      item.isSunday ? 'text-rose-500' : item.isSaturday ? 'text-blue-500' : 'text-slate-400'
+                    }`}
+                  >
                     {item.dayName}
                   </span>
                 </div>
@@ -412,6 +476,23 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
                   {item.fee > 0 ? `${(item.fee / 1000).toFixed(0)}k` : '0đ'}
                 </span>
               </button>
+            );
+          })}
+
+          {/* Trailing Days for Next Month */}
+          {Array.from({ length: trailingEmptyDays }).map((_, i) => {
+            const nextDayNum = i + 1;
+            return (
+              <div
+                key={`next-${nextDayNum}`}
+                className="p-1.5 rounded-2xl border border-dashed border-slate-200/50 bg-slate-50/20 flex flex-col items-center justify-between min-h-[58px] opacity-35 pointer-events-none select-none"
+              >
+                <div className="flex items-center justify-between w-full px-1">
+                  <span className="text-[10px] font-bold text-slate-400 leading-none">{nextDayNum}</span>
+                </div>
+                <span className="text-[7.5px] font-medium text-slate-400 italic">tháng sau</span>
+                <span className="text-[7.5px] font-bold text-slate-300">--</span>
+              </div>
             );
           })}
         </div>
