@@ -106,13 +106,14 @@ export interface MonthCashFlowRow {
   salaryIncome: number;
   loanIncome: number;
   otherIncome: number;
-  totalIncome: number;
+  totalNewIncome: number;
+  totalIncome: number; // Tổng khả dụng = startingBalance + totalNewIncome (Sheet 2 Row 16)
   expensesByCategory: Record<string, number>;
   totalLivingExpense: number;
   savingsAllocation: number;
   totalExpense: number;
-  netBalance: number;
-  closingBalance: number;
+  netBalance: number; // totalNewIncome - totalExpense (Chênh lệch thu chi thuần tháng)
+  closingBalance: number; // totalIncome - totalExpense (Số dư cuối tháng chuyển sang tháng sau)
   status: 'surplus' | 'deficit' | 'balanced';
   statusText: string;
 }

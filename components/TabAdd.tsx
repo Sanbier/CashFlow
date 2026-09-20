@@ -22,6 +22,7 @@ import { formatCurrency, handleAmountInput, handleTextInput, parseAmount, toTitl
 import CustomDatePicker from './CustomDatePicker';
 
 interface TabAddProps {
+  viewDate?: Date;
   categories: string[];
   debts: Debt[];
   categoryBudgets?: Record<string, number>;
@@ -39,6 +40,7 @@ interface TabAddProps {
 }
 
 const TabAdd: React.FC<TabAddProps> = ({
+  viewDate,
   categories,
   debts,
   categoryBudgets = DEFAULT_EXCEL_BUDGETS,
@@ -48,10 +50,20 @@ const TabAdd: React.FC<TabAddProps> = ({
   onUpdateCategories,
 }) => {
   const getLocalToday = () => {
-    const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
+    const today = new Date();
+    if (viewDate) {
+      const isCurrentMonth =
+        viewDate.getFullYear() === today.getFullYear() &&
+        viewDate.getMonth() === today.getMonth();
+      if (!isCurrentMonth) {
+        const y = viewDate.getFullYear();
+        const m = String(viewDate.getMonth() + 1).padStart(2, '0');
+        return `${y}-${m}-01`;
+      }
+    }
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 

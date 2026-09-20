@@ -10,12 +10,15 @@ import {
   Edit2,
   Check,
   Percent,
+  PieChart,
 } from '../constants';
 import { CORE_EXPENSE_CATEGORIES, CORE_SAVING_CATEGORY } from '../constants';
 import { Income, Expense, MonthCashFlowRow, AnnualDashboardKPI } from '../types';
-import { formatCurrency, handleAmountInput, parseAmount } from '../utils';
+import { formatCurrency, handleAmountInput, parseAmount, computeAnnualCashFlow } from '../utils';
 
 interface TabCashFlow12MProps {
+  viewDate: Date;
+  onSelectMonth?: (month: number, year: number) => void;
   incomes: Income[];
   expenses: Expense[];
   initialYearBalance: Record<number, number>;
@@ -23,178 +26,25 @@ interface TabCashFlow12MProps {
 }
 
 export const TabCashFlow12M: React.FC<TabCashFlow12MProps> = ({
+  viewDate,
+  onSelectMonth,
   incomes,
   expenses,
   initialYearBalance,
   onUpdateInitialBalance,
 }) => {
-  const currentYear = new Date().getFullYear();
+  const currentYear = viewDate.getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [activeViewMode, setActiveViewMode] = useState<'matrix' | 'cards'>('matrix');
-  const [focusedMonth, setFocusedMonth] = useState<number>(new Date().getMonth() + 1);
+  const [focusedMonth, setFocusedMonth] = useState<number>(viewDate.getMonth() + 1);
 
   // Edit Starting Balance Modal
   const [showEditBalance, setShowEditBalance] = useState(false);
   const [balanceInput, setBalanceInput] = useState('');
 
-  // 12 Months Computation with Rollover Balance
+  // 12 Months Computation with Rollover Balance using single source of truth engine
   const { monthRows, annualKpi } = useMemo(() => {
-    const rows: MonthCashFlowRow[] = [];
-
-    let rolloverBalance = initialYearBalance[selectedYear] || 0;
-
-    for (let m = 1; m <= 12; m++) {
-      // Incomes for month m
-      const mIncomes = incomes.filter((item) => {
-        const d = new Date(item.date);
-        return d.getFullYear() === selectedYear && d.getMonth() + 1 === m;
-      });
-
-      // Expenses for month m
-      const mExpenses = expenses.filter((item) => {
-        const d = new Date(item.date);
-        return d.getFullYear() === selectedYear && d.getMonth() + 1 === m;
-      });
-
-      // Breakdown Incomes
-      let salary = 0;
-      let loan = 0;
-      let other = 0;
-
-      for (const inc of mIncomes) {
-        if (inc.incomeType === 'salary') {
-          salary += inc.amount;
-        } else if (inc.incomeType === 'loan') {
-          loan += inc.amount;
-        } else if (inc.incomeType === 'other') {
-          other += inc.amount;
-        } else {
-          // Detect from source text
-          const s = inc.source.toLowerCase();
-          if (s.includes('lương')) salary += inc.amount;
-          else if (s.includes('mượn') || s.includes('vay')) loan += inc.amount;
-          else other += inc.amount;
-        }
-      }
-
-      const startingBal = rolloverBalance;
-      // In Excel Sheet 2 Row 16: TỔNG THU = Lương + Mượn + Thu khác + SỐ DƯ ĐẦU THÁNG
-      const totalCashIn = salary + loan + other + startingBal;
-
-      // Breakdown Expenses for 9 core categories
-      const expCatMap: Record<string, number> = {};
-      for (const cat of CORE_EXPENSE_CATEGORIES) {
-        expCatMap[cat] = 0;
-      }
-
-      let totalLiving = 0;
-      let savings = 0;
-
-      for (const exp of mExpenses) {
-        if (exp.category === CORE_SAVING_CATEGORY || exp.category.toLowerCase().includes('tiết kiệm')) {
-          savings += exp.amount;
-        } else if (expCatMap[exp.category] !== undefined) {
-          expCatMap[exp.category] += exp.amount;
-          totalLiving += exp.amount;
-        } else {
-          // Custom / other expense -> bundle into Giải trí/Phát sinh
-          expCatMap['Giải trí/Phát sinh'] = (expCatMap['Giải trí/Phát sinh'] || 0) + exp.amount;
-          totalLiving += exp.amount;
-        }
-      }
-
-      // If user hasn't explicitly logged savings in this month, apply the 10% rule if income exists
-      const totalNewIncome = salary + loan + other;
-      if (savings === 0 && totalNewIncome > 0 && mExpenses.length > 0) {
-        // Excel row 27: 10% of new income
-        savings = Math.round(totalNewIncome * 0.1);
-      }
-
-      const totalExpense = totalLiving + savings;
-      // Chênh lệch / Số dư cuối tháng
-      const closingBal = totalCashIn - totalExpense;
-      const netBal = totalCashIn - totalExpense;
-
-      let status: 'surplus' | 'deficit' | 'balanced' = 'balanced';
-      let statusText = 'CÂN BẰNG';
-
-      if (netBal < 0) {
-        status = 'deficit';
-        statusText = `⚠ CHI VƯỢT THU ${formatCurrency(Math.abs(netBal))}`;
-      } else if (netBal > 0) {
-        status = 'surplus';
-        statusText = `DƯ ${formatCurrency(netBal)}`;
-      }
-
-      rows.push({
-        month: m,
-        year: selectedYear,
-        startingBalance: startingBal,
-        salaryIncome: salary,
-        loanIncome: loan,
-        otherIncome: other,
-        totalIncome: totalCashIn,
-        expensesByCategory: expCatMap,
-        totalLivingExpense: totalLiving,
-        savingsAllocation: savings,
-        totalExpense: totalExpense,
-        netBalance: netBal,
-        closingBalance: closingBal,
-        status,
-        statusText,
-      });
-
-      // Rollover to next month
-      rolloverBalance = closingBal;
-    }
-
-    // Compute 8 Annual KPIs
-    let totalAnnualInc = 0;
-    let totalAnnualExp = 0;
-    let totalAnnualSav = 0;
-
-    let maxExpMonth: { month: number; amount: number } | null = null;
-    let minExpMonth: { month: number; amount: number } | null = null;
-    let maxSurplusMonth: { month: number; amount: number } | null = null;
-
-    for (const r of rows) {
-      const pureIncome = r.salaryIncome + r.loanIncome + r.otherIncome;
-      totalAnnualInc += pureIncome;
-      totalAnnualExp += r.totalExpense;
-      totalAnnualSav += r.savingsAllocation;
-
-      if (r.totalExpense > 0) {
-        if (!maxExpMonth || r.totalExpense > maxExpMonth.amount) {
-          maxExpMonth = { month: r.month, amount: r.totalExpense };
-        }
-        if (!minExpMonth || r.totalExpense < minExpMonth.amount) {
-          minExpMonth = { month: r.month, amount: r.totalExpense };
-        }
-      }
-
-      if (r.netBalance > 0) {
-        if (!maxSurplusMonth || r.netBalance > maxSurplusMonth.amount) {
-          maxSurplusMonth = { month: r.month, amount: r.netBalance };
-        }
-      }
-    }
-
-    const activeExpenseMonths = rows.filter((r) => r.totalExpense > 0).length || 1;
-    const avgMonthlyExp = totalAnnualExp / activeExpenseMonths;
-    const savingsRate = totalAnnualInc > 0 ? (totalAnnualSav / totalAnnualInc) * 100 : 0;
-
-    const kpi: AnnualDashboardKPI = {
-      totalAnnualIncome: totalAnnualInc,
-      totalAnnualExpense: totalAnnualExp,
-      totalAnnualSavings: totalAnnualSav,
-      highestExpenseMonth: maxExpMonth,
-      lowestExpenseMonth: minExpMonth,
-      highestSurplusMonth: maxSurplusMonth,
-      averageMonthlyExpense: avgMonthlyExp,
-      savingsRate,
-    };
-
-    return { monthRows: rows, annualKpi: kpi };
+    return computeAnnualCashFlow(selectedYear, incomes, expenses, initialYearBalance);
   }, [incomes, expenses, selectedYear, initialYearBalance]);
 
   const handleOpenEditBalance = () => {
@@ -398,11 +248,35 @@ export const TabCashFlow12M: React.FC<TabCashFlow12MProps> = ({
                   <th className="p-2 sticky left-0 bg-white/90 backdrop-blur-md z-20 min-w-[130px]">
                     Hạng Mục / Tháng
                   </th>
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                    <th key={m} className="p-2 text-center min-w-[95px]">
-                      T{m}
-                    </th>
-                  ))}
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => {
+                    const isCurrentActive =
+                      viewDate.getFullYear() === selectedYear && viewDate.getMonth() + 1 === m;
+                    return (
+                      <th
+                        key={m}
+                        onClick={() => onSelectMonth?.(m, selectedYear)}
+                        className={`p-2 text-center min-w-[95px] cursor-pointer transition-all hover:bg-blue-100/60 rounded-t-xl select-none group ${
+                          isCurrentActive
+                            ? 'bg-blue-100 text-blue-900 ring-2 ring-blue-500 font-black'
+                            : ''
+                        }`}
+                        title={`Bấm để chuyển sang xem chi phí sinh hoạt Tháng ${m}`}
+                      >
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span className="text-[10px]">T{m}</span>
+                          {isCurrentActive ? (
+                            <span className="text-[7px] text-blue-700 bg-blue-200/90 px-1.5 py-0.5 rounded-full uppercase font-black tracking-wider">
+                              Đang xem
+                            </span>
+                          ) : (
+                            <span className="text-[7px] text-slate-400 group-hover:text-blue-600 font-bold">
+                              Xem ↗
+                            </span>
+                          )}
+                        </div>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
@@ -632,6 +506,17 @@ export const TabCashFlow12M: React.FC<TabCashFlow12MProps> = ({
                     {formatCurrency(row.savingsAllocation)}
                   </div>
                 </div>
+
+                {/* Jump to Sheet 1 (TabBudget) for this Month */}
+                {onSelectMonth && (
+                  <button
+                    onClick={() => onSelectMonth(row.month, row.year)}
+                    className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition-all active:scale-98"
+                  >
+                    <PieChart size={15} />
+                    Xem Ngân Sách Sinh Hoạt Tháng {row.month} (Sheet 1)
+                  </button>
+                )}
               </div>
             );
           })()}

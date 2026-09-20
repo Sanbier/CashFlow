@@ -23,6 +23,9 @@ import {
 import { formatCurrency, handleAmountInput, parseAmount } from '../utils';
 
 interface TabChildSchoolProps {
+  viewDate: Date;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
   childEducation: ChildEducationData;
   onToggleAttendance: (dateStr: string, currentStatus?: AttendanceStatus, note?: string) => void;
   onUpdateConfig: (config: ChildEducationConfig) => void;
@@ -33,15 +36,18 @@ interface TabChildSchoolProps {
 const WEEKDAY_NAMES = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
 export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
+  viewDate,
+  onPrevMonth,
+  onNextMonth,
   childEducation,
   onToggleAttendance,
   onUpdateConfig,
   onUpdatePayment,
   onSyncToExpense,
 }) => {
-  const now = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  // Synchronize month and year strictly with the global viewDate
+  const selectedMonth = viewDate.getMonth() + 1;
+  const selectedYear = viewDate.getFullYear();
 
   // Modal States
   const [showConfigModal, setShowConfigModal] = useState(false);
@@ -52,23 +58,12 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
 
   const { config, attendance, payments } = childEducation;
 
-  // Month navigation
   const handlePrevMonth = () => {
-    if (selectedMonth === 1) {
-      setSelectedMonth(12);
-      setSelectedYear((y) => y - 1);
-    } else {
-      setSelectedMonth((m) => m - 1);
-    }
+    onPrevMonth();
   };
 
   const handleNextMonth = () => {
-    if (selectedMonth === 12) {
-      setSelectedMonth(1);
-      setSelectedYear((y) => y + 1);
-    } else {
-      setSelectedMonth((m) => m + 1);
-    }
+    onNextMonth();
   };
 
   // Days in selected month

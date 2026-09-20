@@ -16,13 +16,19 @@ import {
   TrendingDown,
   TrendingUp,
   PiggyBank,
+  RefreshCw,
+  Wallet,
 } from '../constants';
 import { CORE_EXPENSE_CATEGORIES, CORE_SAVING_CATEGORY, DEFAULT_EXCEL_BUDGETS } from '../constants';
-import { Expense, Income, Debt, UpdateDebtsHandler } from '../types';
+import { Expense, Income, Debt, UpdateDebtsHandler, MonthCashFlowRow } from '../types';
 import { formatCurrency, handleAmountInput, handleTextInput, parseAmount } from '../utils';
 import { ModalBudgetConfig } from './modals/ModalBudgetConfig';
 
 interface TabBudgetProps {
+  viewDate: Date;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  monthCashFlow: MonthCashFlowRow;
   incomes: Income[];
   expenses: Expense[];
   debts: Debt[];
@@ -34,6 +40,10 @@ interface TabBudgetProps {
 }
 
 const TabBudget: React.FC<TabBudgetProps> = ({
+  viewDate,
+  onPrevMonth,
+  onNextMonth,
+  monthCashFlow,
   incomes,
   expenses,
   debts,
@@ -43,10 +53,9 @@ const TabBudget: React.FC<TabBudgetProps> = ({
   autoCreateTransaction,
   setAutoCreateTransaction,
 }) => {
-  // Current view month & year (default: current system month/year)
-  const now = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  // Current view month & year strictly synchronized with global viewDate
+  const selectedMonth = viewDate.getMonth() + 1;
+  const selectedYear = viewDate.getFullYear();
 
   // Budget Modal State
   const [showConfigModal, setShowConfigModal] = useState(false);
@@ -67,26 +76,7 @@ const TabBudget: React.FC<TabBudgetProps> = ({
   const [debtNote, setDebtNote] = useState('');
   const [debtType, setDebtType] = useState<'payable' | 'receivable'>('payable');
 
-  // Month Navigation
-  const handlePrevMonth = () => {
-    if (selectedMonth === 1) {
-      setSelectedMonth(12);
-      setSelectedYear((y) => y - 1);
-    } else {
-      setSelectedMonth((m) => m - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (selectedMonth === 12) {
-      setSelectedMonth(1);
-      setSelectedYear((y) => y + 1);
-    } else {
-      setSelectedMonth((m) => m + 1);
-    }
-  };
-
-  // Filter transactions for the selected month & year
+  // Filter transactions strictly for the active calendar month & year
   const monthIncomes = useMemo(() => {
     return incomes.filter((item) => {
       const d = new Date(item.date);
@@ -100,16 +90,6 @@ const TabBudget: React.FC<TabBudgetProps> = ({
       return d.getMonth() + 1 === selectedMonth && d.getFullYear() === selectedYear;
     });
   }, [expenses, selectedMonth, selectedYear]);
-
-  const totalMonthIncome = useMemo(() => {
-    return monthIncomes.reduce((sum, item) => sum + item.amount, 0);
-  }, [monthIncomes]);
-
-  const totalMonthExpense = useMemo(() => {
-    return monthExpenses.reduce((sum, item) => sum + item.amount, 0);
-  }, [monthExpenses]);
-
-  const monthBalance = totalMonthIncome - totalMonthExpense;
 
   // Compute spending per category
   const categorySpentMap = useMemo(() => {
@@ -140,7 +120,6 @@ const TabBudget: React.FC<TabBudgetProps> = ({
   const activeDebts = currentDebtList.filter((d) => d.total - d.paid > 0);
   const doneDebts = currentDebtList.filter((d) => d.total - d.paid <= 0);
 
-  // 4 KPIs for current active tab (or payable default)
   const debtKpiRemaining = useMemo(() => {
     return payableDebts.reduce((sum, d) => sum + Math.max(0, d.total - d.paid), 0);
   }, [payableDebts]);
@@ -212,12 +191,15 @@ const TabBudget: React.FC<TabBudgetProps> = ({
     );
   };
 
+  const prevMonthNum = selectedMonth === 1 ? 12 : selectedMonth - 1;
+  const nextMonthNum = selectedMonth === 12 ? 1 : selectedMonth + 1;
+
   return (
     <div className="space-y-4 animate-fadeIn pb-16 pt-1">
-      {/* Month Navigation Header */}
+      {/* Month Navigation Header (Synchronized globally) */}
       <div className="glass-panel p-3.5 rounded-[28px] border border-white/60 flex items-center justify-between shadow-sm">
         <button
-          onClick={handlePrevMonth}
+          onClick={onPrevMonth}
           className="p-2 rounded-2xl bg-white/50 hover:bg-white text-slate-600 transition-all active:scale-95 shadow-sm"
           title="Tháng trước"
         >
@@ -233,7 +215,7 @@ const TabBudget: React.FC<TabBudgetProps> = ({
         </div>
 
         <button
-          onClick={handleNextMonth}
+          onClick={onNextMonth}
           className="p-2 rounded-2xl bg-white/50 hover:bg-white text-slate-600 transition-all active:scale-95 shadow-sm"
           title="Tháng sau"
         >
@@ -241,60 +223,121 @@ const TabBudget: React.FC<TabBudgetProps> = ({
         </button>
       </div>
 
-      {/* Top Monthly Summary Banner (Thu, Chi, Còn Lại) */}
-      <div className="glass-panel p-4 rounded-[28px] border border-white/60 shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-36 h-36 bg-blue-300/20 rounded-full blur-2xl pointer-events-none" />
+      {/* Sheet 1 & Sheet 2 Exact Rollover Linkage Card */}
+      <div className="glass-panel p-4 rounded-[28px] border border-white/60 shadow-lg relative overflow-hidden space-y-3">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-300/20 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="grid grid-cols-3 gap-2 text-center relative z-10">
-          <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
-            <div className="text-[9px] font-black uppercase text-emerald-700 tracking-wider flex items-center justify-center gap-1">
-              <TrendingUp size={11} /> Thu Nhập
+        <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 relative z-10">
+          <div className="flex items-center gap-1.5">
+            <Wallet size={14} className="text-indigo-600" />
+            <span className="text-[10px] font-black uppercase text-slate-800 tracking-wider">
+              Dòng Tiền Liên Tháng (Sheet 1 ↔ Sheet 2)
+            </span>
+          </div>
+          <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200">
+            Công thức chuẩn Excel
+          </span>
+        </div>
+
+        {/* 2-Tier Rollover Flow */}
+        <div className="grid grid-cols-2 gap-2 relative z-10">
+          {/* 1. Số Dư Đầu Tháng (Từ tháng trước chuyển sang) */}
+          <div className="p-2.5 rounded-2xl bg-blue-50/80 border border-blue-200/80">
+            <div className="flex items-center justify-between text-[8px] font-black uppercase text-blue-700 tracking-wider">
+              <span className="flex items-center gap-1">
+                <RefreshCw size={9} /> Số Dư Đầu T{selectedMonth}
+              </span>
+              <span className="text-[7px] text-blue-500 font-bold">Từ T{prevMonthNum}</span>
             </div>
-            <div className="text-xs sm:text-sm font-black text-emerald-700 mt-1 truncate">
-              {formatCurrency(totalMonthIncome)}
+            <div className="text-xs sm:text-sm font-black text-blue-900 mt-1 truncate">
+              {formatCurrency(monthCashFlow.startingBalance)}
+            </div>
+            <div className="text-[7px] text-blue-600/80 font-medium mt-0.5">
+              = Số dư cuối Tháng {prevMonthNum}
             </div>
           </div>
 
-          <div className="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/20">
-            <div className="text-[9px] font-black uppercase text-rose-700 tracking-wider flex items-center justify-center gap-1">
-              <TrendingDown size={11} /> Đã Chi
+          {/* 2. Thu Nhập Mới Tháng Này */}
+          <div className="p-2.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80">
+            <div className="flex items-center justify-between text-[8px] font-black uppercase text-emerald-700 tracking-wider">
+              <span className="flex items-center gap-1">
+                <TrendingUp size={9} /> Thu Mới T{selectedMonth}
+              </span>
+              <span className="text-[7px] text-emerald-500 font-bold">Phát sinh</span>
             </div>
-            <div className="text-xs sm:text-sm font-black text-rose-700 mt-1 truncate">
-              {formatCurrency(totalMonthExpense)}
+            <div className="text-xs sm:text-sm font-black text-emerald-900 mt-1 truncate">
+              {formatCurrency(monthCashFlow.totalNewIncome)}
             </div>
-          </div>
-
-          <div
-            className={`p-2.5 rounded-2xl border ${
-              monthBalance >= 0
-                ? 'bg-blue-500/10 border-blue-500/20 text-blue-700'
-                : 'bg-amber-500/10 border-amber-500/20 text-amber-700'
-            }`}
-          >
-            <div className="text-[9px] font-black uppercase tracking-wider">Còn Lại</div>
-            <div className="text-xs sm:text-sm font-black mt-1 truncate">
-              {formatCurrency(monthBalance)}
+            <div className="text-[7px] text-emerald-600/80 font-medium mt-0.5 truncate">
+              Lương: {formatCurrency(monthCashFlow.salaryIncome)}
             </div>
           </div>
         </div>
 
-        {/* Status Tag */}
-        <div className="mt-3 text-center">
+        {/* 3 Main KPI Row (E10, L149, G10) */}
+        <div className="grid grid-cols-3 gap-2 text-center relative z-10 pt-1">
+          {/* Ô E10: Tổng Thu Sẵn Có */}
+          <div className="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+            <div className="text-[8px] font-black uppercase text-indigo-700 tracking-wider">
+              Tổng Thu (Ô E10)
+            </div>
+            <div className="text-xs sm:text-sm font-black text-indigo-800 mt-1 truncate">
+              {formatCurrency(monthCashFlow.totalIncome)}
+            </div>
+            <div className="text-[7px] text-indigo-500 font-bold mt-0.5">= S.Dư + Thu mới</div>
+          </div>
+
+          {/* Ô L149: Tổng Chi Thực Tế */}
+          <div className="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/20">
+            <div className="text-[8px] font-black uppercase text-rose-700 tracking-wider">
+              Tổng Chi (Ô L149)
+            </div>
+            <div className="text-xs sm:text-sm font-black text-rose-800 mt-1 truncate">
+              {formatCurrency(monthCashFlow.totalExpense)}
+            </div>
+            <div className="text-[7px] text-rose-500 font-bold mt-0.5">Sinh hoạt + T.Luỹ</div>
+          </div>
+
+          {/* Ô G10: Số Dư Cuối Tháng Chuyển Sang Tháng Sau */}
+          <div
+            className={`p-2.5 rounded-2xl border ${
+              monthCashFlow.closingBalance >= 0
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-800'
+                : 'bg-amber-500/10 border-amber-500/20 text-amber-800'
+            }`}
+          >
+            <div className="text-[8px] font-black uppercase tracking-wider">
+              Còn Lại (Ô G10)
+            </div>
+            <div className="text-xs sm:text-sm font-black mt-1 truncate">
+              {formatCurrency(monthCashFlow.closingBalance)}
+            </div>
+            <div className="text-[7px] font-bold mt-0.5 opacity-80">
+              Chuyển sang T{nextMonthNum}
+            </div>
+          </div>
+        </div>
+
+        {/* Status Tag with Rollover Explanation */}
+        <div className="pt-1 text-center relative z-10">
           <span
-            className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wide shadow-sm ${
-              monthBalance < 0
+            className={`inline-block px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wide shadow-sm ${
+              monthCashFlow.netBalance < 0
                 ? 'bg-rose-500 text-white animate-pulse'
-                : monthBalance > 0
+                : monthCashFlow.netBalance > 0
                 ? 'bg-emerald-500 text-white'
                 : 'bg-slate-500 text-white'
             }`}
           >
-            {monthBalance < 0
-              ? `⚠ CHI VƯỢT THU ${formatCurrency(Math.abs(monthBalance))}`
-              : monthBalance > 0
-              ? `DƯ ${formatCurrency(monthBalance)}`
-              : 'CÂN BẰNG'}
+            {monthCashFlow.netBalance < 0
+              ? `⚠ CHI VƯỢT THU MỚI ${formatCurrency(Math.abs(monthCashFlow.netBalance))}`
+              : monthCashFlow.netBalance > 0
+              ? `DƯ THU MỚI ${formatCurrency(monthCashFlow.netBalance)}`
+              : 'THU CHI CÂN BẰNG'}
           </span>
+          <p className="text-[8px] font-bold text-slate-400 mt-1">
+            Số dư {formatCurrency(monthCashFlow.closingBalance)} sẽ tự động làm số dư đầu Tháng {nextMonthNum}
+          </p>
         </div>
       </div>
 

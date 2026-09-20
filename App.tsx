@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { TabType, UpdateDebtsHandler } from './types';
-import { formatCurrency, formatDate } from './utils';
+import { TabType, UpdateDebtsHandler, MonthCashFlowRow } from './types';
+import { formatCurrency, formatDate, getMonthDateRange, computeAnnualCashFlow } from './utils';
 import { useFinancialData } from './hooks/useFinancialData';
 
 // Components
@@ -19,17 +19,27 @@ import ModalFixedTracking from './components/modals/ModalFixedTracking';
 import ModalFixedConfig from './components/modals/ModalFixedConfig';
 
 const App: React.FC = () => {
-  // 1. View & UI States
+  // 1. Master View & UI States (Single source of truth for Month & Year)
   const [viewDate, setViewDate] = useState(() => {
     const today = new Date();
-    if (today.getDate() > 30) {
-      today.setMonth(today.getMonth() + 1);
-      today.setDate(1);
-    }
-    return today;
+    return new Date(today.getFullYear(), today.getMonth(), 1);
   });
   const [activeTab, setActiveTab] = useState<TabType>('add');
   const [autoCreateTransaction, setAutoCreateTransaction] = useState(true);
+
+  // Month Navigation Handlers (Synchronized across all tabs)
+  const handlePrevMonth = () => {
+    setViewDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setViewDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  };
+
+  const handleSelectMonth = (month: number, year: number) => {
+    setViewDate(new Date(year, month - 1, 1));
+    setActiveTab('budget');
+  };
 
   // Modal Visibility States
   const [showReloadConfirm, setShowReloadConfirm] = useState(false);
@@ -72,20 +82,47 @@ const App: React.FC = () => {
     updateInitialYearBalance,
   } = useFinancialData(firebaseConfigStr, familyCode);
 
-  // 3. Derived State (Fiscal range for month summary)
-  const getFiscalRange = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const startDate = new Date(year, month, 0);
-    startDate.setHours(0, 0, 0, 0);
-    const endDate = new Date(year, month + 1, 0);
-    endDate.setDate(endDate.getDate() - 1);
-    endDate.setHours(23, 59, 59, 999);
-    return { startDate, endDate };
-  };
+  // 3. Strict Calendar Month Range ("Tháng nào ra tháng đó": 01/MM/YYYY -> lastDay/MM/YYYY)
+  const { startDate, endDate } = useMemo(
+    () => getMonthDateRange(viewDate.getFullYear(), viewDate.getMonth()),
+    [viewDate]
+  );
 
-  const { startDate, endDate } = useMemo(() => getFiscalRange(viewDate), [viewDate]);
+  // 4. Continuous 12-Month Rollover Cash Flow Engine (Sheet 2: THU CHI NAM)
+  const { monthRows } = useMemo(() => {
+    return computeAnnualCashFlow(
+      viewDate.getFullYear(),
+      incomes,
+      expenses,
+      initialYearBalance
+    );
+  }, [viewDate, incomes, expenses, initialYearBalance]);
 
+  const currentMonthCashFlow: MonthCashFlowRow = useMemo(() => {
+    const m = viewDate.getMonth() + 1;
+    return (
+      monthRows.find((r) => r.month === m) || {
+        month: m,
+        year: viewDate.getFullYear(),
+        startingBalance: 0,
+        salaryIncome: 0,
+        loanIncome: 0,
+        otherIncome: 0,
+        totalNewIncome: 0,
+        totalIncome: 0,
+        expensesByCategory: {},
+        totalLivingExpense: 0,
+        savingsAllocation: 0,
+        totalExpense: 0,
+        netBalance: 0,
+        closingBalance: 0,
+        status: 'balanced',
+        statusText: 'CÂN BẰNG',
+      }
+    );
+  }, [monthRows, viewDate]);
+
+  // Filter transactions for History & Monthly Paid in Active Month
   const { filteredIncomes, filteredExpenses } = useMemo(() => {
     const filter = <T extends { date: string }>(items: T[]): T[] =>
       items.filter((item) => {
@@ -95,18 +132,11 @@ const App: React.FC = () => {
     return { filteredIncomes: filter(incomes), filteredExpenses: filter(expenses) };
   }, [incomes, expenses, startDate, endDate]);
 
-  const sumIncomeMonth = useMemo(
-    () => filteredIncomes.reduce((a, c) => a + c.amount, 0),
-    [filteredIncomes]
-  );
-  const sumExpenseMonth = useMemo(
-    () => filteredExpenses.reduce((a, c) => a + c.amount, 0),
-    [filteredExpenses]
-  );
-  const balance = sumIncomeMonth - sumExpenseMonth;
-  const isOverBudget = sumIncomeMonth > 0 && sumExpenseMonth / sumIncomeMonth > 0.9;
+  const isOverBudget =
+    currentMonthCashFlow.totalIncome > 0 &&
+    currentMonthCashFlow.totalExpense / currentMonthCashFlow.totalIncome > 0.9;
 
-  // 4. Handlers
+  // 5. Handlers
   const handleUpdateDebtsWrapper: UpdateDebtsHandler = (
     newDebts,
     newItem,
@@ -119,16 +149,14 @@ const App: React.FC = () => {
   return (
     <AppLayout
       viewDate={viewDate}
-      onPrevMonth={() =>
-        setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 15))
-      }
-      onNextMonth={() =>
-        setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 15))
-      }
+      onPrevMonth={handlePrevMonth}
+      onNextMonth={handleNextMonth}
       startDate={startDate}
       endDate={endDate}
-      sumIncome={sumIncomeMonth}
-      sumExpense={sumExpenseMonth}
+      sumIncome={currentMonthCashFlow.totalIncome}
+      sumExpense={currentMonthCashFlow.totalExpense}
+      startingBalance={currentMonthCashFlow.startingBalance}
+      balance={currentMonthCashFlow.closingBalance}
       isConnected={isConnected}
       isSyncing={isSyncing}
       syncError={syncError}
@@ -137,7 +165,6 @@ const App: React.FC = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       isOverBudget={isOverBudget}
-      balance={balance}
       onOpenFixedTracking={() => setShowFixedTrackingModal(true)}
       onReload={() => setShowReloadConfirm(true)}
       modals={
@@ -174,6 +201,7 @@ const App: React.FC = () => {
       {/* 1. Tab Nhập (Add) */}
       {activeTab === 'add' && (
         <TabAdd
+          viewDate={viewDate}
           categories={categories}
           debts={debts}
           categoryBudgets={categoryBudgets}
@@ -191,6 +219,10 @@ const App: React.FC = () => {
       {/* 2. Tab Sinh Hoạt (Sheet 1: Ngân Sách 9 Nhóm & Sổ Nợ) */}
       {activeTab === 'budget' && (
         <TabBudget
+          viewDate={viewDate}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
+          monthCashFlow={currentMonthCashFlow}
           incomes={incomes}
           expenses={expenses}
           debts={debts}
@@ -205,6 +237,9 @@ const App: React.FC = () => {
       {/* 3. Tab Lịch Học (Sheet 3: Điểm Danh & Biểu Phí Con) */}
       {activeTab === 'childSchool' && (
         <TabChildSchool
+          viewDate={viewDate}
+          onPrevMonth={handlePrevMonth}
+          onNextMonth={handleNextMonth}
           childEducation={childEducation}
           onToggleAttendance={toggleChildAttendance}
           onUpdateConfig={updateChildEducationConfig}
@@ -216,6 +251,8 @@ const App: React.FC = () => {
       {/* 4. Tab Dòng Tiền (Sheet 2: Ma Trận 12 Tháng & 8 KPI Năm) */}
       {activeTab === 'cashflow12M' && (
         <TabCashFlow12M
+          viewDate={viewDate}
+          onSelectMonth={handleSelectMonth}
           incomes={incomes}
           expenses={expenses}
           initialYearBalance={initialYearBalance}

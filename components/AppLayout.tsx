@@ -30,6 +30,7 @@ interface AppLayoutProps {
     endDate: Date;
     sumIncome: number;
     sumExpense: number;
+    startingBalance?: number;
     isConnected: boolean;
     isSyncing: boolean;
     syncError: string | null;
@@ -46,7 +47,7 @@ interface AppLayoutProps {
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({
-    viewDate, onPrevMonth, onNextMonth, startDate, endDate, sumIncome, sumExpense,
+    viewDate, onPrevMonth, onNextMonth, startDate, endDate, sumIncome, sumExpense, startingBalance = 0,
     isConnected, isSyncing, syncError, familyCode, onOpenCloud,
     activeTab, onTabChange,
     isOverBudget, balance,
@@ -249,13 +250,23 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                                 <div className="grid grid-cols-2 gap-3 mt-4">
                                     <div className="glass-panel p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
                                         <div className="absolute -right-6 -top-6 w-16 h-16 bg-green-300/30 rounded-full blur-xl group-hover:scale-150 transition-all duration-700"></div>
-                                        <div className="text-green-700 text-[10px] font-black uppercase mb-1 flex items-center justify-center gap-1 relative z-10"><TrendingUp size={12}/> Thu Nhập</div>
+                                        <div className="text-green-700 text-[10px] font-black uppercase mb-1 flex items-center justify-center gap-1 relative z-10">
+                                            <TrendingUp size={12}/> {startingBalance > 0 ? 'Tổng Khả Dụng' : 'Thu Nhập'}
+                                        </div>
                                         <div className="font-black text-base sm:text-lg text-slate-800 relative z-10">{formatCurrency(sumIncome)}</div>
+                                        {startingBalance > 0 && (
+                                            <div className="text-[8px] font-bold text-blue-600 relative z-10 mt-0.5 truncate">
+                                                S.Dư đầu: +{formatCurrency(startingBalance)}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="glass-panel p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
                                         <div className="absolute -right-6 -top-6 w-16 h-16 bg-red-300/30 rounded-full blur-xl group-hover:scale-150 transition-all duration-700"></div>
                                         <div className="text-red-600 text-[10px] font-black uppercase mb-1 flex items-center justify-center gap-1 relative z-10"><TrendingDown size={12}/> Chi Tiêu</div>
                                         <div className="font-black text-base sm:text-lg text-slate-800 relative z-10">{formatCurrency(sumExpense)}</div>
+                                        <div className="text-[8px] font-bold text-slate-500 relative z-10 mt-0.5 truncate">
+                                            Còn lại: {formatCurrency(balance)}
+                                        </div>
                                     </div>
                                 </div>
 
