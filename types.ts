@@ -18,6 +18,10 @@ export interface Expense {
   debtAction?: 'repay' | 'lend' | null;
 }
 
+export type HistoryItem =
+  | (Income & { type: 'income' })
+  | (Expense & { type: 'expense' });
+
 export interface FixedTemplateItem {
   category: string;
   amount: number;
@@ -34,3 +38,33 @@ export interface Debt {
 }
 
 export type TabType = 'add' | 'debt' | 'report' | 'savings' | 'history' | 'settings';
+
+export interface FirebaseConfig {
+  apiKey: string;
+  authDomain?: string;
+  projectId: string;
+  storageBucket?: string;
+  messagingSenderId?: string;
+  appId?: string;
+}
+
+export interface FamilyCloudData {
+  incomes: Income[];
+  expenses: Expense[];
+  fixedTemplate: FixedTemplateItem[];
+  categories: string[];
+  debts: Debt[];
+  fixedTracking: Record<string, string[]>;
+  lastUpdate: string;
+  encrypted?: boolean;
+  cipherPayload?: string;
+  iv?: string;
+  salt?: string;
+}
+
+export type UpdateDebtsHandler = (
+  newDebts: Debt[] | null,
+  newItem?: Debt,
+  isEditId?: number | null,
+  autoCreateTransaction?: boolean
+) => void;

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -8,117 +7,15 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     <title>Sổ Thu Chi & Quản Lý Nợ</title>
-    
+
     <!-- Icon cho iOS Homescreen -->
     <link rel="apple-touch-icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxDdlZYMPRhs2qZTEX31LsJ8A-AYHLbO0loA&s">
     <link rel="icon" href="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxDdlZYMPRhs2qZTEX31LsJ8A-AYHLbO0loA&s">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Quicksand', 'Nunito', 'sans-serif'],
-                    },
-                    animation: {
-                        blob: "blob 7s infinite",
-                        fadeIn: "fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards",
-                    },
-                    keyframes: {
-                        blob: {
-                            "0%": { transform: "translate(0px, 0px) scale(1)" },
-                            "33%": { transform: "translate(30px, -50px) scale(1.1)" },
-                            "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
-                            "100%": { transform: "translate(0px, 0px) scale(1)" },
-                        },
-                        fadeIn: {
-                            "0%": { opacity: "0", transform: "translateY(10px)" },
-                            "100%": { opacity: "1", transform: "translateY(0)" },
-                        }
-                    },
-                }
-            }
-        }
-    </script>
-
-    <!-- Font chữ tròn trịa hơn cho hợp với Liquid style -->
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <style>
-        /* iOS Optimization & Base Styles */
-        body {
-            -webkit-tap-highlight-color: transparent;
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-            -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            font-family: 'Quicksand', sans-serif;
-            font-weight: 600;
-            color: #1e293b;
-            /* iOS Smooth Scrolling & Font Rendering */
-            -webkit-overflow-scrolling: touch;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .safe-pb { padding-bottom: env(safe-area-inset-bottom); }
-        .safe-mb { margin-bottom: env(safe-area-inset-bottom); }
-
-        .btn-effect:active { transform: scale(0.95); transition-duration: 0.1s; }
-        .input-effect:focus { transform: scale(1.005); border-color: rgba(255,255,255,0.9); }
-        
-        /* Optimized Glass Effect */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.45); /* Tăng độ đục nhẹ để giảm gánh nặng render background */
-            backdrop-filter: blur(12px); /* Giảm blur từ 16px xuống 12px cho mượt hơn trên mobile */
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.65);
-            box-shadow: 0 4px 24px 0 rgba(31, 38, 135, 0.08);
-            transform: translateZ(0); /* Kích hoạt hardware acceleration */
-        }
-        
-        /* Input nhẹ hơn */
-        .glass-input {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(8px);
-            -webkit-appearance: none; /* Fix style input mặc định iOS */
-            appearance: none;
-        }
-
-        .category-btn {
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            line-height: 1.2;
-            word-break: break-word;
-            white-space: normal;
-            padding: 4px;
-        }
-        
-        /* Hide Scrollbar but keep functionality */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "vite": "https://esm.sh/vite@^7.3.0",
-    "path": "https://esm.sh/path@^0.12.7",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
-    "url": "https://esm.sh/url@^0.11.4",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
 </head>
 <body>
     <div id="root"></div>

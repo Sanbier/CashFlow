@@ -6,7 +6,7 @@ import { formatCurrency, handleAmountInput, handleTextInput, parseAmount } from 
 
 interface TabDebtProps {
     debts: Debt[];
-    onUpdateDebts: (newDebts: Debt[], syncIncome?: any, syncExpense?: any) => void;
+    onUpdateDebts: (newDebts: Debt[] | null, newItem?: Debt, isEditId?: number | null) => void;
     autoCreateTransaction: boolean;
     setAutoCreateTransaction: (v: boolean) => void;
 }
@@ -91,9 +91,10 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                     {/* DANH SÁCH ĐANG NỢ (ACTIVE) */}
                     <div className="flex flex-col gap-2 pb-4">
                         {activeDebts.map(item => {
+                            const percentage = item.total > 0 ? Math.round((item.paid / item.total) * 100) : 0;
+                            const clampedPercent = Math.min(100, Math.max(0, percentage));
                             let progressBarColor = activeDebtTab === 'receivable' ? 'bg-gradient-to-r from-blue-400 to-indigo-500' : 'bg-gradient-to-r from-red-500 to-rose-500';
                             if (activeDebtTab === 'payable') {
-                                const percentage = (item.paid / item.total) * 100;
                                 if (percentage >= 50) progressBarColor = 'bg-gradient-to-r from-yellow-400 to-amber-500';
                                 else progressBarColor = 'bg-gradient-to-r from-red-500 to-rose-500';
                             }
@@ -101,10 +102,10 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                             return (
                                 <div key={item.id} className="w-full glass-panel p-3 rounded-2xl border border-white/60 flex items-center gap-3 relative overflow-hidden group hover:bg-white/60 transition-all min-h-[64px]">
                                     <div className={`absolute left-0 top-0 bottom-0 w-1 ${activeDebtTab === 'payable' ? 'bg-red-500' : 'bg-blue-500'}`}></div>
-                                    
+
                                     {/* Icon Percent Box */}
                                     <div className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center flex-shrink-0 shadow-sm text-white ${progressBarColor.replace('to-r', 'to-br')}`}>
-                                        <span className="text-[10px] font-black leading-none">{Math.round((item.paid/item.total)*100)}%</span>
+                                        <span className="text-[10px] font-black leading-none">{clampedPercent}%</span>
                                     </div>
 
                                     {/* Content */}
@@ -117,10 +118,10 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                                                 {formatCurrency(item.total - item.paid)}
                                             </span>
                                         </div>
-                                        
+
                                         {/* Slim Progress Bar */}
                                         <div className="w-full bg-slate-100/50 rounded-full h-1 overflow-hidden">
-                                            <div className={`h-full rounded-full ${progressBarColor}`} style={{width: `${Math.min(100, (item.paid/item.total)*100)}%`}}></div>
+                                            <div className={`h-full rounded-full ${progressBarColor}`} style={{width: `${clampedPercent}%`}}></div>
                                         </div>
 
                                         <div className="flex justify-between items-center text-[9px] font-bold text-slate-400 leading-none">
@@ -130,7 +131,7 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                                     </div>
 
                                     {/* Actions */}
-                                    <div className="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all transform scale-95 group-hover:scale-100">
+                                    <div className="flex gap-1 flex-shrink-0 opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-all transform scale-95 group-hover:scale-100">
                                         <button onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="p-1.5 bg-blue-50 text-blue-500 rounded-lg hover:bg-blue-100 border border-blue-100"><Edit2 size={12}/></button>
                                         <button onClick={(e)=>{ e.stopPropagation(); if(confirm('Xóa sổ nợ?')) onUpdateDebts(debts.filter(d => d.id !== item.id));}} className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 border border-red-100"><Trash2 size={12}/></button>
                                     </div>
@@ -245,8 +246,8 @@ const TabDebt: React.FC<TabDebtProps> = ({ debts, onUpdateDebts, autoCreateTrans
                             const paid = parseAmount(debtPaid);
                              if (!debtName || total <= 0) { alert("Nhập tên và tổng nợ hợp lệ."); return; }
                             
-                            const newItem = { id: isEditingDebt || Date.now(), name: debtName, total, paid, note: debtNote, type: debtType, updatedAt: new Date().toISOString() };
-                            (onUpdateDebts as any)(null, newItem, isEditingDebt);
+                            const newItem: Debt = { id: isEditingDebt || Date.now(), name: debtName, total, paid, note: debtNote, type: debtType, updatedAt: new Date().toISOString() };
+                            onUpdateDebts(null, newItem, isEditingDebt);
                             setShowDebtForm(false); setIsEditingDebt(null); setDebtName(''); setDebtTotal(''); setDebtPaid(''); setDebtNote('');
                         }} className="flex-1 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-black rounded-2xl shadow-lg shadow-blue-200/50 text-[10px] uppercase tracking-widest btn-effect hover:shadow-blue-300">{isEditingDebt ? 'Cập Nhật' : 'Lưu Hồ Sơ'}</button>
                     </div>

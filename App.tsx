@@ -62,7 +62,7 @@ const App: React.FC = () => {
     const { startDate, endDate } = useMemo(() => getFiscalRange(viewDate), [viewDate]);
 
     const { filteredIncomes, filteredExpenses } = useMemo(() => {
-        const filter = (items: any[]) => items.filter(item => {
+        const filter = <T extends { date: string }>(items: T[]): T[] => items.filter(item => {
             const d = new Date(item.date);
             return (d >= startDate && d <= endDate);
         });
@@ -76,7 +76,7 @@ const App: React.FC = () => {
     const totalAccumulatedSavings = useMemo(() => SAVING_CATEGORIES.map(cat => expenses.filter(e => e.category === cat).reduce((sum, item) => sum + item.amount, 0)).reduce((acc, curr) => acc + curr, 0), [expenses]);
 
     // 4. Handlers (Chỉ là cầu nối UI -> Hook)
-    const handleUpdateDebtsWrapper = (newDebts: any, newItem: any, isEditId: any) => {
+    const handleUpdateDebtsWrapper = (newDebts: any, newItem?: any, isEditId?: any) => {
         updateDebts(newDebts, newItem, isEditId, autoCreateTransaction);
     };
 

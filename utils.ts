@@ -1,38 +1,45 @@
+export const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat('vi-VN').format(amount);
 
-export const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN').format(amount);
-
-export const formatDate = (date: string) => { 
-    if(!date) return ''; 
-    const d = new Date(date); 
-    return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`; 
+export const formatDate = (date: string) => {
+  if (!date) return '';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+  return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
 };
 
-export const formatDateTime = (date: string) => { 
-    if(!date) return ''; 
-    const d = new Date(date); 
-    const time = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-    const day = `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
-    return `${time} • ${day}`; 
+export const formatDateTime = (date: string) => {
+  if (!date) return '';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return '';
+  const time = `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+  const day = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+  return `${time} • ${day}`;
 };
 
 export const toTitleCase = (str: string) => {
-    return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  return str
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 };
 
-export const parseAmount = (val: string) => val ? parseInt(val.replace(/\./g,''), 10) : 0;
+export const parseAmount = (val: string) =>
+  val ? parseInt(val.replace(/\./g, ''), 10) || 0 : 0;
 
-export const handleAmountInput = (val: string, setter: (v: string) => void) => { 
-    const raw = val.replace(/\D/g,''); 
-    setter(raw === '' ? '' : Number(raw).toLocaleString('vi-VN')); 
+export const handleAmountInput = (val: string, setter: (v: string) => void) => {
+  const raw = val.replace(/\D/g, '');
+  setter(raw === '' ? '' : Number(raw).toLocaleString('vi-VN'));
 };
 
 export const handleTextInput = (val: string, setter: (v: string) => void) => {
-    setter(toTitleCase(val));
+  setter(toTitleCase(val));
 };
 
-export const getCombinedDate = (dateInput: string) => { 
-    const d = new Date(dateInput); 
-    const now = new Date(); 
-    d.setHours(now.getHours(), now.getMinutes(), now.getSeconds()); 
-    return d.toISOString(); 
+export const getCombinedDate = (dateInput: string) => {
+  const d = new Date(dateInput);
+  const now = new Date();
+  d.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+  return d.toISOString();
 };

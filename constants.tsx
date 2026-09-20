@@ -60,3 +60,5 @@ export const Users: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M16 2
 export const MessageCircle: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></IconBase>;
 export const Clock: React.FC<IconProps> = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></IconBase>;
 export const Check: React.FC<IconProps> = (p) => <IconBase {...p}><polyline points="20 6 9 17 4 12"/></IconBase>;
+export const ShieldCheck: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></IconBase>;
+
