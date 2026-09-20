@@ -1,17 +1,16 @@
 
 import React from 'react';
-import { SettingsIcon, Clock, Cloud, RefreshCw } from '../constants';
+import { SettingsIcon, Cloud, RefreshCw } from '../constants';
 
 interface TabSettingsProps {
     isConnected: boolean;
     projectId: string;
     familyCode: string;
     onReload: () => void;
-    onOpenFixedConfig: () => void;
     onOpenCloudForm: () => void;
 }
 
-const TabSettings: React.FC<TabSettingsProps> = ({ isConnected, projectId, familyCode, onReload, onOpenFixedConfig, onOpenCloudForm }) => {
+const TabSettings: React.FC<TabSettingsProps> = ({ isConnected, projectId, familyCode, onReload, onOpenCloudForm }) => {
     return (
         <div className="space-y-6 animate-fadeIn mt-2">
             {isConnected && (
@@ -41,7 +40,6 @@ const TabSettings: React.FC<TabSettingsProps> = ({ isConnected, projectId, famil
             <div className="bg-white p-6 rounded-[32px] shadow-sm border border-gray-100 space-y-4">
                 <h3 className="font-black text-gray-800 border-b border-gray-50 pb-4 flex items-center gap-2 uppercase text-xs tracking-widest"><SettingsIcon size={20} className="text-slate-500"/> Thiết lập hệ thống</h3>
                 <div className="grid grid-cols-1 gap-3">
-                    <button onClick={onOpenFixedConfig} className="w-full p-4 bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Chi Tiêu Cố Định <Clock size={18}/></button>
                     <button onClick={onOpenCloudForm} className="w-full p-4 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 rounded-2xl font-black text-[10px] uppercase tracking-widest flex justify-between items-center shadow-sm active:scale-95 transition-all">Cấu Hình Đám Mây <Cloud size={18}/></button>
                 </div>
                 <div className="pt-6 border-t border-gray-50 text-center">

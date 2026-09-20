@@ -16,8 +16,6 @@ import AppLayout from './components/AppLayout';
 // Modals
 import ModalCloudConfig from './components/modals/ModalCloudConfig';
 import ModalReloadConfirm from './components/modals/ModalReloadConfirm';
-import ModalFixedTracking from './components/modals/ModalFixedTracking';
-import ModalFixedConfig from './components/modals/ModalFixedConfig';
 
 const App: React.FC = () => {
   // 1. Master View & UI States (Single source of truth for Month & Year)
@@ -44,8 +42,6 @@ const App: React.FC = () => {
 
   // Modal Visibility States
   const [showReloadConfirm, setShowReloadConfirm] = useState(false);
-  const [showFixedConfig, setShowFixedConfig] = useState(false);
-  const [showFixedTrackingModal, setShowFixedTrackingModal] = useState(false);
   const [showCloudForm, setShowCloudForm] = useState(false);
 
   // 2. Data Logic (Load from Custom Hook - Default to Provided Firebase Config)
@@ -71,7 +67,6 @@ const App: React.FC = () => {
     incomes,
     expenses,
     debts,
-    fixedTemplate,
     categories,
     categoryBudgets,
     childEducation,
@@ -86,8 +81,6 @@ const App: React.FC = () => {
     deleteItem,
     updateNote,
     updateCategories,
-    confirmFixedItem,
-    saveFixedConfig,
     updateCategoryBudgets,
     toggleChildAttendance,
     updateChildEducationConfig,
@@ -179,7 +172,6 @@ const App: React.FC = () => {
       activeTab={activeTab}
       onTabChange={setActiveTab}
       isOverBudget={isOverBudget}
-      onOpenFixedTracking={() => setShowFixedTrackingModal(true)}
       onReload={() => setShowReloadConfirm(true)}
       modals={
         <>
@@ -193,21 +185,6 @@ const App: React.FC = () => {
             isOpen={showReloadConfirm}
             onClose={() => setShowReloadConfirm(false)}
             onConfirm={() => window.location.reload()}
-          />
-          <ModalFixedTracking
-            isOpen={showFixedTrackingModal}
-            onClose={() => setShowFixedTrackingModal(false)}
-            viewDate={viewDate}
-            fixedTemplate={fixedTemplate}
-            expenses={filteredExpenses}
-            onConfirmPayment={(item, amt) => confirmFixedItem(item, amt, viewDate)}
-          />
-          <ModalFixedConfig
-            isOpen={showFixedConfig}
-            onClose={() => setShowFixedConfig(false)}
-            categories={categories}
-            fixedTemplate={fixedTemplate}
-            onSave={saveFixedConfig}
           />
         </>
       }
@@ -292,7 +269,6 @@ const App: React.FC = () => {
           projectId={projectId}
           familyCode={familyCode}
           onReload={() => window.location.reload()}
-          onOpenFixedConfig={() => setShowFixedConfig(true)}
           onOpenCloudForm={() => setShowCloudForm(true)}
         />
       )}

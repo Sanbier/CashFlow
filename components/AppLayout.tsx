@@ -7,7 +7,6 @@ import {
   TrendingDown,
   CloudOff,
   SettingsIcon,
-  MessageCircle,
   Wallet,
   AlertTriangle,
   Wifi,
@@ -40,7 +39,7 @@ interface AppLayoutProps {
     onTabChange: (tab: TabType) => void;
     isOverBudget: boolean;
     balance: number;
-    onOpenFixedTracking: () => void;
+    onOpenFixedTracking?: () => void;
     onReload: () => void;
     children: React.ReactNode;
     modals: React.ReactNode;
@@ -329,22 +328,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                         {/* 4. FLOATING ACTION CONTROLS & BOTTOM DOCK                                */}
                         {/* ========================================================================= */}
                         <div
-                            className="absolute left-4 right-4 z-30 pointer-events-none flex items-center justify-between"
+                            className="absolute left-4 right-4 z-30 pointer-events-none flex items-center justify-end"
                             style={{
                                 bottom: 'max(0.65rem, calc(env(safe-area-inset-bottom, 0px) + 0.25rem))'
                             }}
                         >
-                            {/* Left FAB: Fixed Expenses Tracking */}
-                            <button
-                                onClick={onOpenFixedTracking}
-                                className="pointer-events-auto relative w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-white/95 border border-white/90 flex items-center justify-center transform hover:scale-105 active:scale-90 transition-all duration-200 group shadow-[0_10px_25px_rgba(0,0,0,0.12)] backdrop-blur-xl ring-1 ring-black/5"
-                                title="Chi cố định hàng tháng"
-                            >
-                                <div className="absolute inset-0 bg-indigo-50/70 rounded-full"></div>
-                                <MessageCircle size={22} className="text-indigo-600 relative z-10 drop-shadow-sm group-hover:text-purple-600 transition-colors"/>
-                            </button>
-
-                            {/* Right FAB: Wallet Balance & Quick Reload */}
+                            {/* Floating Wallet Balance & Quick Reload Pill */}
                             <div
                                 onClick={onReload}
                                 className="pointer-events-auto cursor-pointer"
