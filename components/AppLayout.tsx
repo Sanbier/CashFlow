@@ -236,19 +236,19 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                         <div className="flex-1 overflow-y-auto no-scrollbar relative flex flex-col overscroll-contain z-10">
 
                             {/* 1. Header Section */}
-                            <div className="p-6 pb-2 relative z-10 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] sm:pt-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <button onClick={onPrevMonth} className="p-3 bg-white/70 hover:bg-white/90 rounded-2xl text-slate-700 btn-effect backdrop-blur-md shadow-sm border border-white/60"><ChevronLeft size={20}/></button>
+                            <div className="px-4 sm:px-6 pb-2 relative z-10 pt-[calc(env(safe-area-inset-top,0px)+0.25rem)] sm:pt-6">
+                                <div className="flex items-center justify-between mb-2 sm:mb-4">
+                                    <button onClick={onPrevMonth} className="p-2.5 sm:p-3 bg-white/70 hover:bg-white/90 rounded-2xl text-slate-700 btn-effect backdrop-blur-md shadow-sm border border-white/60"><ChevronLeft size={18}/></button>
                                     <div className="flex flex-col items-center justify-center text-center">
                                         <span className="text-[10px] font-bold text-slate-500 block mb-0.5 tracking-wider uppercase">{formatDate(startDate.toISOString())} - {formatDate(endDate.toISOString())}</span>
-                                        <div className="font-black text-xl text-slate-800 flex items-center gap-2 justify-center uppercase tracking-wide drop-shadow-sm"><CalendarIcon size={18} className="text-purple-600"/> Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</div>
+                                        <div className="font-black text-lg sm:text-xl text-slate-800 flex items-center gap-1.5 sm:gap-2 justify-center uppercase tracking-wide drop-shadow-sm"><CalendarIcon size={16} className="text-purple-600"/> Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</div>
                                     </div>
-                                    <button onClick={onNextMonth} className="p-3 bg-white/70 hover:bg-white/90 rounded-2xl text-slate-700 btn-effect backdrop-blur-md shadow-sm border border-white/60"><ChevronRight size={20}/></button>
+                                    <button onClick={onNextMonth} className="p-2.5 sm:p-3 bg-white/70 hover:bg-white/90 rounded-2xl text-slate-700 btn-effect backdrop-blur-md shadow-sm border border-white/60"><ChevronRight size={18}/></button>
                                 </div>
 
                                 {/* Summary Cards */}
-                                <div className="grid grid-cols-2 gap-3 mt-4">
-                                    <div className="glass-panel p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
+                                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mt-2 sm:mt-4">
+                                    <div className="glass-panel p-3 sm:p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
                                         <div className="absolute -right-6 -top-6 w-16 h-16 bg-green-300/30 rounded-full blur-xl group-hover:scale-150 transition-all duration-700"></div>
                                         <div className="text-green-700 text-[10px] font-black uppercase mb-1 flex items-center justify-center gap-1 relative z-10">
                                             <TrendingUp size={12}/> {startingBalance > 0 ? 'Tổng Khả Dụng' : 'Thu Nhập'}
@@ -260,7 +260,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                                             </div>
                                         )}
                                     </div>
-                                    <div className="glass-panel p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
+                                    <div className="glass-panel p-3 sm:p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
                                         <div className="absolute -right-6 -top-6 w-16 h-16 bg-red-300/30 rounded-full blur-xl group-hover:scale-150 transition-all duration-700"></div>
                                         <div className="text-red-600 text-[10px] font-black uppercase mb-1 flex items-center justify-center gap-1 relative z-10"><TrendingDown size={12}/> Chi Tiêu</div>
                                         <div className="font-black text-base sm:text-lg text-slate-800 relative z-10">{formatCurrency(sumExpense)}</div>
@@ -271,9 +271,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                                 </div>
 
                                 {/* Cloud Status */}
-                                <div className="mt-4 flex justify-center">
+                                <div className="mt-2.5 sm:mt-4 flex justify-center">
                                     {!isConnected ? (
-                                        <button onClick={onOpenCloud} className="flex items-center gap-2 bg-white/70 border border-white/80 px-4 py-1.5 rounded-full text-[10px] font-bold text-slate-600 transition-all backdrop-blur-md shadow-sm hover:bg-white/90">
+                                        <button onClick={onOpenCloud} className="flex items-center gap-2 bg-white/70 border border-white/80 px-3.5 py-1.5 rounded-full text-[10px] font-bold text-slate-600 transition-all backdrop-blur-md shadow-sm hover:bg-white/90">
                                             <CloudOff size={12} className="text-gray-400"/> <span>Kết nối Cloud</span>
                                         </button>
                                     ) : (
@@ -290,7 +290,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                             </div>
 
                             {/* 2. iOS Segmented Navigation Tabs */}
-                            <div className="px-3 sm:px-6 sticky top-0 z-20 py-2">
+                            <div className="px-3 sm:px-6 sticky top-0 z-20 py-1.5 sm:py-2">
                                 <div className="glass-panel p-1.5 flex border border-white/70 overflow-x-auto no-scrollbar rounded-2xl shadow-sm gap-1">
                                     {([
                                         { key: 'add', label: 'Nhập', icon: <Plus size={13} strokeWidth={2.5}/> },
@@ -318,8 +318,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
 
                             {/* 3. Main Tab Content (Ample bottom clearance so scrolling avoids floating buttons) */}
                             <div
-                                className="p-6 flex-1"
-                                style={{ paddingBottom: 'max(8.5rem, calc(env(safe-area-inset-bottom, 0px) + 7.5rem))' }}
+                                className="px-3.5 sm:px-6 py-2 sm:py-4 flex-1"
+                                style={{ paddingBottom: 'max(4.75rem, calc(env(safe-area-inset-bottom, 0px) + 3.75rem))' }}
                             >
                                 {children}
                             </div>
@@ -331,7 +331,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                         <div
                             className="absolute left-4 right-4 z-30 pointer-events-none flex items-center justify-between"
                             style={{
-                                bottom: 'max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.85rem))'
+                                bottom: 'max(0.65rem, calc(env(safe-area-inset-bottom, 0px) + 0.25rem))'
                             }}
                         >
                             {/* Left FAB: Fixed Expenses Tracking */}
