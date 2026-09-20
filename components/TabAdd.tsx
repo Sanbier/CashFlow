@@ -397,7 +397,7 @@ const TabAdd: React.FC<TabAddProps> = ({
 
       {/* Modal Add / Rename Category (Native UI thay vì window.prompt) */}
       {categoryModal && (
-        <div className="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center p-6 backdrop-blur-md animate-fadeIn">
+        <div className="fixed sm:absolute inset-0 bg-black/60 z-[120] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md animate-fadeIn">
           <div className="bg-white rounded-[32px] p-6 max-w-xs w-full shadow-2xl space-y-4 border border-white/20 relative">
             <button
               onClick={() => setCategoryModal(null)}

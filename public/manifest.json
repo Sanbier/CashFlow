@@ -1,0 +1,25 @@
+{
+  "name": "Sổ Thu Chi & Quản Lý Nợ",
+  "short_name": "CashFlow",
+  "description": "Quản lý thu chi và theo dõi nợ gia đình",
+  "start_url": "/CashFlow/",
+  "scope": "/CashFlow/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#8ec5fc",
+  "theme_color": "#8ec5fc",
+  "icons": [
+    {
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxDdlZYMPRhs2qZTEX31LsJ8A-AYHLbO0loA&s",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxDdlZYMPRhs2qZTEX31LsJ8A-AYHLbO0loA&s",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -53,11 +53,11 @@ const ModalFixedTracking: React.FC<ModalFixedTrackingProps> = ({ isOpen, onClose
     const doneItems = listItems.filter(i => i.isDone);
 
     return (
-        <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-end justify-center backdrop-blur-md animate-fadeIn safe-pb">
+        <div className="fixed sm:absolute inset-0 bg-slate-900/60 z-[100] flex items-end justify-center backdrop-blur-md animate-fadeIn safe-pb">
             {/* Click outside to close area */}
             <div className="absolute inset-0" onClick={onClose}></div>
 
-            <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl border-t border-white/50 relative z-10 transition-all">
+            <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] w-full max-h-[85vh] flex flex-col shadow-2xl border-t border-white/50 relative z-10 transition-all">
                 {/* Header Compact */}
                 <div className="px-5 pt-4 pb-2 flex justify-between items-center">
                     <div>

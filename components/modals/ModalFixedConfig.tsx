@@ -37,8 +37,8 @@ const ModalFixedConfig: React.FC<ModalFixedConfigProps> = ({ isOpen, onClose, ca
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-6 backdrop-blur-md animate-fadeIn">
-            <div className="bg-white rounded-[48px] w-full max-w-sm p-8 shadow-2xl relative border border-gray-100">
+        <div className="fixed sm:absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md animate-fadeIn">
+            <div className="bg-white rounded-[36px] w-full max-w-sm p-6 sm:p-8 shadow-2xl relative border border-gray-100 max-h-[85vh] overflow-y-auto no-scrollbar">
                 <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-gray-100 rounded-full text-gray-400"><X size={20}/></button>
                 <h3 className="font-black text-gray-800 text-lg mb-8 uppercase tracking-tighter flex items-center gap-3"><Clock size={24} className="text-purple-600"/> Thiết lập hạn mức</h3>
                 <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 no-scrollbar">

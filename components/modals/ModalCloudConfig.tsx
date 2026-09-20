@@ -41,8 +41,8 @@ const ModalCloudConfig: React.FC<ModalCloudConfigProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-[110] flex items-center justify-center p-6 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-[40px] w-full max-w-md p-6 sm:p-8 shadow-2xl text-left border border-white/20 relative max-h-[92vh] overflow-y-auto no-scrollbar">
+    <div className="fixed sm:absolute inset-0 bg-black/80 z-[110] flex items-center justify-center p-4 sm:p-6 backdrop-blur-md animate-fadeIn">
+      <div className="bg-white rounded-[36px] w-full max-w-sm p-6 shadow-2xl text-left border border-white/20 relative max-h-[85vh] overflow-y-auto no-scrollbar">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 p-2 bg-gray-100 rounded-full text-gray-400 hover:bg-gray-200 transition-all"

@@ -61,4 +61,9 @@ export const MessageCircle: React.FC<IconProps> = (p) => <IconBase {...p}><path 
 export const Clock: React.FC<IconProps> = (p) => <IconBase {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></IconBase>;
 export const Check: React.FC<IconProps> = (p) => <IconBase {...p}><polyline points="20 6 9 17 4 12"/></IconBase>;
 export const ShieldCheck: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></IconBase>;
+export const Wifi: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M12 20h.01"/><path d="M2 8.82a15 15 0 0 1 20 0"/><path d="M5 12.86a10 10 0 0 1 14 0"/><path d="M8.5 16.5a5 5 0 0 1 7 0"/></IconBase>;
+export const Signal: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 20V4"/></IconBase>;
+export const Battery: React.FC<IconProps> = (p) => <IconBase {...p}><rect width="16" height="10" x="2" y="7" rx="2" ry="2"/><line x1="22" x2="22" y1="11" y2="13"/><rect width="10" height="6" x="4" y="9" rx="1" fill="currentColor"/></IconBase>;
+export const Smartphone: React.FC<IconProps> = (p) => <IconBase {...p}><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></IconBase>;
+
 

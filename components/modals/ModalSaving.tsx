@@ -40,8 +40,8 @@ const ModalSaving: React.FC<ModalSavingProps> = ({ isOpen, onClose, onSave }) =>
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-slate-900/40 z-[110] flex items-center justify-center p-6 backdrop-blur-lg animate-fadeIn">
-            <div className="glass-panel bg-white/70 rounded-[40px] w-full max-w-sm p-8 shadow-2xl relative border-white/50">
+        <div className="fixed sm:absolute inset-0 bg-slate-900/40 z-[110] flex items-center justify-center p-4 sm:p-6 backdrop-blur-lg animate-fadeIn">
+            <div className="glass-panel bg-white/80 rounded-[36px] w-full max-w-sm p-6 shadow-2xl relative border-white/50">
                 <button onClick={onClose} className="absolute top-5 right-5 p-2 bg-white/50 rounded-full text-slate-400 hover:bg-white hover:text-slate-600 transition-all"><X size={20}/></button>
                 <h3 className="font-black text-rose-500 text-lg mb-8 uppercase tracking-tighter flex items-center gap-2"><PiggyBank size={24}/> Nạp Heo Đất</h3>
                 <div className="space-y-5">

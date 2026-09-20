@@ -12,8 +12,8 @@ const ModalReloadConfirm: React.FC<ModalReloadConfirmProps> = ({ isOpen, onClose
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn">
-            <div className="bg-white rounded-[40px] p-8 shadow-2xl text-center max-w-[300px] w-full border border-gray-100">
+        <div className="fixed sm:absolute inset-0 bg-black/60 z-[120] flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn">
+            <div className="bg-white rounded-[36px] p-6 sm:p-8 shadow-2xl text-center max-w-[280px] w-full border border-gray-100">
                 <div className="bg-slate-100 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner"><RefreshCw size={28} className="text-blue-600"/></div>
                 <h3 className="font-black text-lg mb-2 text-gray-800 uppercase tracking-tighter">Tải lại App?</h3>
                 <p className="text-[10px] text-gray-400 font-bold mb-8 uppercase tracking-tight">Dữ liệu sẽ được cập nhật mới nhất từ Đám mây.</p>
