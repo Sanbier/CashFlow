@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Plus,
   Trash2,
+  MAX_SATURDAY_TOTAL_FEE,
 } from '../constants';
 import {
   ChildEducationData,
@@ -80,11 +81,9 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
     return new Date(selectedYear, selectedMonth, 0).getDate();
   }, [selectedYear, selectedMonth]);
 
-  // Days data array for the calendar
-  const calendarDays = useMemo(() => {
+  // Days raw metadata array
+  const rawDays = useMemo(() => {
     const list = [];
-    let attendedSaturdayCountSoFar = 0;
-
     for (let day = 1; day <= daysInMonth; day++) {
       const dateObj = new Date(selectedYear, selectedMonth - 1, day);
       const dayOfWeek = dateObj.getDay(); // 0: Sunday, 1: Mon, ..., 6: Sat
@@ -107,20 +106,6 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
         status = isSunday ? 'nghi' : 'hoc';
       }
 
-      // Fee for this specific day
-      // Quy định Thứ 7: 1 ngày 50k, 4 ngày 200k, vượt 4 ngày vẫn tính 200k (buổi thứ 5 trở đi không tính thêm)
-      let fee = 0;
-      let saturdayOrder = 0;
-      if (status === 'hoc') {
-        if (isSaturday) {
-          attendedSaturdayCountSoFar++;
-          saturdayOrder = attendedSaturdayCountSoFar;
-          fee = attendedSaturdayCountSoFar <= 4 ? config.saturdayFee : 0;
-        } else if (!isSunday) {
-          fee = config.regularDayFee;
-        }
-      }
-
       list.push({
         day,
         dateStr,
@@ -129,26 +114,58 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
         isSunday,
         isSaturday,
         status,
-        fee,
-        saturdayOrder,
         note: savedRecord?.note || '',
       });
     }
     return list;
-  }, [selectedYear, selectedMonth, daysInMonth, attendance, config]);
+  }, [selectedYear, selectedMonth, daysInMonth, attendance]);
 
   // Calculation Counters
   const regularDayCount = useMemo(() => {
-    return calendarDays.filter((d) => d.status === 'hoc' && !d.isSunday && !d.isSaturday).length;
-  }, [calendarDays]);
+    return rawDays.filter((d) => d.status === 'hoc' && !d.isSunday && !d.isSaturday).length;
+  }, [rawDays]);
 
   const saturdayCount = useMemo(() => {
-    return calendarDays.filter((d) => d.status === 'hoc' && d.isSaturday).length;
-  }, [calendarDays]);
+    return rawDays.filter((d) => d.status === 'hoc' && d.isSaturday).length;
+  }, [rawDays]);
 
   const absentDayCount = useMemo(() => {
-    return calendarDays.filter((d) => d.status === 'nghi' && !d.isSunday).length;
-  }, [calendarDays]);
+    return rawDays.filter((d) => d.status === 'nghi' && !d.isSunday).length;
+  }, [rawDays]);
+
+  // Quy định Thứ 7:
+  // Tổng tiền học thứ 7 tối đa 1 tháng là 200.000đ.
+  // - Nếu học <= 4 buổi: 50.000đ / buổi (1 buổi 50k, 2 buổi 100k, 3 buổi 150k, 4 buổi 200k).
+  // - Nếu học > 4 buổi (5 buổi, 6 buổi...): tổng cố định 200.000đ, chia đều cho số buổi học (5 buổi -> 40k/buổi, 6 buổi -> 33.3k/buổi).
+  const saturdayTotalFee = useMemo(() => {
+    if (saturdayCount <= 0) return 0;
+    if (saturdayCount <= 4) return saturdayCount * config.saturdayFee;
+    return MAX_SATURDAY_TOTAL_FEE;
+  }, [saturdayCount, config.saturdayFee]);
+
+  const perSaturdayFee = useMemo(() => {
+    if (saturdayCount <= 0) return config.saturdayFee;
+    if (saturdayCount <= 4) return config.saturdayFee;
+    return saturdayTotalFee / saturdayCount;
+  }, [saturdayCount, saturdayTotalFee, config.saturdayFee]);
+
+  // Days data array for the calendar with accurately allocated fees
+  const calendarDays = useMemo(() => {
+    return rawDays.map((d) => {
+      let fee = 0;
+      if (d.status === 'hoc') {
+        if (d.isSaturday) {
+          fee = perSaturdayFee;
+        } else if (!d.isSunday) {
+          fee = config.regularDayFee;
+        }
+      }
+      return {
+        ...d,
+        fee,
+      };
+    });
+  }, [rawDays, perSaturdayFee, config.regularDayFee]);
 
   // Calculation for Monday-first calendar alignment:
   // getDay(): 0 is Sunday, 1 is Monday, ..., 6 is Saturday
@@ -168,9 +185,6 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
   }, [leadingEmptyDays, daysInMonth]);
 
   const regularDayTotalFee = regularDayCount * config.regularDayFee;
-  // Quy định T7: 1 ngày 50k, 4 ngày 200k, vượt 4 ngày vẫn tính trần 200k
-  const saturdayBillableDays = Math.min(saturdayCount, 4);
-  const saturdayTotalFee = saturdayBillableDays * config.saturdayFee;
 
   // Monthly Allowances (Loại bỏ hoàn toàn Tiền Ăn)
   const cleanMonthlyAllowances = useMemo(() => {
@@ -331,7 +345,7 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
               <span>Học Thứ 7 ({saturdayCount} buổi)</span>
               {saturdayCount > 4 && (
                 <span className="bg-blue-200 text-blue-900 px-1.5 py-0.5 rounded-md font-black text-[7px]">
-                  TRẦN 200K
+                  CHIA ĐỀU {(perSaturdayFee / 1000).toFixed(perSaturdayFee % 1000 === 0 ? 0 : 1)}K
                 </span>
               )}
             </div>
@@ -392,7 +406,7 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
               Lịch Chấm Công Điểm Danh (1 Chạm)
             </h3>
             <p className="text-[9px] font-bold text-slate-400">
-              Nghỉ: {absentDayCount} ngày • Ngày thường: {config.regularDayFee.toLocaleString('vi-VN')}đ • T7: {config.saturdayFee.toLocaleString('vi-VN')}đ (tối đa 4 buổi = 200k)
+              Nghỉ: {absentDayCount} ngày • Ngày thường: {config.regularDayFee.toLocaleString('vi-VN')}đ • T7: {saturdayCount > 4 ? `200k/tháng (chia đều ${(perSaturdayFee / 1000).toFixed(perSaturdayFee % 1000 === 0 ? 0 : 1)}k/buổi)` : `${config.saturdayFee.toLocaleString('vi-VN')}đ/buổi (trần 200k)`}
             </p>
           </div>
           <div className="flex items-center gap-2 text-[9px] font-black">
@@ -493,10 +507,8 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
 
                 {/* Day Fee Amount */}
                 <span className="text-[7.5px] font-bold opacity-75 truncate max-w-full">
-                  {item.isSaturday && item.status === 'hoc' && item.saturdayOrder > 4
-                    ? '0đ (Max 200k)'
-                    : item.fee > 0
-                    ? `${(item.fee / 1000).toFixed(0)}k`
+                  {item.fee > 0
+                    ? `${(item.fee / 1000).toFixed(item.fee % 1000 === 0 ? 0 : 1)}k`
                     : '0đ'}
                 </span>
               </button>
