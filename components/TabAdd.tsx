@@ -130,8 +130,12 @@ const TabAdd: React.FC<TabAddProps> = ({
   };
 
   const handleDeleteCategory = (catToDelete: string) => {
-    if (!confirm(`Xác nhận xóa danh mục "${catToDelete}"?`)) return;
-    onUpdateCategories(categories.filter((c) => c !== catToDelete));
+    if (!window.confirm(`Xác nhận xóa danh mục "${catToDelete}"?`)) return;
+    const remaining = categories.filter((c) => c !== catToDelete);
+    onUpdateCategories(remaining);
+    if (expenseCategory === catToDelete) {
+      setExpenseCategory(remaining[0] || '');
+    }
   };
 
   const handleSaveCategoryModal = () => {
@@ -323,31 +327,26 @@ const TabAdd: React.FC<TabAddProps> = ({
                 return (
                   <div key={cat} className="relative h-[62px]">
                     {isCategoryManageMode ? (
-                      <div className="absolute inset-0 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-2xl flex flex-col items-center justify-between p-1 z-20 shadow-sm animate-fadeIn">
-                        <span className="text-[7px] font-extrabold text-slate-500 truncate w-full text-center uppercase tracking-tighter">
+                      <div className="absolute inset-0 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-2xl flex flex-col items-center justify-between p-1.5 z-20 shadow-sm animate-fadeIn">
+                        <span className="text-[8px] font-black text-slate-700 truncate w-full text-center leading-tight uppercase">
                           {cat}
                         </span>
-                        <div className="grid grid-cols-3 gap-0.5 w-full place-items-center">
-                          <button onClick={() => handleMoveCategory(idx, 'up')} className="p-0.5 text-slate-400">
-                            <ChevronUp size={11} />
+                        <div className="flex items-center gap-1.5 w-full justify-center mt-1">
+                          <button
+                            type="button"
+                            onClick={() => setCategoryModal({ mode: 'rename', oldName: cat, value: cat })}
+                            className="flex-1 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center border border-blue-200/60 active:scale-90 transition-transform"
+                            title="Đổi tên danh mục"
+                          >
+                            <Edit2 size={11} />
                           </button>
                           <button
-                            onClick={() => setCategoryModal({ mode: 'rename', oldName: cat, value: cat })}
-                            className="p-0.5 text-blue-500"
+                            type="button"
+                            onClick={() => handleDeleteCategory(cat)}
+                            className="flex-1 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg flex items-center justify-center border border-red-200/60 active:scale-90 transition-transform"
+                            title="Xóa danh mục"
                           >
-                            <Edit2 size={9} />
-                          </button>
-                          <button onClick={() => handleMoveCategory(idx, 'down')} className="p-0.5 text-slate-400">
-                            <ChevronDown size={11} />
-                          </button>
-                          <button onClick={() => handleMoveCategory(idx, 'left')} className="p-0.5 text-slate-400">
-                            <ChevronLeft size={11} />
-                          </button>
-                          <button onClick={() => handleDeleteCategory(cat)} className="p-0.5 text-red-500">
                             <Trash2 size={11} />
-                          </button>
-                          <button onClick={() => handleMoveCategory(idx, 'right')} className="p-0.5 text-slate-400">
-                            <ChevronRight size={11} />
                           </button>
                         </div>
                       </div>
@@ -381,15 +380,15 @@ const TabAdd: React.FC<TabAddProps> = ({
                 );
               })}
 
-              {!isCategoryManageMode && (
-                <button
-                  type="button"
-                  onClick={() => setCategoryModal({ mode: 'add', value: '' })}
-                  className="h-[62px] text-[10px] font-bold rounded-2xl border-2 border-dashed border-slate-300 text-slate-400 hover:bg-white/30 hover:border-slate-400 hover:text-slate-500 transition-all flex items-center justify-center"
-                >
-                  <Plus size={18} />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setCategoryModal({ mode: 'add', value: '' })}
+                className="h-[62px] text-[10px] font-bold rounded-2xl border-2 border-dashed border-slate-300 text-slate-400 hover:bg-white/30 hover:border-slate-400 hover:text-slate-500 transition-all flex flex-col items-center justify-center gap-1"
+                title="Thêm danh mục mới"
+              >
+                <Plus size={18} />
+                <span className="text-[8px] font-extrabold uppercase">Thêm</span>
+              </button>
             </div>
 
             {/* Real-time Category Spending & Budget Remaining Feedback */}

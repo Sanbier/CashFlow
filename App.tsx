@@ -80,6 +80,7 @@ const App: React.FC = () => {
     updateDebts,
     deleteItem,
     updateNote,
+    updateTransaction,
     updateCategories,
     updateCategoryBudgets,
     toggleChildAttendance,
@@ -256,8 +257,12 @@ const App: React.FC = () => {
         <TabHistory
           incomes={filteredIncomes}
           expenses={filteredExpenses}
+          allIncomes={incomes}
+          allExpenses={expenses}
+          viewDate={viewDate}
           onDelete={deleteItem}
           onUpdateNote={updateNote}
+          onUpdateTransaction={updateTransaction}
           categories={categories}
         />
       )}

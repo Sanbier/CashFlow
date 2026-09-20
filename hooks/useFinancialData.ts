@@ -50,7 +50,9 @@ function mergeDebts(local: Debt[], remote: Debt[]): Debt[] {
 }
 
 function mergeCategories(local: string[], remote: string[]): string[] {
-  return Array.from(new Set([...DEFAULT_CATEGORIES, ...local, ...remote]));
+  if (remote && remote.length > 0) return remote;
+  if (local && local.length > 0) return local;
+  return [...DEFAULT_CATEGORIES];
 }
 
 function mergeTracking(
@@ -85,6 +87,7 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
 
   const dbRef = useRef<Firestore | null>(null);
   const passphraseRef = useRef<string>(localStorage.getItem('fb_passphrase') || '');
+  const isInitialSyncRef = useRef<boolean>(true);
 
   // Local Storage Loader
   const loadLocal = useCallback(() => {
@@ -273,6 +276,7 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
 
   // Firebase Realtime Listener Setup
   useEffect(() => {
+    isInitialSyncRef.current = true;
     const localData = loadLocal();
 
     if (!firebaseConfigStr || !familyCode) {
@@ -299,6 +303,12 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
       unsubscribe = onSnapshot(
         docRef,
         async (snapshot) => {
+          // If this snapshot is our own pending local write, skip re-merging to prevent ghost resurrection
+          if (snapshot.metadata.hasPendingWrites) {
+            setIsSyncing(false);
+            return;
+          }
+
           if (snapshot.exists()) {
             const rawData = snapshot.data();
             let resolvedData: FamilyCloudData;
@@ -326,67 +336,146 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
               resolvedData = rawData as FamilyCloudData;
             }
 
-            // Merge with local state to preserve any local edits
-            const mergedIncomes = mergeTransactions(localData.incomes, resolvedData.incomes || []);
-            const mergedExpenses = mergeTransactions(localData.expenses, resolvedData.expenses || []);
-            const mergedDebts = mergeDebts(localData.debts, resolvedData.debts || []);
-            const mergedCats = mergeCategories(localData.categories, resolvedData.categories || DEFAULT_CATEGORIES);
-            const mergedFixed = resolvedData.fixedTemplate || localData.fixedTemplate;
-            const mergedTracking = mergeTracking(localData.fixedTracking, resolvedData.fixedTracking || {});
-            const mergedBudgets = {
-              ...DEFAULT_EXCEL_BUDGETS,
-              ...(localData.categoryBudgets || {}),
-              ...(resolvedData.categoryBudgets || {}),
-            };
-            const mergedChildEdu: ChildEducationData = {
-              config: {
-                ...DEFAULT_CHILD_EDUCATION_DATA.config,
-                ...(localData.childEducation?.config || {}),
-                ...(resolvedData.childEducation?.config || {}),
-              },
-              attendance: {
-                ...(localData.childEducation?.attendance || {}),
-                ...(resolvedData.childEducation?.attendance || {}),
-              },
-              payments: {
-                ...(localData.childEducation?.payments || {}),
-                ...(resolvedData.childEducation?.payments || {}),
-              },
-            };
-            if (mergedChildEdu?.config?.monthlyAllowances) {
-              mergedChildEdu.config.monthlyAllowances = mergedChildEdu.config.monthlyAllowances.filter(
-                (item) => item.id !== 'an' && !item.name.toLowerCase().includes('tiền ăn')
+            if (isInitialSyncRef.current) {
+              isInitialSyncRef.current = false;
+              const currentLocal = loadLocal();
+
+              // On initial sync, merge local with cloud
+              const mergedIncomes = mergeTransactions(currentLocal.incomes, resolvedData.incomes || []);
+              const mergedExpenses = mergeTransactions(currentLocal.expenses, resolvedData.expenses || []);
+              const mergedDebts = mergeDebts(currentLocal.debts, resolvedData.debts || []);
+              const mergedCats = resolvedData.categories && resolvedData.categories.length > 0
+                ? resolvedData.categories
+                : (currentLocal.categories && currentLocal.categories.length > 0 ? currentLocal.categories : DEFAULT_CATEGORIES);
+              const mergedFixed = resolvedData.fixedTemplate || currentLocal.fixedTemplate;
+              const mergedTracking = mergeTracking(currentLocal.fixedTracking, resolvedData.fixedTracking || {});
+              const mergedBudgets = {
+                ...DEFAULT_EXCEL_BUDGETS,
+                ...(currentLocal.categoryBudgets || {}),
+                ...(resolvedData.categoryBudgets || {}),
+              };
+              const mergedChildEdu: ChildEducationData = {
+                config: {
+                  ...DEFAULT_CHILD_EDUCATION_DATA.config,
+                  ...(currentLocal.childEducation?.config || {}),
+                  ...(resolvedData.childEducation?.config || {}),
+                },
+                attendance: {
+                  ...(currentLocal.childEducation?.attendance || {}),
+                  ...(resolvedData.childEducation?.attendance || {}),
+                },
+                payments: {
+                  ...(currentLocal.childEducation?.payments || {}),
+                  ...(resolvedData.childEducation?.payments || {}),
+                },
+              };
+              if (mergedChildEdu?.config?.monthlyAllowances) {
+                mergedChildEdu.config.monthlyAllowances = mergedChildEdu.config.monthlyAllowances.filter(
+                  (item) => item.id !== 'an' && !item.name.toLowerCase().includes('tiền ăn')
+                );
+              }
+              const mergedInitBalance = {
+                ...currentLocal.initialYearBalance,
+                ...(resolvedData.initialYearBalance || {}),
+              };
+
+              setIncomes(mergedIncomes);
+              setExpenses(mergedExpenses);
+              setDebts(mergedDebts);
+              setCategories(mergedCats);
+              setFixedTemplate(mergedFixed);
+              setFixedTracking(mergedTracking);
+              setCategoryBudgets(mergedBudgets);
+              setChildEducation(mergedChildEdu);
+              setInitialYearBalance(mergedInitBalance);
+
+              persistLocal(
+                mergedIncomes,
+                mergedExpenses,
+                mergedFixed,
+                mergedCats,
+                mergedDebts,
+                mergedTracking,
+                mergedBudgets,
+                mergedChildEdu,
+                mergedInitBalance
+              );
+
+              // If local had unsynced items not in cloud, push the merged state to cloud
+              if (currentLocal.incomes.length > (resolvedData.incomes?.length || 0) ||
+                  currentLocal.expenses.length > (resolvedData.expenses?.length || 0)) {
+                syncToCloud({
+                  incomes: mergedIncomes,
+                  expenses: mergedExpenses,
+                  fixedTemplate: mergedFixed,
+                  categories: mergedCats,
+                  debts: mergedDebts,
+                  fixedTracking: mergedTracking,
+                  categoryBudgets: mergedBudgets,
+                  childEducation: mergedChildEdu,
+                  initialYearBalance: mergedInitBalance,
+                  lastUpdate: new Date().toISOString(),
+                });
+              }
+            } else {
+              // Remote server update: authoritative state replaces local without resurrecting deleted items
+              const newIncomes = resolvedData.incomes || [];
+              const newExpenses = resolvedData.expenses || [];
+              const newDebts = resolvedData.debts || [];
+              const newCats = resolvedData.categories && resolvedData.categories.length > 0
+                ? resolvedData.categories
+                : DEFAULT_CATEGORIES;
+              const newFixed = resolvedData.fixedTemplate || [];
+              const newTracking = resolvedData.fixedTracking || {};
+              const newBudgets = {
+                ...DEFAULT_EXCEL_BUDGETS,
+                ...(resolvedData.categoryBudgets || {}),
+              };
+              const newChildEdu: ChildEducationData = {
+                config: {
+                  ...DEFAULT_CHILD_EDUCATION_DATA.config,
+                  ...(resolvedData.childEducation?.config || {}),
+                },
+                attendance: {
+                  ...(resolvedData.childEducation?.attendance || {}),
+                },
+                payments: {
+                  ...(resolvedData.childEducation?.payments || {}),
+                },
+              };
+              if (newChildEdu?.config?.monthlyAllowances) {
+                newChildEdu.config.monthlyAllowances = newChildEdu.config.monthlyAllowances.filter(
+                  (item) => item.id !== 'an' && !item.name.toLowerCase().includes('tiền ăn')
+                );
+              }
+              const newInitBalance = resolvedData.initialYearBalance || { 2026: 0 };
+
+              setIncomes(newIncomes);
+              setExpenses(newExpenses);
+              setDebts(newDebts);
+              setCategories(newCats);
+              setFixedTemplate(newFixed);
+              setFixedTracking(newTracking);
+              setCategoryBudgets(newBudgets);
+              setChildEducation(newChildEdu);
+              setInitialYearBalance(newInitBalance);
+
+              persistLocal(
+                newIncomes,
+                newExpenses,
+                newFixed,
+                newCats,
+                newDebts,
+                newTracking,
+                newBudgets,
+                newChildEdu,
+                newInitBalance
               );
             }
-            const mergedInitBalance = {
-              ...localData.initialYearBalance,
-              ...(resolvedData.initialYearBalance || {}),
-            };
-
-            setIncomes(mergedIncomes);
-            setExpenses(mergedExpenses);
-            setDebts(mergedDebts);
-            setCategories(mergedCats);
-            setFixedTemplate(mergedFixed);
-            setFixedTracking(mergedTracking);
-            setCategoryBudgets(mergedBudgets);
-            setChildEducation(mergedChildEdu);
-            setInitialYearBalance(mergedInitBalance);
-
-            persistLocal(
-              mergedIncomes,
-              mergedExpenses,
-              mergedFixed,
-              mergedCats,
-              mergedDebts,
-              mergedTracking,
-              mergedBudgets,
-              mergedChildEdu,
-              mergedInitBalance
-            );
             setSyncError(null);
           } else {
             // First time sync: push existing local data to cloud
+            isInitialSyncRef.current = false;
             if (localData.incomes.length > 0 || localData.expenses.length > 0 || localData.debts.length > 0) {
               const initialPayload: FamilyCloudData = {
                 incomes: localData.incomes,
@@ -572,19 +661,130 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
   };
 
   const deleteItem = (id: number, type: 'income' | 'expense') => {
+    let updatedDebts = debts;
+
     if (type === 'income') {
-      saveData(incomes.filter((i) => i.id !== id), expenses);
+      const itemToDelete = incomes.find((i) => i.id === id);
+      if (itemToDelete?.relatedDebtId && itemToDelete.debtAction === 'collect') {
+        updatedDebts = debts.map((d) =>
+          d.id === itemToDelete.relatedDebtId
+            ? { ...d, paid: Math.max(0, d.paid - itemToDelete.amount), updatedAt: new Date().toISOString() }
+            : d
+        );
+      }
+      saveData(
+        incomes.filter((i) => i.id !== id),
+        expenses,
+        fixedTemplate,
+        categories,
+        updatedDebts
+      );
     } else {
-      saveData(incomes, expenses.filter((e) => e.id !== id));
+      const itemToDelete = expenses.find((e) => e.id === id);
+      if (itemToDelete?.relatedDebtId) {
+        if (itemToDelete.debtAction === 'repay') {
+          updatedDebts = debts.map((d) =>
+            d.id === itemToDelete.relatedDebtId
+              ? { ...d, paid: Math.max(0, d.paid - itemToDelete.amount), updatedAt: new Date().toISOString() }
+              : d
+          );
+        } else if (itemToDelete.debtAction === 'lend') {
+          updatedDebts = debts.map((d) =>
+            d.id === itemToDelete.relatedDebtId
+              ? { ...d, total: Math.max(0, d.total - itemToDelete.amount), updatedAt: new Date().toISOString() }
+              : d
+          );
+        }
+      }
+      saveData(
+        incomes,
+        expenses.filter((e) => e.id !== id),
+        fixedTemplate,
+        categories,
+        updatedDebts
+      );
+    }
+  };
+
+  const updateTransaction = (
+    id: number,
+    type: 'income' | 'expense',
+    updates: {
+      amount?: number;
+      note?: string;
+      date?: string;
+      categoryOrSource?: string;
+    }
+  ) => {
+    let updatedDebts = debts;
+
+    if (type === 'income') {
+      const oldItem = incomes.find((i) => i.id === id);
+      if (!oldItem) return;
+
+      const newAmount = updates.amount !== undefined ? updates.amount : oldItem.amount;
+      const diff = newAmount - oldItem.amount;
+
+      if (oldItem.relatedDebtId && oldItem.debtAction === 'collect' && diff !== 0) {
+        updatedDebts = debts.map((d) =>
+          d.id === oldItem.relatedDebtId
+            ? { ...d, paid: Math.max(0, d.paid + diff), updatedAt: new Date().toISOString() }
+            : d
+        );
+      }
+
+      const updatedIncomes = incomes.map((item) => {
+        if (item.id !== id) return item;
+        return {
+          ...item,
+          amount: newAmount,
+          note: updates.note !== undefined ? updates.note : item.note,
+          date: updates.date !== undefined ? updates.date : item.date,
+          source: updates.categoryOrSource !== undefined ? updates.categoryOrSource : item.source,
+        };
+      });
+
+      saveData(updatedIncomes, expenses, fixedTemplate, categories, updatedDebts);
+    } else {
+      const oldItem = expenses.find((e) => e.id === id);
+      if (!oldItem) return;
+
+      const newAmount = updates.amount !== undefined ? updates.amount : oldItem.amount;
+      const diff = newAmount - oldItem.amount;
+
+      if (oldItem.relatedDebtId && diff !== 0) {
+        if (oldItem.debtAction === 'repay') {
+          updatedDebts = debts.map((d) =>
+            d.id === oldItem.relatedDebtId
+              ? { ...d, paid: Math.max(0, d.paid + diff), updatedAt: new Date().toISOString() }
+              : d
+          );
+        } else if (oldItem.debtAction === 'lend') {
+          updatedDebts = debts.map((d) =>
+            d.id === oldItem.relatedDebtId
+              ? { ...d, total: Math.max(0, d.total + diff), updatedAt: new Date().toISOString() }
+              : d
+          );
+        }
+      }
+
+      const updatedExpenses = expenses.map((item) => {
+        if (item.id !== id) return item;
+        return {
+          ...item,
+          amount: newAmount,
+          note: updates.note !== undefined ? updates.note : item.note,
+          date: updates.date !== undefined ? updates.date : item.date,
+          category: updates.categoryOrSource !== undefined ? updates.categoryOrSource : item.category,
+        };
+      });
+
+      saveData(incomes, updatedExpenses, fixedTemplate, categories, updatedDebts);
     }
   };
 
   const updateNote = (id: number, type: 'income' | 'expense', newNote: string) => {
-    if (type === 'income') {
-      saveData(incomes.map((i) => (i.id === id ? { ...i, note: newNote } : i)), expenses);
-    } else {
-      saveData(incomes, expenses.map((e) => (e.id === id ? { ...e, note: newNote } : e)));
-    }
+    updateTransaction(id, type, { note: newNote });
   };
 
   const updateCategories = (newCats: string[]) => {
@@ -836,6 +1036,7 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     updateDebts,
     deleteItem,
     updateNote,
+    updateTransaction,
     updateCategories,
     confirmFixedItem,
     saveFixedConfig,
