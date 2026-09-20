@@ -101,6 +101,11 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
       const localChildEdu: ChildEducationData = JSON.parse(
         localStorage.getItem('family_child_education') || JSON.stringify(DEFAULT_CHILD_EDUCATION_DATA)
       );
+      if (localChildEdu?.config?.monthlyAllowances) {
+        localChildEdu.config.monthlyAllowances = localChildEdu.config.monthlyAllowances.filter(
+          (item) => item.id !== 'an' && !item.name.toLowerCase().includes('tiền ăn')
+        );
+      }
       const localInitBalance: Record<number, number> = JSON.parse(
         localStorage.getItem('family_initial_year_balance') || '{"2026": 0}'
       );
@@ -345,6 +350,11 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
                 ...(resolvedData.childEducation?.payments || {}),
               },
             };
+            if (mergedChildEdu?.config?.monthlyAllowances) {
+              mergedChildEdu.config.monthlyAllowances = mergedChildEdu.config.monthlyAllowances.filter(
+                (item) => item.id !== 'an' && !item.name.toLowerCase().includes('tiền ăn')
+              );
+            }
             const mergedInitBalance = {
               ...localData.initialYearBalance,
               ...(resolvedData.initialYearBalance || {}),

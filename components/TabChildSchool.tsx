@@ -83,6 +83,8 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
   // Days data array for the calendar
   const calendarDays = useMemo(() => {
     const list = [];
+    let attendedSaturdayCountSoFar = 0;
+
     for (let day = 1; day <= daysInMonth; day++) {
       const dateObj = new Date(selectedYear, selectedMonth - 1, day);
       const dayOfWeek = dateObj.getDay(); // 0: Sunday, 1: Mon, ..., 6: Sat
@@ -106,10 +108,14 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
       }
 
       // Fee for this specific day
+      // Quy định Thứ 7: 1 ngày 50k, 4 ngày 200k, vượt 4 ngày vẫn tính 200k (buổi thứ 5 trở đi không tính thêm)
       let fee = 0;
+      let saturdayOrder = 0;
       if (status === 'hoc') {
         if (isSaturday) {
-          fee = config.saturdayFee;
+          attendedSaturdayCountSoFar++;
+          saturdayOrder = attendedSaturdayCountSoFar;
+          fee = attendedSaturdayCountSoFar <= 4 ? config.saturdayFee : 0;
         } else if (!isSunday) {
           fee = config.regularDayFee;
         }
@@ -124,6 +130,7 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
         isSaturday,
         status,
         fee,
+        saturdayOrder,
         note: savedRecord?.note || '',
       });
     }
@@ -161,14 +168,22 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
   }, [leadingEmptyDays, daysInMonth]);
 
   const regularDayTotalFee = regularDayCount * config.regularDayFee;
-  const saturdayTotalFee = saturdayCount * config.saturdayFee;
+  // Quy định T7: 1 ngày 50k, 4 ngày 200k, vượt 4 ngày vẫn tính trần 200k
+  const saturdayBillableDays = Math.min(saturdayCount, 4);
+  const saturdayTotalFee = saturdayBillableDays * config.saturdayFee;
 
-  // Monthly Allowances
+  // Monthly Allowances (Loại bỏ hoàn toàn Tiền Ăn)
+  const cleanMonthlyAllowances = useMemo(() => {
+    return (config.monthlyAllowances || []).filter(
+      (item) => item.id !== 'an' && !item.name.toLowerCase().includes('tiền ăn')
+    );
+  }, [config.monthlyAllowances]);
+
   const monthlyAllowancesTotal = useMemo(() => {
-    return config.monthlyAllowances
+    return cleanMonthlyAllowances
       .filter((item) => item.enabled)
       .reduce((sum, item) => sum + item.amount, 0);
-  }, [config.monthlyAllowances]);
+  }, [cleanMonthlyAllowances]);
 
   // Annual Allowances (applied in config.applyAnnualAllowanceMonth, default September)
   const isAnnualAllowanceApplicable =
@@ -312,8 +327,13 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
           </div>
 
           <div className="p-2.5 rounded-2xl bg-blue-50 border border-blue-200/80">
-            <div className="text-[8px] font-black uppercase text-blue-800 tracking-wider">
-              Học Thứ 7 ({saturdayCount} buổi)
+            <div className="text-[8px] font-black uppercase text-blue-800 tracking-wider flex items-center justify-between">
+              <span>Học Thứ 7 ({saturdayCount} buổi)</span>
+              {saturdayCount > 4 && (
+                <span className="bg-blue-200 text-blue-900 px-1.5 py-0.5 rounded-md font-black text-[7px]">
+                  TRẦN 200K
+                </span>
+              )}
             </div>
             <div className="text-xs sm:text-sm font-black text-blue-700 mt-1">
               {formatCurrency(saturdayTotalFee)}
@@ -372,7 +392,7 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
               Lịch Chấm Công Điểm Danh (1 Chạm)
             </h3>
             <p className="text-[9px] font-bold text-slate-400">
-              Nghỉ: {absentDayCount} ngày • Ngày thường: {config.regularDayFee.toLocaleString('vi-VN')}đ • T7: {config.saturdayFee.toLocaleString('vi-VN')}đ
+              Nghỉ: {absentDayCount} ngày • Ngày thường: {config.regularDayFee.toLocaleString('vi-VN')}đ • T7: {config.saturdayFee.toLocaleString('vi-VN')}đ (tối đa 4 buổi = 200k)
             </p>
           </div>
           <div className="flex items-center gap-2 text-[9px] font-black">
@@ -473,7 +493,11 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
 
                 {/* Day Fee Amount */}
                 <span className="text-[7.5px] font-bold opacity-75 truncate max-w-full">
-                  {item.fee > 0 ? `${(item.fee / 1000).toFixed(0)}k` : '0đ'}
+                  {item.isSaturday && item.status === 'hoc' && item.saturdayOrder > 4
+                    ? '0đ (Max 200k)'
+                    : item.fee > 0
+                    ? `${(item.fee / 1000).toFixed(0)}k`
+                    : '0đ'}
                 </span>
               </button>
             );
@@ -667,7 +691,11 @@ const ConfigModal: React.FC<ConfigModalProps> = ({ config, onClose, onSaveConfig
     config.applyAnnualAllowanceMonth ? String(config.applyAnnualAllowanceMonth) : '9'
   );
 
-  const [monthlyItems, setMonthlyItems] = useState<AllowanceItem[]>(config.monthlyAllowances);
+  const [monthlyItems, setMonthlyItems] = useState<AllowanceItem[]>(() =>
+    (config.monthlyAllowances || []).filter(
+      (item) => item.id !== 'an' && !item.name.toLowerCase().includes('tiền ăn')
+    )
+  );
   const [annualItems, setAnnualItems] = useState<AllowanceItem[]>(config.annualAllowances);
 
   const handleSave = () => {
@@ -713,7 +741,7 @@ const ConfigModal: React.FC<ConfigModalProps> = ({ config, onClose, onSaveConfig
               </div>
               <div>
                 <label className="block text-[8px] font-black text-slate-400 uppercase mb-1">
-                  Học Thứ 7 / buổi
+                  Học Thứ 7 / buổi <span className="text-blue-600 font-bold">(Max 200k)</span>
                 </label>
                 <input
                   type="text"

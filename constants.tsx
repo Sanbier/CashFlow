@@ -42,7 +42,6 @@ export const DEFAULT_CHILD_EDUCATION_DATA: ChildEducationData = {
     regularDayFee: 32000,
     saturdayFee: 50000,
     monthlyAllowances: [
-      { id: 'an', name: 'Tiền ăn', amount: 672000, enabled: true },
       { id: 'ban_tru', name: 'Chăm sóc bán trú', amount: 140000, enabled: true },
       { id: 'nuoc', name: 'Tiền nước', amount: 12000, enabled: true },
       { id: 'an_sang', name: 'Chăm sóc ăn sáng', amount: 50000, enabled: true },
@@ -60,6 +59,9 @@ export const DEFAULT_CHILD_EDUCATION_DATA: ChildEducationData = {
   attendance: {},
   payments: {},
 };
+
+export const MAX_SATURDAY_BILLABLE_DAYS = 4;
+export const MAX_SATURDAY_TOTAL_FEE = 200000;
 
 export const DEFAULT_FIREBASE_CONFIG = {
   apiKey: "AIzaSyBmSTUadewx5jgJYJeRz6E1GpsTgf5P08A",
