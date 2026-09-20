@@ -1,8 +1,24 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, onSnapshot, setDoc, Firestore, Unsubscribe } from 'firebase/firestore';
-import { Income, Expense, Debt, FixedTemplateItem, FamilyCloudData, FirebaseConfig, UpdateDebtsHandler } from '../types';
-import { DEFAULT_CATEGORIES, DEBT_CATEGORY_NAME } from '../constants';
+import {
+  Income,
+  Expense,
+  Debt,
+  FixedTemplateItem,
+  FamilyCloudData,
+  FirebaseConfig,
+  UpdateDebtsHandler,
+  ChildEducationData,
+  ChildEducationConfig,
+  AttendanceStatus,
+} from '../types';
+import {
+  DEFAULT_CATEGORIES,
+  DEBT_CATEGORY_NAME,
+  DEFAULT_EXCEL_BUDGETS,
+  DEFAULT_CHILD_EDUCATION_DATA,
+} from '../constants';
 import { getCombinedDate } from '../utils';
 import { encryptCloudData, decryptCloudData } from '../crypto';
 
@@ -57,6 +73,9 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
   const [categories, setCategories] = useState<string[]>([]);
   const [debts, setDebts] = useState<Debt[]>([]);
   const [fixedTracking, setFixedTracking] = useState<Record<string, string[]>>({});
+  const [categoryBudgets, setCategoryBudgets] = useState<Record<string, number>>(DEFAULT_EXCEL_BUDGETS);
+  const [childEducation, setChildEducation] = useState<ChildEducationData>(DEFAULT_CHILD_EDUCATION_DATA);
+  const [initialYearBalance, setInitialYearBalance] = useState<Record<number, number>>({ 2026: 0 });
 
   // Sync States
   const [isConnected, setIsConnected] = useState(false);
@@ -76,6 +95,15 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
       const localFixedTracking: Record<string, string[]> = JSON.parse(localStorage.getItem('family_fixed_tracking') || '{}');
       const localCats: string[] = JSON.parse(localStorage.getItem('family_categories') || JSON.stringify(DEFAULT_CATEGORIES));
       const localDebts: Debt[] = JSON.parse(localStorage.getItem('family_debts') || '[]');
+      const localBudgets: Record<string, number> = JSON.parse(
+        localStorage.getItem('family_category_budgets') || JSON.stringify(DEFAULT_EXCEL_BUDGETS)
+      );
+      const localChildEdu: ChildEducationData = JSON.parse(
+        localStorage.getItem('family_child_education') || JSON.stringify(DEFAULT_CHILD_EDUCATION_DATA)
+      );
+      const localInitBalance: Record<number, number> = JSON.parse(
+        localStorage.getItem('family_initial_year_balance') || '{"2026": 0}'
+      );
 
       setIncomes(localIncomes);
       setExpenses(localExpenses);
@@ -83,6 +111,9 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
       setCategories(localCats);
       setDebts(localDebts);
       setFixedTracking(localFixedTracking);
+      setCategoryBudgets(localBudgets);
+      setChildEducation(localChildEdu);
+      setInitialYearBalance(localInitBalance);
 
       return {
         incomes: localIncomes,
@@ -91,6 +122,9 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
         categories: localCats,
         debts: localDebts,
         fixedTracking: localFixedTracking,
+        categoryBudgets: localBudgets,
+        childEducation: localChildEdu,
+        initialYearBalance: localInitBalance,
       };
     } catch {
       return {
@@ -100,6 +134,9 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
         categories: DEFAULT_CATEGORIES,
         debts: [],
         fixedTracking: {},
+        categoryBudgets: DEFAULT_EXCEL_BUDGETS,
+        childEducation: DEFAULT_CHILD_EDUCATION_DATA,
+        initialYearBalance: { 2026: 0 },
       };
     }
   }, []);
@@ -111,7 +148,10 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     newFixed: FixedTemplateItem[],
     newCats: string[],
     newDebts: Debt[],
-    newTracking: Record<string, string[]>
+    newTracking: Record<string, string[]>,
+    newBudgets: Record<string, number>,
+    newChildEdu: ChildEducationData,
+    newInitBalance: Record<number, number>
   ) => {
     localStorage.setItem('family_incomes', JSON.stringify(newIncomes));
     localStorage.setItem('family_expenses', JSON.stringify(newExpenses));
@@ -119,6 +159,9 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     localStorage.setItem('family_categories', JSON.stringify(newCats));
     localStorage.setItem('family_debts', JSON.stringify(newDebts));
     localStorage.setItem('family_fixed_tracking', JSON.stringify(newTracking));
+    localStorage.setItem('family_category_budgets', JSON.stringify(newBudgets));
+    localStorage.setItem('family_child_education', JSON.stringify(newChildEdu));
+    localStorage.setItem('family_initial_year_balance', JSON.stringify(newInitBalance));
   }, []);
 
   // Sync to Cloud
@@ -163,7 +206,10 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     newFixed = fixedTemplate,
     newCats = categories,
     newDebts = debts,
-    newTracking = fixedTracking
+    newTracking = fixedTracking,
+    newBudgets = categoryBudgets,
+    newChildEdu = childEducation,
+    newInitBalance = initialYearBalance
   ) => {
     setIncomes(newIncomes);
     setExpenses(newExpenses);
@@ -171,8 +217,21 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     setCategories(newCats);
     setDebts(newDebts);
     setFixedTracking(newTracking);
+    setCategoryBudgets(newBudgets);
+    setChildEducation(newChildEdu);
+    setInitialYearBalance(newInitBalance);
 
-    persistLocal(newIncomes, newExpenses, newFixed, newCats, newDebts, newTracking);
+    persistLocal(
+      newIncomes,
+      newExpenses,
+      newFixed,
+      newCats,
+      newDebts,
+      newTracking,
+      newBudgets,
+      newChildEdu,
+      newInitBalance
+    );
 
     const payload: FamilyCloudData = {
       incomes: newIncomes,
@@ -181,13 +240,28 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
       categories: newCats,
       debts: newDebts,
       fixedTracking: newTracking,
+      categoryBudgets: newBudgets,
+      childEducation: newChildEdu,
+      initialYearBalance: newInitBalance,
       lastUpdate: new Date().toISOString(),
     };
 
     if (isConnected && dbRef.current && familyCode) {
       syncToCloud(payload);
     }
-  }, [fixedTemplate, categories, debts, fixedTracking, persistLocal, isConnected, familyCode, syncToCloud]);
+  }, [
+    fixedTemplate,
+    categories,
+    debts,
+    fixedTracking,
+    categoryBudgets,
+    childEducation,
+    initialYearBalance,
+    persistLocal,
+    isConnected,
+    familyCode,
+    syncToCloud,
+  ]);
 
   // Firebase Realtime Listener Setup
   useEffect(() => {
@@ -251,6 +325,30 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
             const mergedCats = mergeCategories(localData.categories, resolvedData.categories || DEFAULT_CATEGORIES);
             const mergedFixed = resolvedData.fixedTemplate || localData.fixedTemplate;
             const mergedTracking = mergeTracking(localData.fixedTracking, resolvedData.fixedTracking || {});
+            const mergedBudgets = {
+              ...DEFAULT_EXCEL_BUDGETS,
+              ...(localData.categoryBudgets || {}),
+              ...(resolvedData.categoryBudgets || {}),
+            };
+            const mergedChildEdu: ChildEducationData = {
+              config: {
+                ...DEFAULT_CHILD_EDUCATION_DATA.config,
+                ...(localData.childEducation?.config || {}),
+                ...(resolvedData.childEducation?.config || {}),
+              },
+              attendance: {
+                ...(localData.childEducation?.attendance || {}),
+                ...(resolvedData.childEducation?.attendance || {}),
+              },
+              payments: {
+                ...(localData.childEducation?.payments || {}),
+                ...(resolvedData.childEducation?.payments || {}),
+              },
+            };
+            const mergedInitBalance = {
+              ...localData.initialYearBalance,
+              ...(resolvedData.initialYearBalance || {}),
+            };
 
             setIncomes(mergedIncomes);
             setExpenses(mergedExpenses);
@@ -258,8 +356,21 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
             setCategories(mergedCats);
             setFixedTemplate(mergedFixed);
             setFixedTracking(mergedTracking);
+            setCategoryBudgets(mergedBudgets);
+            setChildEducation(mergedChildEdu);
+            setInitialYearBalance(mergedInitBalance);
 
-            persistLocal(mergedIncomes, mergedExpenses, mergedFixed, mergedCats, mergedDebts, mergedTracking);
+            persistLocal(
+              mergedIncomes,
+              mergedExpenses,
+              mergedFixed,
+              mergedCats,
+              mergedDebts,
+              mergedTracking,
+              mergedBudgets,
+              mergedChildEdu,
+              mergedInitBalance
+            );
             setSyncError(null);
           } else {
             // First time sync: push existing local data to cloud
@@ -271,6 +382,9 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
                 categories: localData.categories,
                 debts: localData.debts,
                 fixedTracking: localData.fixedTracking,
+                categoryBudgets: localData.categoryBudgets,
+                childEducation: localData.childEducation,
+                initialYearBalance: localData.initialYearBalance,
                 lastUpdate: new Date().toISOString(),
               };
               syncToCloud(initialPayload);
@@ -296,8 +410,30 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
   }, [firebaseConfigStr, familyCode, loadLocal, persistLocal, syncToCloud]);
 
   // Business Logic Handlers
-  const addIncome = (source: string, amount: number, dateInput: string, note: string) => {
-    const newItem: Income = { id: Date.now(), source, amount, date: getCombinedDate(dateInput), note };
+  const addIncome = (
+    source: string,
+    amount: number,
+    dateInput: string,
+    note: string,
+    incomeType?: 'salary' | 'loan' | 'other'
+  ) => {
+    // Detect type if not provided
+    let detectedType = incomeType;
+    if (!detectedType) {
+      const lowerSource = source.toLowerCase();
+      if (lowerSource.includes('lương')) detectedType = 'salary';
+      else if (lowerSource.includes('mượn') || lowerSource.includes('vay')) detectedType = 'loan';
+      else detectedType = 'other';
+    }
+
+    const newItem: Income = {
+      id: Date.now(),
+      source,
+      amount,
+      date: getCombinedDate(dateInput),
+      note,
+      incomeType: detectedType,
+    };
     saveData([newItem, ...incomes], expenses);
   };
 
@@ -314,7 +450,7 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     let linkedDebtId: number | null = null;
     let actionType: 'repay' | 'lend' | null = null;
 
-    if (category === 'Cá Nhân (Ba-Mẹ)') {
+    if (category === 'Cá nhân' || category === 'Cá Nhân (Ba-Mẹ)') {
       finalNote = `[${whoSpent}] ${note}`.trim();
     }
 
@@ -336,6 +472,7 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
             note: `Nhận lại nợ: ${debtItem.name} ${note ? '- ' + note : ''}`,
             relatedDebtId: linkedDebtId,
             debtAction: 'collect',
+            incomeType: 'other',
           };
           saveData([newItem, ...incomes], expenses, fixedTemplate, categories, updatedDebts);
           return;
@@ -399,6 +536,7 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
               amount: newItem.paid - oldPaid,
               date: new Date().toISOString(),
               debtAction: 'collect',
+              incomeType: 'other',
             });
           }
         } else if (newItem.paid > oldPaid) {
@@ -465,14 +603,213 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     const newTrackingList = currentTracking.includes(item.category)
       ? currentTracking
       : [...currentTracking, item.category];
-    saveData(incomes, newExpenses, fixedTemplate, categories, debts, {
-      ...fixedTracking,
-      [trackingKey]: newTrackingList,
-    });
+    saveData(
+      incomes,
+      newExpenses,
+      fixedTemplate,
+      categories,
+      debts,
+      {
+        ...fixedTracking,
+        [trackingKey]: newTrackingList,
+      },
+      categoryBudgets,
+      childEducation,
+      initialYearBalance
+    );
   };
 
   const saveFixedConfig = (newTemplate: FixedTemplateItem[]) => {
     saveData(incomes, expenses, newTemplate);
+  };
+
+  // Excel Sheet 1: Update Category Budgets
+  const updateCategoryBudgets = (newBudgets: Record<string, number>) => {
+    saveData(
+      incomes,
+      expenses,
+      fixedTemplate,
+      categories,
+      debts,
+      fixedTracking,
+      newBudgets,
+      childEducation,
+      initialYearBalance
+    );
+  };
+
+  // Excel Sheet 3: Toggle Attendance for Child (key: "YYYY-MM-DD")
+  const toggleChildAttendance = (dateStr: string, currentStatus?: AttendanceStatus, note?: string) => {
+    const nextStatus: AttendanceStatus = currentStatus === 'hoc' ? 'nghi' : 'hoc';
+    const newAttendance = {
+      ...childEducation.attendance,
+      [dateStr]: {
+        status: nextStatus,
+        note: note !== undefined ? note : childEducation.attendance[dateStr]?.note,
+      },
+    };
+    const newChildEdu: ChildEducationData = {
+      ...childEducation,
+      attendance: newAttendance,
+    };
+    saveData(
+      incomes,
+      expenses,
+      fixedTemplate,
+      categories,
+      debts,
+      fixedTracking,
+      categoryBudgets,
+      newChildEdu,
+      initialYearBalance
+    );
+  };
+
+  const updateChildEducationConfig = (newConfig: ChildEducationConfig) => {
+    const newChildEdu: ChildEducationData = {
+      ...childEducation,
+      config: newConfig,
+    };
+    saveData(
+      incomes,
+      expenses,
+      fixedTemplate,
+      categories,
+      debts,
+      fixedTracking,
+      categoryBudgets,
+      newChildEdu,
+      initialYearBalance
+    );
+  };
+
+  const updateChildPayment = (
+    month: number,
+    year: number,
+    actualPaid: number,
+    calculatedFee: number,
+    note?: string
+  ) => {
+    const paymentKey = `${year}-${month}`;
+    let status: 'paid' | 'partial' | 'unpaid' = 'unpaid';
+    if (actualPaid >= calculatedFee && calculatedFee > 0) {
+      status = 'paid';
+    } else if (actualPaid > 0) {
+      status = 'partial';
+    }
+
+    const newPayments = {
+      ...childEducation.payments,
+      [paymentKey]: {
+        month,
+        year,
+        calculatedFee,
+        actualPaid,
+        status,
+        note: note || '',
+      },
+    };
+    const newChildEdu: ChildEducationData = {
+      ...childEducation,
+      payments: newPayments,
+    };
+    saveData(
+      incomes,
+      expenses,
+      fixedTemplate,
+      categories,
+      debts,
+      fixedTracking,
+      categoryBudgets,
+      newChildEdu,
+      initialYearBalance
+    );
+  };
+
+  // 1-Click Sync Child Fee to Expense ("Con cái")
+  const syncChildFeeToExpense = (month: number, year: number, calculatedFee: number) => {
+    // Check if there is already an expense recorded for child education in this month
+    const existingExpense = expenses.find((e) => {
+      if (e.category !== 'Con cái') return false;
+      const d = new Date(e.date);
+      return (
+        d.getFullYear() === year &&
+        d.getMonth() + 1 === month &&
+        (e.note?.includes('Tiền học con') || e.note?.includes('Học phí'))
+      );
+    });
+
+    let updatedExpenses: Expense[];
+    if (existingExpense) {
+      updatedExpenses = expenses.map((e) =>
+        e.id === existingExpense.id
+          ? {
+              ...e,
+              amount: calculatedFee,
+              note: `Tiền học con T${month}/${year} (Đồng bộ tự động)`,
+            }
+          : e
+      );
+    } else {
+      const newExpense: Expense = {
+        id: Date.now(),
+        category: 'Con cái',
+        amount: calculatedFee,
+        date: new Date(year, month - 1, 10).toISOString(), // ghi vào ngày 10 của tháng
+        note: `Tiền học con T${month}/${year} (Đồng bộ tự động)`,
+      };
+      updatedExpenses = [newExpense, ...expenses];
+    }
+
+    // Also update payment record status to 'paid' if amount matches
+    const paymentKey = `${year}-${month}`;
+    const existingPayment = childEducation.payments[paymentKey];
+    const newPayments = {
+      ...childEducation.payments,
+      [paymentKey]: {
+        month,
+        year,
+        calculatedFee,
+        actualPaid: calculatedFee,
+        status: 'paid' as const,
+        note: existingPayment?.note || 'Đã đồng bộ vào sổ chi tiêu',
+      },
+    };
+    const newChildEdu: ChildEducationData = {
+      ...childEducation,
+      payments: newPayments,
+    };
+
+    saveData(
+      incomes,
+      updatedExpenses,
+      fixedTemplate,
+      categories,
+      debts,
+      fixedTracking,
+      categoryBudgets,
+      newChildEdu,
+      initialYearBalance
+    );
+  };
+
+  // Excel Sheet 2: Initial Year Balance (e.g. 2026 starting rollover)
+  const updateInitialYearBalance = (year: number, amount: number) => {
+    const newBalances = {
+      ...initialYearBalance,
+      [year]: amount,
+    };
+    saveData(
+      incomes,
+      expenses,
+      fixedTemplate,
+      categories,
+      debts,
+      fixedTracking,
+      categoryBudgets,
+      childEducation,
+      newBalances
+    );
   };
 
   return {
@@ -482,6 +819,9 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     fixedTemplate,
     categories,
     fixedTracking,
+    categoryBudgets,
+    childEducation,
+    initialYearBalance,
     isConnected,
     isSyncing,
     syncError,
@@ -495,5 +835,11 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     updateCategories,
     confirmFixedItem,
     saveFixedConfig,
+    updateCategoryBudgets,
+    toggleChildAttendance,
+    updateChildEducationConfig,
+    updateChildPayment,
+    syncChildFeeToExpense,
+    updateInitialYearBalance,
   };
 };

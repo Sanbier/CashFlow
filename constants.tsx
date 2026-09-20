@@ -1,23 +1,77 @@
+import React from 'react';
+import { ChildEducationData } from './types';
 
-import React, { useState } from 'react';
+export const DEBT_CATEGORY_NAME = "Nợ";
+export const LEGACY_DEBT_CATEGORY_NAME = "Nợ (Vay - Trả Góp)";
 
-export const DEBT_CATEGORY_NAME = "Nợ (Vay - Trả Góp)";
+// 9 Core Expense Categories + 1 Saving Category from Excel Sheet 1
+export const CORE_EXPENSE_CATEGORIES = [
+  "Ăn uống",
+  "Đi lại",
+  "Con cái",
+  "Cá nhân",
+  "Hoá đơn",
+  "Hiếu hỷ",
+  "Sức khoẻ",
+  "Nợ",
+  "Giải trí/Phát sinh"
+] as const;
+
+export const CORE_SAVING_CATEGORY = "Tiết kiệm";
+
+export const DEFAULT_EXCEL_BUDGETS: Record<string, number> = {
+  "Ăn uống": 4000000,
+  "Đi lại": 500000,
+  "Con cái": 3200000,
+  "Cá nhân": 700000,
+  "Hoá đơn": 1100000,
+  "Hiếu hỷ": 500000,
+  "Sức khoẻ": 700000,
+  "Nợ": 1500000,
+  "Giải trí/Phát sinh": 500000,
+  "Tiết kiệm": 1500000,
+};
 
 export const SAVING_CATEGORIES = [
-    "Tiết Kiệm Mục Tiêu", 
-    "Tiết Kiệm Ngắn Hạn", 
-    "Quỹ Khẩn Cấp"        
+  "Tiết kiệm",
+  "Tiết Kiệm Mục Tiêu",
+  "Tiết Kiệm Ngắn Hạn",
+  "Quỹ Khẩn Cấp"
 ];
 
 export const DEFAULT_CATEGORIES = [
-    "Ăn (Sáng/Trưa/Tối)", "Ăn vặt/Nước ngọt", "Wi-Fi & Điện", "Cưới hỏi & Ma chay", 
-    "Học phí cho Con", "Bỉm cho Con", "Sữa cho Con", "Xăng xe", 
-    "Rác thải sinh hoạt", "Nhu Yêu Phẩm", "Đồ dùng Y Tế", 
-    ...SAVING_CATEGORIES,
-    "Tiền Cá Nhân", DEBT_CATEGORY_NAME, "Mua Sắm"
+  ...CORE_EXPENSE_CATEGORIES,
+  CORE_SAVING_CATEGORY,
+  "Ăn (Sáng/Trưa/Tối)", "Ăn vặt/Nước ngọt", "Wi-Fi & Điện", "Cưới hỏi & Ma chay",
+  "Học phí cho Con", "Bỉm cho Con", "Sữa cho Con", "Xăng xe",
+  "Rác thải sinh hoạt", "Nhu Yêu Phẩm", "Đồ dùng Y Tế", "Mua Sắm"
 ];
 
-interface IconProps {
+export const DEFAULT_CHILD_EDUCATION_DATA: ChildEducationData = {
+  config: {
+    regularDayFee: 32000,
+    saturdayFee: 50000,
+    monthlyAllowances: [
+      { id: 'an', name: 'Tiền ăn', amount: 672000, enabled: true },
+      { id: 'ban_tru', name: 'Chăm sóc bán trú', amount: 140000, enabled: true },
+      { id: 'nuoc', name: 'Tiền nước', amount: 12000, enabled: true },
+      { id: 'an_sang', name: 'Chăm sóc ăn sáng', amount: 50000, enabled: true },
+      { id: 'anh_van', name: 'Học thêm Anh văn', amount: 170000, enabled: true },
+      { id: 'aerobic', name: 'Aerobic', amount: 70000, enabled: true },
+    ],
+    annualAllowances: [
+      { id: 'sach_vo', name: 'Sách vở', amount: 101500, enabled: true },
+      { id: 'dung_cu', name: 'Tiền dụng cụ học', amount: 116000, enabled: true },
+      { id: 'dong_phuc', name: 'Đồng phục (2 bộ)', amount: 210000, enabled: true },
+      { id: 'bao_hiem', name: 'Bảo hiểm tai nạn', amount: 200000, enabled: true },
+    ],
+    applyAnnualAllowanceMonth: 9,
+  },
+  attendance: {},
+  payments: {},
+};
+
+export interface IconProps {
   size?: number;
   className?: string;
   strokeWidth?: number;
@@ -65,5 +119,8 @@ export const Wifi: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M12 20
 export const Signal: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M2 20h.01"/><path d="M7 20v-4"/><path d="M12 20v-8"/><path d="M17 20V8"/><path d="M22 20V4"/></IconBase>;
 export const Battery: React.FC<IconProps> = (p) => <IconBase {...p}><rect width="16" height="10" x="2" y="7" rx="2" ry="2"/><line x1="22" x2="22" y1="11" y2="13"/><rect width="10" height="6" x="4" y="9" rx="1" fill="currentColor"/></IconBase>;
 export const Smartphone: React.FC<IconProps> = (p) => <IconBase {...p}><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></IconBase>;
-
-
+export const GraduationCap: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></IconBase>;
+export const TableColumns: React.FC<IconProps> = (p) => <IconBase {...p}><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/><path d="M3 9h18"/><path d="M3 15h18"/></IconBase>;
+export const Percent: React.FC<IconProps> = (p) => <IconBase {...p}><line x1="19" x2="5" y1="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></IconBase>;
+export const Receipt: React.FC<IconProps> = (p) => <IconBase {...p}><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></IconBase>;
+export const Award: React.FC<IconProps> = (p) => <IconBase {...p}><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></IconBase>;

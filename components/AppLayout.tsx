@@ -12,7 +12,12 @@ import {
   AlertTriangle,
   Wifi,
   Signal,
-  Smartphone
+  Smartphone,
+  PieChart,
+  GraduationCap,
+  TableColumns,
+  History,
+  Plus
 } from '../constants';
 import { formatCurrency, formatDate } from '../utils';
 import { TabType } from '../types';
@@ -274,11 +279,27 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                             </div>
 
                             {/* 2. iOS Segmented Navigation Tabs */}
-                            <div className="px-6 sticky top-0 z-20 py-2">
-                                <div className="glass-panel p-1.5 flex border border-white/70 overflow-x-auto no-scrollbar rounded-2xl shadow-sm">
-                                    {(['add', 'debt', 'report', 'savings', 'history', 'settings'] as TabType[]).map(tab => (
-                                        <button key={tab} onClick={() => onTabChange(tab)} className={`flex-1 min-w-[54px] py-2.5 rounded-xl text-[10px] font-bold uppercase transition-all duration-200 btn-effect flex flex-col items-center gap-1 ${activeTab === tab ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md' : 'text-slate-500 hover:bg-white/40'}`}>
-                                            {tab === 'add' ? 'Nhập' : tab === 'debt' ? 'Nợ' : tab === 'report' ? 'Báo Cáo' : tab === 'savings' ? 'Tiết Kiệm' : tab === 'history' ? 'Lịch Sử' : <SettingsIcon size={16}/>}
+                            <div className="px-3 sm:px-6 sticky top-0 z-20 py-2">
+                                <div className="glass-panel p-1.5 flex border border-white/70 overflow-x-auto no-scrollbar rounded-2xl shadow-sm gap-1">
+                                    {([
+                                        { key: 'add', label: 'Nhập', icon: <Plus size={13} strokeWidth={2.5}/> },
+                                        { key: 'budget', label: 'Sinh Hoạt', icon: <PieChart size={13}/> },
+                                        { key: 'childSchool', label: 'Lịch Học', icon: <GraduationCap size={13}/> },
+                                        { key: 'cashflow12M', label: 'Dòng Tiền', icon: <TableColumns size={13}/> },
+                                        { key: 'history', label: 'Lịch Sử', icon: <History size={13}/> },
+                                        { key: 'settings', label: 'Cài Đặt', icon: <SettingsIcon size={13}/> }
+                                    ] as const).map(({ key, label, icon }) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => onTabChange(key as TabType)}
+                                            className={`flex-1 min-w-[48px] py-2 px-1 rounded-xl text-[9px] font-black uppercase transition-all duration-200 btn-effect flex flex-col items-center justify-center gap-0.5 ${
+                                                activeTab === key
+                                                    ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md'
+                                                    : 'text-slate-500 hover:bg-white/40'
+                                            }`}
+                                        >
+                                            {icon}
+                                            <span className="truncate leading-none">{label}</span>
                                         </button>
                                     ))}
                                 </div>
