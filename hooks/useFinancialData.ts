@@ -178,18 +178,21 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
       const passphrase = passphraseRef.current.trim();
       let dataToSave: Record<string, unknown>;
 
+      // Deep sanitize payload: strip out any 'undefined' values which Firestore rejects
+      const cleanPayload: FamilyCloudData = JSON.parse(JSON.stringify(payload));
+
       if (passphrase) {
-        const encrypted = await encryptCloudData(payload, passphrase);
+        const encrypted = await encryptCloudData(cleanPayload, passphrase);
         dataToSave = {
           encrypted: true,
           cipherPayload: encrypted.cipherPayload,
           iv: encrypted.iv,
           salt: encrypted.salt,
-          lastUpdate: payload.lastUpdate,
+          lastUpdate: cleanPayload.lastUpdate,
         };
       } else {
         dataToSave = {
-          ...payload,
+          ...cleanPayload,
           encrypted: false,
         };
       }
@@ -640,11 +643,14 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
   // Excel Sheet 3: Toggle Attendance for Child (key: "YYYY-MM-DD")
   const toggleChildAttendance = (dateStr: string, currentStatus?: AttendanceStatus, note?: string) => {
     const nextStatus: AttendanceStatus = currentStatus === 'hoc' ? 'nghi' : 'hoc';
+    const existingNote = childEducation.attendance[dateStr]?.note;
+    const resolvedNote = note !== undefined ? note : (existingNote || '');
+
     const newAttendance = {
       ...childEducation.attendance,
       [dateStr]: {
         status: nextStatus,
-        note: note !== undefined ? note : childEducation.attendance[dateStr]?.note,
+        note: resolvedNote,
       },
     };
     const newChildEdu: ChildEducationData = {
