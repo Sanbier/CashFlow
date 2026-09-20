@@ -318,6 +318,7 @@ const TabAdd: React.FC<TabAddProps> = ({
               {categories.map((cat, idx) => {
                 const isCore = (CORE_EXPENSE_CATEGORIES as readonly string[]).includes(cat);
                 const isSelected = expenseCategory === cat;
+                const catSpent = getMonthlyPaid(cat);
 
                 return (
                   <div key={cat} className="relative h-[62px]">
@@ -363,11 +364,17 @@ const TabAdd: React.FC<TabAddProps> = ({
                         }`}
                       >
                         <span className="truncate w-full text-center">{cat}</span>
-                        {isCore && !isSelected && (
-                          <span className="text-[7px] font-extrabold text-blue-600 uppercase tracking-tighter opacity-80">
-                            Cốt lõi
-                          </span>
-                        )}
+                        <span
+                          className={`text-[7.5px] tracking-tight truncate max-w-full mt-0.5 ${
+                            isSelected
+                              ? 'text-white/90 font-black'
+                              : catSpent > 0
+                              ? 'text-red-600 font-black'
+                              : 'text-slate-400 font-semibold'
+                          }`}
+                        >
+                          {formatCurrency(catSpent)}đ
+                        </span>
                       </button>
                     )}
                   </div>
