@@ -75,7 +75,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     }, []);
 
     return (
-        <div className="min-h-screen w-full relative flex items-center justify-center font-sans overflow-x-hidden sm:overflow-y-auto select-none sm:select-text sm:bg-gradient-to-br sm:from-[#090b10] sm:via-[#10141f] sm:to-[#08090d] sm:py-8 sm:px-4">
+        <div className="h-[100dvh] w-full relative flex items-center justify-center font-sans overflow-hidden sm:overflow-y-auto select-none sm:select-text sm:bg-gradient-to-br sm:from-[#090b10] sm:via-[#10141f] sm:to-[#08090d] sm:py-8 sm:px-4">
             {/* Desktop Studio Lighting & Ambient Glow (Visible on PC / Tablet) */}
             <div className="hidden sm:block fixed inset-0 pointer-events-none z-0 overflow-hidden">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[900px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none"></div>
@@ -91,7 +91,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
             </div>
 
             {/* Hyper-realistic Phone Chassis Wrapper (Active on Desktop, collapses cleanly on mobile) */}
-            <div className="relative w-full h-[100dvh] sm:w-[416px] sm:h-[875px] sm:rounded-[60px] sm:bg-gradient-to-b sm:from-[#3a3b40] sm:via-[#222327] sm:to-[#121316] sm:p-[12px] sm:shadow-[0_45px_110px_-15px_rgba(0,0,0,0.85),0_20px_50px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.22),inset_0_1px_1px_rgba(255,255,255,0.3)] sm:ring-2 sm:ring-black/60 flex flex-col transition-all duration-300 z-10 shrink-0">
+            <div className="relative w-full h-full sm:w-[416px] sm:h-[875px] sm:rounded-[60px] sm:bg-gradient-to-b sm:from-[#3a3b40] sm:via-[#222327] sm:to-[#121316] sm:p-[12px] sm:shadow-[0_45px_110px_-15px_rgba(0,0,0,0.85),0_20px_50px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.22),inset_0_1px_1px_rgba(255,255,255,0.3)] sm:ring-2 sm:ring-black/60 flex flex-col transition-all duration-300 z-10 shrink-0">
 
                 {/* Metallic Antenna Bands (4 corners on titanium frame) */}
                 <div className="hidden sm:block absolute -left-[1px] top-24 w-[2px] h-[5px] bg-[#141416]"></div>
@@ -236,7 +236,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                         <div className="flex-1 overflow-y-auto no-scrollbar relative flex flex-col overscroll-contain z-10">
 
                             {/* 1. Header Section */}
-                            <div className="p-6 pb-2 relative z-10">
+                            <div className="p-6 pb-2 relative z-10 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] sm:pt-6">
                                 <div className="flex items-center justify-between mb-4">
                                     <button onClick={onPrevMonth} className="p-3 bg-white/70 hover:bg-white/90 rounded-2xl text-slate-700 btn-effect backdrop-blur-md shadow-sm border border-white/60"><ChevronLeft size={20}/></button>
                                     <div className="flex flex-col items-center justify-center text-center">
@@ -317,7 +317,10 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                             </div>
 
                             {/* 3. Main Tab Content (Ample bottom clearance so scrolling avoids floating buttons) */}
-                            <div className="p-6 pb-36 flex-1">
+                            <div
+                                className="p-6 flex-1"
+                                style={{ paddingBottom: 'max(8.5rem, calc(env(safe-area-inset-bottom, 0px) + 7.5rem))' }}
+                            >
                                 {children}
                             </div>
                         </div>
@@ -325,7 +328,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                         {/* ========================================================================= */}
                         {/* 4. FLOATING ACTION CONTROLS & BOTTOM DOCK                                */}
                         {/* ========================================================================= */}
-                        <div className="absolute bottom-5 sm:bottom-6 left-4 right-4 z-30 pointer-events-none flex items-center justify-between">
+                        <div
+                            className="absolute left-4 right-4 z-30 pointer-events-none flex items-center justify-between"
+                            style={{
+                                bottom: 'max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.85rem))'
+                            }}
+                        >
                             {/* Left FAB: Fixed Expenses Tracking */}
                             <button
                                 onClick={onOpenFixedTracking}
@@ -361,8 +369,9 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                             <div className="w-36 h-1 bg-slate-800/45 hover:bg-slate-800/70 transition-colors rounded-full cursor-pointer"></div>
                         </div>
 
-                        {/* 6. Modals Container */}
+                        {/* 6. Modals Container & Portal Root */}
                         {modals}
+                        <div id="app-modal-root" className="contents" />
                     </div>
                 </div>
             </div>

@@ -23,6 +23,7 @@ import { CORE_EXPENSE_CATEGORIES, CORE_SAVING_CATEGORY, DEFAULT_EXCEL_BUDGETS } 
 import { Expense, Income, Debt, UpdateDebtsHandler, MonthCashFlowRow } from '../types';
 import { formatCurrency, handleAmountInput, handleTextInput, parseAmount } from '../utils';
 import { ModalBudgetConfig } from './modals/ModalBudgetConfig';
+import ModalPortal from './common/ModalPortal';
 
 interface TabBudgetProps {
   viewDate: Date;
@@ -670,8 +671,9 @@ const TabBudget: React.FC<TabBudgetProps> = ({
 
       {/* Debt Form Modal */}
       {showDebtForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
-          <div className="glass-panel w-full max-w-md rounded-[32px] border border-white/60 p-5 space-y-4 shadow-2xl">
+        <ModalPortal>
+          <div className="fixed sm:absolute inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
+            <div className="glass-panel w-full max-w-sm sm:max-w-md rounded-[32px] border border-white/60 p-5 space-y-4 shadow-2xl">
             <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider text-center">
               {isEditingDebt ? 'Cập Nhật Khoản Nợ' : 'Tạo Khoản Nợ Mới'}
             </h3>
@@ -807,6 +809,7 @@ const TabBudget: React.FC<TabBudgetProps> = ({
             </div>
           </div>
         </div>
+      </ModalPortal>
       )}
 
       {/* Budget Configuration Modal */}

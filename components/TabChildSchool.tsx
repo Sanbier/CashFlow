@@ -22,6 +22,7 @@ import {
   AllowanceItem,
 } from '../types';
 import { formatCurrency, handleAmountInput, parseAmount } from '../utils';
+import ModalPortal from './common/ModalPortal';
 
 interface TabChildSchoolProps {
   viewDate: Date;
@@ -624,54 +625,56 @@ export const TabChildSchool: React.FC<TabChildSchoolProps> = ({
 
       {/* Edit Payment Modal */}
       {editingPaymentMonth !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
-          <div className="glass-panel w-full max-w-sm rounded-[32px] border border-white/60 p-5 space-y-4 shadow-2xl">
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider text-center">
-              Ghi Nhận Đóng Tiền Học Tháng {editingPaymentMonth}/{selectedYear}
-            </h3>
+        <ModalPortal>
+          <div className="fixed sm:absolute inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
+            <div className="glass-panel w-full max-w-sm rounded-[32px] border border-white/60 p-5 space-y-4 shadow-2xl">
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider text-center">
+                Ghi Nhận Đóng Tiền Học Tháng {editingPaymentMonth}/{selectedYear}
+              </h3>
 
-            <div>
-              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 pl-1">
-                Số Tiền Thực Tế Đã Đóng (VNĐ)
-              </label>
-              <input
-                type="text"
-                value={paymentInputAmount}
-                onChange={(e) => handleAmountInput(e.target.value, setPaymentInputAmount)}
-                placeholder="0"
-                className="w-full px-4 py-3 rounded-2xl bg-white/70 border border-slate-200 text-slate-800 text-sm font-black outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
+              <div>
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 pl-1">
+                  Số Tiền Thực Tế Đã Đóng (VNĐ)
+                </label>
+                <input
+                  type="text"
+                  value={paymentInputAmount}
+                  onChange={(e) => handleAmountInput(e.target.value, setPaymentInputAmount)}
+                  placeholder="0"
+                  className="w-full px-4 py-3 rounded-2xl bg-white/70 border border-slate-200 text-slate-800 text-sm font-black outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
 
-            <div>
-              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 pl-1">
-                Ghi Chú Đóng Tiền
-              </label>
-              <input
-                type="text"
-                value={paymentInputNote}
-                onChange={(e) => setPaymentInputNote(e.target.value)}
-                placeholder="VD: Đã đóng cô giáo ngày 10, tạm ứng..."
-                className="w-full px-4 py-3 rounded-2xl bg-white/70 border border-slate-200 text-slate-700 text-xs font-medium outline-none"
-              />
-            </div>
+              <div>
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 pl-1">
+                  Ghi Chú Đóng Tiền
+                </label>
+                <input
+                  type="text"
+                  value={paymentInputNote}
+                  onChange={(e) => setPaymentInputNote(e.target.value)}
+                  placeholder="VD: Đã đóng cô giáo ngày 10, tạm ứng..."
+                  className="w-full px-4 py-3 rounded-2xl bg-white/70 border border-slate-200 text-slate-700 text-xs font-medium outline-none"
+                />
+              </div>
 
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={() => setEditingPaymentMonth(null)}
-                className="flex-1 py-3 rounded-2xl bg-slate-200/80 text-slate-700 text-[10px] font-black uppercase tracking-wider"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSavePayment}
-                className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-indigo-500/20"
-              >
-                Lưu Đóng Tiền
-              </button>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setEditingPaymentMonth(null)}
+                  className="flex-1 py-3 rounded-2xl bg-slate-200/80 text-slate-700 text-[10px] font-black uppercase tracking-wider"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleSavePayment}
+                  className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-indigo-500/20"
+                >
+                  Lưu Đóng Tiền
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
 
       {/* Biểu Phí Configuration Modal */}
@@ -722,8 +725,9 @@ const ConfigModal: React.FC<ConfigModalProps> = ({ config, onClose, onSaveConfig
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
-      <div className="glass-panel w-full max-w-md max-h-[85vh] rounded-[32px] border border-white/60 p-5 flex flex-col shadow-2xl relative overflow-hidden">
+    <ModalPortal>
+      <div className="fixed sm:absolute inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
+        <div className="glass-panel w-full max-w-sm sm:max-w-md max-h-[85vh] rounded-[32px] border border-white/60 p-5 flex flex-col shadow-2xl relative overflow-hidden">
         <div className="flex justify-between items-center pb-3 border-b border-slate-200/50">
           <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider">
             Cấu Hình Biểu Phí & Phụ Cấp Con
@@ -865,7 +869,8 @@ const ConfigModal: React.FC<ConfigModalProps> = ({ config, onClose, onSaveConfig
         </div>
       </div>
     </div>
-  );
+  </ModalPortal>
+);
 };
 
 export default TabChildSchool;

@@ -15,6 +15,7 @@ import {
 import { CORE_EXPENSE_CATEGORIES, CORE_SAVING_CATEGORY } from '../constants';
 import { Income, Expense, MonthCashFlowRow, AnnualDashboardKPI } from '../types';
 import { formatCurrency, handleAmountInput, parseAmount, computeAnnualCashFlow } from '../utils';
+import ModalPortal from './common/ModalPortal';
 
 interface TabCashFlow12MProps {
   viewDate: Date;
@@ -525,44 +526,46 @@ export const TabCashFlow12M: React.FC<TabCashFlow12MProps> = ({
 
       {/* Edit Starting Balance Modal */}
       {showEditBalance && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
-          <div className="glass-panel w-full max-w-sm rounded-[32px] border border-white/60 p-5 space-y-4 shadow-2xl">
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider text-center">
-              Số Dư Chuyển Tiếp Đầu Năm {selectedYear}
-            </h3>
-            <p className="text-[10px] text-slate-500 text-center font-bold">
-              Số dư này sẽ làm điểm khởi đầu (Tháng 1) và tự động chuyển tiếp qua 12 tháng.
-            </p>
+        <ModalPortal>
+          <div className="fixed sm:absolute inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
+            <div className="glass-panel w-full max-w-sm rounded-[32px] border border-white/60 p-5 space-y-4 shadow-2xl">
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider text-center">
+                Số Dư Chuyển Tiếp Đầu Năm {selectedYear}
+              </h3>
+              <p className="text-[10px] text-slate-500 text-center font-bold">
+                Số dư này sẽ làm điểm khởi đầu (Tháng 1) và tự động chuyển tiếp qua 12 tháng.
+              </p>
 
-            <div>
-              <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 pl-1">
-                Số Tiền Đầu Năm (VNĐ)
-              </label>
-              <input
-                type="text"
-                value={balanceInput}
-                onChange={(e) => handleAmountInput(e.target.value, setBalanceInput)}
-                placeholder="0"
-                className="w-full px-4 py-3 rounded-2xl bg-white/70 border border-slate-200 text-slate-800 text-sm font-black outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+              <div>
+                <label className="block text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1 pl-1">
+                  Số Tiền Đầu Năm (VNĐ)
+                </label>
+                <input
+                  type="text"
+                  value={balanceInput}
+                  onChange={(e) => handleAmountInput(e.target.value, setBalanceInput)}
+                  placeholder="0"
+                  className="w-full px-4 py-3 rounded-2xl bg-white/70 border border-slate-200 text-slate-800 text-sm font-black outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
 
-            <div className="flex gap-2 pt-2">
-              <button
-                onClick={() => setShowEditBalance(false)}
-                className="flex-1 py-3 rounded-2xl bg-slate-200/80 text-slate-700 text-[10px] font-black uppercase tracking-wider"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSaveBalance}
-                className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-blue-500/20"
-              >
-                Lưu Số Dư
-              </button>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => setShowEditBalance(false)}
+                  className="flex-1 py-3 rounded-2xl bg-slate-200/80 text-slate-700 text-[10px] font-black uppercase tracking-wider"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleSaveBalance}
+                  className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-black uppercase tracking-wider shadow-lg shadow-blue-500/20"
+                >
+                  Lưu Số Dư
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </ModalPortal>
       )}
     </div>
   );

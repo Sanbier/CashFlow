@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Save, RefreshCw } from '../../constants';
 import { CORE_EXPENSE_CATEGORIES, CORE_SAVING_CATEGORY, DEFAULT_EXCEL_BUDGETS } from '../../constants';
 import { formatCurrency, handleAmountInput, parseAmount } from '../../utils';
+import ModalPortal from '../common/ModalPortal';
 
 interface ModalBudgetConfigProps {
   isOpen: boolean;
@@ -53,8 +54,9 @@ export const ModalBudgetConfig: React.FC<ModalBudgetConfigProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
-      <div className="glass-panel w-full max-w-md max-h-[85vh] rounded-[32px] border border-white/60 p-5 flex flex-col shadow-2xl relative overflow-hidden">
+    <ModalPortal>
+      <div className="fixed sm:absolute inset-0 z-[110] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-fadeIn">
+        <div className="glass-panel w-full max-w-sm sm:max-w-md max-h-[85vh] rounded-[32px] border border-white/60 p-5 flex flex-col shadow-2xl relative overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center pb-3 border-b border-slate-200/50">
           <div>
@@ -143,5 +145,6 @@ export const ModalBudgetConfig: React.FC<ModalBudgetConfigProps> = ({
         </div>
       </div>
     </div>
-  );
+  </ModalPortal>
+);
 };
