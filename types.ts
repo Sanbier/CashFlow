@@ -46,11 +46,7 @@ export type TabType =
   | 'childSchool'
   | 'cashflow12M'
   | 'history'
-  | 'settings'
-  // Legacy aliases for backward compatibility:
-  | 'debt'
-  | 'report'
-  | 'savings';
+  | 'settings';
 
 export type BudgetWarningStatus = 'surplus' | 'deficit' | 'balanced';
 

@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { SAVING_CATEGORIES } from './constants';
 import { TabType, UpdateDebtsHandler } from './types';
 import { formatCurrency, formatDate } from './utils';
 import { useFinancialData } from './hooks/useFinancialData';
@@ -13,13 +12,7 @@ import TabHistory from './components/TabHistory';
 import TabSettings from './components/TabSettings';
 import AppLayout from './components/AppLayout';
 
-// Legacy fallbacks
-import TabDebt from './components/TabDebt';
-import TabReport from './components/TabReport';
-import TabSavings from './components/TabSavings';
-
 // Modals
-import ModalSaving from './components/modals/ModalSaving';
 import ModalCloudConfig from './components/modals/ModalCloudConfig';
 import ModalReloadConfirm from './components/modals/ModalReloadConfirm';
 import ModalFixedTracking from './components/modals/ModalFixedTracking';
@@ -42,7 +35,6 @@ const App: React.FC = () => {
   const [showReloadConfirm, setShowReloadConfirm] = useState(false);
   const [showFixedConfig, setShowFixedConfig] = useState(false);
   const [showFixedTrackingModal, setShowFixedTrackingModal] = useState(false);
-  const [showSavingForm, setShowSavingForm] = useState(false);
   const [showCloudForm, setShowCloudForm] = useState(false);
 
   // 2. Data Logic (Load from Custom Hook)
@@ -69,7 +61,6 @@ const App: React.FC = () => {
     updateDebts,
     deleteItem,
     updateNote,
-    addSavings,
     updateCategories,
     confirmFixedItem,
     saveFixedConfig,
@@ -114,13 +105,6 @@ const App: React.FC = () => {
   );
   const balance = sumIncomeMonth - sumExpenseMonth;
   const isOverBudget = sumIncomeMonth > 0 && sumExpenseMonth / sumIncomeMonth > 0.9;
-  const totalAccumulatedSavings = useMemo(
-    () =>
-      SAVING_CATEGORIES.map((cat) =>
-        expenses.filter((e) => e.category === cat).reduce((sum, item) => sum + item.amount, 0)
-      ).reduce((acc, curr) => acc + curr, 0),
-    [expenses]
-  );
 
   // 4. Handlers
   const handleUpdateDebtsWrapper: UpdateDebtsHandler = (
@@ -158,11 +142,6 @@ const App: React.FC = () => {
       onReload={() => setShowReloadConfirm(true)}
       modals={
         <>
-          <ModalSaving
-            isOpen={showSavingForm}
-            onClose={() => setShowSavingForm(false)}
-            onSave={addSavings}
-          />
           <ModalCloudConfig
             isOpen={showCloudForm}
             onClose={() => setShowCloudForm(false)}
@@ -210,7 +189,7 @@ const App: React.FC = () => {
       )}
 
       {/* 2. Tab Sinh Hoạt (Sheet 1: Ngân Sách 9 Nhóm & Sổ Nợ) */}
-      {(activeTab === 'budget' || activeTab === 'debt') && (
+      {activeTab === 'budget' && (
         <TabBudget
           incomes={incomes}
           expenses={expenses}
@@ -235,7 +214,7 @@ const App: React.FC = () => {
       )}
 
       {/* 4. Tab Dòng Tiền (Sheet 2: Ma Trận 12 Tháng & 8 KPI Năm) */}
-      {(activeTab === 'cashflow12M' || activeTab === 'report') && (
+      {activeTab === 'cashflow12M' && (
         <TabCashFlow12M
           incomes={incomes}
           expenses={expenses}
@@ -264,15 +243,6 @@ const App: React.FC = () => {
           onReload={() => window.location.reload()}
           onOpenFixedConfig={() => setShowFixedConfig(true)}
           onOpenCloudForm={() => setShowCloudForm(true)}
-        />
-      )}
-
-      {/* Legacy Savings Tab support if accessed directly */}
-      {activeTab === 'savings' && (
-        <TabSavings
-          totalAccumulated={totalAccumulatedSavings}
-          expenses={expenses}
-          onOpenSavingForm={() => setShowSavingForm(true)}
         />
       )}
     </AppLayout>

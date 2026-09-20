@@ -574,17 +574,6 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     }
   };
 
-  const addSavings = (category: string, amount: number, date: string, note: string) => {
-    const newItem: Expense = {
-      id: Date.now(),
-      category: category,
-      amount: amount,
-      date: getCombinedDate(date),
-      note: note,
-    };
-    saveData(incomes, [newItem, ...expenses], fixedTemplate, categories, debts);
-  };
-
   const updateCategories = (newCats: string[]) => {
     saveData(incomes, expenses, fixedTemplate, newCats);
   };
@@ -831,7 +820,6 @@ export const useFinancialData = (firebaseConfigStr: string, familyCode: string) 
     updateDebts,
     deleteItem,
     updateNote,
-    addSavings,
     updateCategories,
     confirmFixedItem,
     saveFixedConfig,

@@ -32,19 +32,9 @@ export const DEFAULT_EXCEL_BUDGETS: Record<string, number> = {
   "Tiết kiệm": 1500000,
 };
 
-export const SAVING_CATEGORIES = [
-  "Tiết kiệm",
-  "Tiết Kiệm Mục Tiêu",
-  "Tiết Kiệm Ngắn Hạn",
-  "Quỹ Khẩn Cấp"
-];
-
 export const DEFAULT_CATEGORIES = [
   ...CORE_EXPENSE_CATEGORIES,
   CORE_SAVING_CATEGORY,
-  "Ăn (Sáng/Trưa/Tối)", "Ăn vặt/Nước ngọt", "Wi-Fi & Điện", "Cưới hỏi & Ma chay",
-  "Học phí cho Con", "Bỉm cho Con", "Sữa cho Con", "Xăng xe",
-  "Rác thải sinh hoạt", "Nhu Yêu Phẩm", "Đồ dùng Y Tế", "Mua Sắm"
 ];
 
 export const DEFAULT_CHILD_EDUCATION_DATA: ChildEducationData = {

@@ -15,6 +15,7 @@ import {
   Check,
   CORE_EXPENSE_CATEGORIES,
   DEFAULT_EXCEL_BUDGETS,
+  DEFAULT_CATEGORIES,
 } from '../constants';
 import { Debt } from '../types';
 import { formatCurrency, handleAmountInput, handleTextInput, parseAmount, toTitleCase } from '../utils';
@@ -272,16 +273,31 @@ const TabAdd: React.FC<TabAddProps> = ({
             <div className="flex items-center gap-2 text-red-600 font-black uppercase text-xs tracking-widest">
               Chọn danh mục chi tiêu
             </div>
-            <button
-              onClick={() => setIsCategoryManageMode(!isCategoryManageMode)}
-              className={`text-[9px] font-bold px-3 py-1 rounded-xl border backdrop-blur-sm transition-all ${
-                isCategoryManageMode
-                  ? 'bg-slate-800 text-white border-slate-700 shadow-md'
-                  : 'bg-white/50 text-slate-600 border-white/60 hover:bg-white/80'
-              }`}
-            >
-              {isCategoryManageMode ? 'Xong' : 'Sửa Mục'}
-            </button>
+            <div className="flex items-center gap-1.5">
+              {isCategoryManageMode && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Khôi phục danh mục về đúng 9 nhóm cốt lõi + Tiết kiệm chuẩn file Excel?')) {
+                      onUpdateCategories([...DEFAULT_CATEGORIES]);
+                    }
+                  }}
+                  className="text-[9px] font-bold px-2.5 py-1 rounded-xl bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 transition-all"
+                >
+                  Chuẩn Excel
+                </button>
+              )}
+              <button
+                onClick={() => setIsCategoryManageMode(!isCategoryManageMode)}
+                className={`text-[9px] font-bold px-3 py-1 rounded-xl border backdrop-blur-sm transition-all ${
+                  isCategoryManageMode
+                    ? 'bg-slate-800 text-white border-slate-700 shadow-md'
+                    : 'bg-white/50 text-slate-600 border-white/60 hover:bg-white/80'
+                }`}
+              >
+                {isCategoryManageMode ? 'Xong' : 'Sửa Mục'}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-4 relative z-10">
