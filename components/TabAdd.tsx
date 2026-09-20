@@ -166,7 +166,7 @@ const TabAdd: React.FC<TabAddProps> = ({
   const currentCategoryRemaining = currentCategoryBudget - currentCategorySpent;
 
   return (
-    <div className="space-y-4 animate-fadeIn pb-16 pt-1">
+    <div className="space-y-4 animate-fadeIn pb-6 pt-1">
       {/* Tab Switcher */}
       <div className="glass-panel p-1.5 rounded-2xl flex mb-1 relative z-20">
         <button

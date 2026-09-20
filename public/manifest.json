@@ -6,8 +6,8 @@
   "scope": "/CashFlow/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#8ec5fc",
-  "theme_color": "#8ec5fc",
+  "background_color": "#dfe9f3",
+  "theme_color": "#dfe9f3",
   "icons": [
     {
       "src": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxDdlZYMPRhs2qZTEX31LsJ8A-AYHLbO0loA&s",

@@ -9,9 +9,10 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: hidden;
+  background-color: #dfe9f3;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 1024px) {
   html, body, #root {
     overflow: auto;
     height: auto;
@@ -21,7 +22,7 @@ html, body, #root {
 
 body {
   -webkit-tap-highlight-color: transparent;
-  background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+  background: linear-gradient(135deg, #dfe9f3 0%, #ffffff 50%, #eef2f8 100%);
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;

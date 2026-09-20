@@ -74,64 +74,64 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     }, []);
 
     return (
-        <div className="h-[100dvh] w-full relative flex items-center justify-center font-sans overflow-hidden sm:overflow-y-auto select-none sm:select-text sm:bg-gradient-to-br sm:from-[#090b10] sm:via-[#10141f] sm:to-[#08090d] sm:py-8 sm:px-4">
+        <div className="fixed inset-0 w-full h-full font-sans overflow-hidden select-none bg-gradient-to-br from-[#dfe9f3] via-[#ffffff] to-[#eef2f8] lg:relative lg:flex lg:items-center lg:justify-center lg:overflow-y-auto lg:select-text lg:bg-gradient-to-br lg:from-[#090b10] lg:via-[#10141f] lg:to-[#08090d] lg:py-8 lg:px-4">
             {/* Desktop Studio Lighting & Ambient Glow (Visible on PC / Tablet) */}
-            <div className="hidden sm:block fixed inset-0 pointer-events-none z-0 overflow-hidden">
+            <div className="hidden lg:block fixed inset-0 pointer-events-none z-0 overflow-hidden">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[900px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none"></div>
                 <div className="absolute top-10 left-1/4 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
                 <div className="absolute bottom-10 right-1/4 w-[450px] h-[450px] bg-blue-600/10 rounded-full blur-[130px] pointer-events-none"></div>
             </div>
 
             {/* Desktop Info Badge */}
-            <div className="hidden sm:flex fixed top-5 right-6 z-50 items-center gap-2.5 px-4 py-2 bg-slate-900/90 hover:bg-slate-800 backdrop-blur-xl text-white text-xs font-bold rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/15 transition-all">
+            <div className="hidden lg:flex fixed top-5 right-6 z-50 items-center gap-2.5 px-4 py-2 bg-slate-900/90 hover:bg-slate-800 backdrop-blur-xl text-white text-xs font-bold rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/15 transition-all">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
                 <Smartphone size={14} className="text-indigo-400" />
                 <span className="tracking-wide">iPhone 16 Pro Max • iOS 18</span>
             </div>
 
             {/* Hyper-realistic Phone Chassis Wrapper (Active on Desktop, collapses cleanly on mobile) */}
-            <div className="relative w-full h-full sm:w-[416px] sm:h-[875px] sm:rounded-[60px] sm:bg-gradient-to-b sm:from-[#3a3b40] sm:via-[#222327] sm:to-[#121316] sm:p-[12px] sm:shadow-[0_45px_110px_-15px_rgba(0,0,0,0.85),0_20px_50px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.22),inset_0_1px_1px_rgba(255,255,255,0.3)] sm:ring-2 sm:ring-black/60 flex flex-col transition-all duration-300 z-10 shrink-0">
+            <div className="relative w-full h-full lg:w-[416px] lg:h-[875px] lg:rounded-[60px] lg:bg-gradient-to-b lg:from-[#3a3b40] lg:via-[#222327] lg:to-[#121316] lg:p-[12px] lg:shadow-[0_45px_110px_-15px_rgba(0,0,0,0.85),0_20px_50px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.22),inset_0_1px_1px_rgba(255,255,255,0.3)] lg:ring-2 lg:ring-black/60 flex flex-col transition-all duration-300 z-10 shrink-0">
 
                 {/* Metallic Antenna Bands (4 corners on titanium frame) */}
-                <div className="hidden sm:block absolute -left-[1px] top-24 w-[2px] h-[5px] bg-[#141416]"></div>
-                <div className="hidden sm:block absolute -left-[1px] bottom-24 w-[2px] h-[5px] bg-[#141416]"></div>
-                <div className="hidden sm:block absolute -right-[1px] top-24 w-[2px] h-[5px] bg-[#141416]"></div>
-                <div className="hidden sm:block absolute -right-[1px] bottom-24 w-[2px] h-[5px] bg-[#141416]"></div>
+                <div className="hidden lg:block absolute -left-[1px] top-24 w-[2px] h-[5px] bg-[#141416]"></div>
+                <div className="hidden lg:block absolute -left-[1px] bottom-24 w-[2px] h-[5px] bg-[#141416]"></div>
+                <div className="hidden lg:block absolute -right-[1px] top-24 w-[2px] h-[5px] bg-[#141416]"></div>
+                <div className="hidden lg:block absolute -right-[1px] bottom-24 w-[2px] h-[5px] bg-[#141416]"></div>
 
                 {/* Physical Hardware Buttons on Left Side */}
                 {/* 1. Action Button (with subtle orange/gold chamfer) */}
                 <div
                     onClick={() => setIslandExpanded(!islandExpanded)}
                     title="Action Button (Bấm thử Dynamic Island)"
-                    className="hidden sm:block absolute -left-[14px] top-24 w-[3.5px] h-7 bg-gradient-to-r from-amber-600 to-amber-500 rounded-l shadow-md cursor-pointer hover:brightness-125 active:scale-95 transition-all"
+                    className="hidden lg:block absolute -left-[14px] top-24 w-[3.5px] h-7 bg-gradient-to-r from-amber-600 to-amber-500 rounded-l shadow-md cursor-pointer hover:brightness-125 active:scale-95 transition-all"
                 ></div>
 
                 {/* 2. Volume Up */}
-                <div className="hidden sm:block absolute -left-[14px] top-36 w-[3.5px] h-12 bg-gradient-to-r from-slate-500 to-slate-700 rounded-l shadow-md"></div>
+                <div className="hidden lg:block absolute -left-[14px] top-36 w-[3.5px] h-12 bg-gradient-to-r from-slate-500 to-slate-700 rounded-l shadow-md"></div>
                 {/* 3. Volume Down */}
-                <div className="hidden sm:block absolute -left-[14px] top-52 w-[3.5px] h-12 bg-gradient-to-r from-slate-500 to-slate-700 rounded-l shadow-md"></div>
+                <div className="hidden lg:block absolute -left-[14px] top-52 w-[3.5px] h-12 bg-gradient-to-r from-slate-500 to-slate-700 rounded-l shadow-md"></div>
 
                 {/* Physical Hardware Buttons on Right Side */}
                 {/* 4. Side / Power Button (Click to toggle screen on/off!) */}
                 <div
                     onClick={() => setIsScreenOn(!isScreenOn)}
                     title="Nút Nguồn (Bấm để bật/tắt màn hình)"
-                    className="hidden sm:block absolute -right-[14px] top-40 w-[3.5px] h-16 bg-gradient-to-l from-slate-500 to-slate-700 rounded-r shadow-md cursor-pointer hover:brightness-125 active:scale-95 transition-all"
+                    className="hidden lg:block absolute -right-[14px] top-40 w-[3.5px] h-16 bg-gradient-to-l from-slate-500 to-slate-700 rounded-r shadow-md cursor-pointer hover:brightness-125 active:scale-95 transition-all"
                 ></div>
 
                 {/* 5. Camera Control Sensor (iPhone 16 Pro feature) */}
-                <div className="hidden sm:block absolute -right-[13px] bottom-44 w-[2px] h-14 bg-gradient-to-l from-slate-600 to-slate-800 rounded-r shadow-inner"></div>
+                <div className="hidden lg:block absolute -right-[13px] bottom-44 w-[2px] h-14 bg-gradient-to-l from-slate-600 to-slate-800 rounded-r shadow-inner"></div>
 
                 {/* Inner Bezel (True Black Uniform Screen Border) */}
-                <div className="relative w-full h-full sm:rounded-[50px] sm:bg-black sm:p-[4px] overflow-hidden flex flex-col">
+                <div className="relative w-full h-full lg:rounded-[50px] lg:bg-black lg:p-[4px] overflow-hidden flex flex-col">
 
                     {/* Earpiece Speaker Slit (Centered in top bezel) */}
-                    <div className="hidden sm:flex absolute top-[6px] left-1/2 -translate-x-1/2 w-14 h-[3.5px] bg-[#161719] rounded-full z-40 border border-neutral-800/70 items-center justify-center">
+                    <div className="hidden lg:flex absolute top-[6px] left-1/2 -translate-x-1/2 w-14 h-[3.5px] bg-[#161719] rounded-full z-40 border border-neutral-800/70 items-center justify-center">
                         <div className="w-10 h-[1.5px] bg-neutral-900 rounded-full"></div>
                     </div>
 
                     {/* Active OLED Display Surface */}
-                    <div className="relative w-full h-full sm:rounded-[46px] overflow-hidden flex flex-col bg-slate-900 select-none sm:select-text">
+                    <div className="relative w-full h-full lg:rounded-[46px] overflow-hidden flex flex-col bg-gradient-to-br from-[#dfe9f3] via-[#ffffff] to-[#eef2f8] lg:bg-slate-900 select-none lg:select-text">
 
                         {/* SCREEN OFF (AOD / Sleep Mode when user clicks Power Button) */}
                         {!isScreenOn ? (
@@ -159,12 +159,12 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                         </div>
 
                         {/* Screen Glass Specular Glare (Subtle light reflection across the glass) */}
-                        <div className="hidden sm:block absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-white/[0.12] pointer-events-none z-30"></div>
+                        <div className="hidden lg:block absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-white/[0.12] pointer-events-none z-30"></div>
 
                         {/* ========================================================================= */}
-                        {/* iOS TOP STATUS BAR & DYNAMIC ISLAND                                      */}
+                        {/* iOS TOP STATUS BAR & DYNAMIC ISLAND (Only simulated on Desktop)          */}
                         {/* ========================================================================= */}
-                        <div className="hidden sm:flex items-center justify-between px-7 pt-3 pb-1 shrink-0 z-30 select-none relative">
+                        <div className="hidden lg:flex items-center justify-between px-7 pt-3 pb-1 shrink-0 z-30 select-none relative">
                             {/* Left: Clock */}
                             <span className="text-[13px] font-bold text-slate-800 tracking-tight pl-1 font-sans">
                                 {currentTime}
@@ -235,34 +235,34 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                         <div className="flex-1 overflow-y-auto no-scrollbar relative flex flex-col overscroll-contain z-10">
 
                             {/* 1. Header Section */}
-                            <div className="px-4 sm:px-6 pb-2 relative z-10 pt-[calc(env(safe-area-inset-top,0px)+0.25rem)] sm:pt-6">
-                                <div className="flex items-center justify-between mb-2 sm:mb-4">
-                                    <button onClick={onPrevMonth} className="p-2.5 sm:p-3 bg-white/70 hover:bg-white/90 rounded-2xl text-slate-700 btn-effect backdrop-blur-md shadow-sm border border-white/60"><ChevronLeft size={18}/></button>
+                            <div className="px-4 lg:px-6 pb-2 relative z-10 pt-[max(1.75rem,calc(env(safe-area-inset-top,0px)+0.75rem))] lg:pt-6">
+                                <div className="flex items-center justify-between mb-2 lg:mb-4">
+                                    <button onClick={onPrevMonth} className="p-2.5 lg:p-3 bg-white/70 hover:bg-white/90 rounded-2xl text-slate-700 btn-effect backdrop-blur-md shadow-sm border border-white/60"><ChevronLeft size={18}/></button>
                                     <div className="flex flex-col items-center justify-center text-center">
                                         <span className="text-[10px] font-bold text-slate-500 block mb-0.5 tracking-wider uppercase">{formatDate(startDate.toISOString())} - {formatDate(endDate.toISOString())}</span>
-                                        <div className="font-black text-lg sm:text-xl text-slate-800 flex items-center gap-1.5 sm:gap-2 justify-center uppercase tracking-wide drop-shadow-sm"><CalendarIcon size={16} className="text-purple-600"/> Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</div>
+                                        <div className="font-black text-lg lg:text-xl text-slate-800 flex items-center gap-1.5 lg:gap-2 justify-center uppercase tracking-wide drop-shadow-sm"><CalendarIcon size={16} className="text-purple-600"/> Tháng {viewDate.getMonth() + 1}/{viewDate.getFullYear()}</div>
                                     </div>
-                                    <button onClick={onNextMonth} className="p-2.5 sm:p-3 bg-white/70 hover:bg-white/90 rounded-2xl text-slate-700 btn-effect backdrop-blur-md shadow-sm border border-white/60"><ChevronRight size={18}/></button>
+                                    <button onClick={onNextMonth} className="p-2.5 lg:p-3 bg-white/70 hover:bg-white/90 rounded-2xl text-slate-700 btn-effect backdrop-blur-md shadow-sm border border-white/60"><ChevronRight size={18}/></button>
                                 </div>
 
                                 {/* Summary Cards */}
-                                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 mt-2 sm:mt-4">
-                                    <div className="glass-panel p-3 sm:p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
+                                <div className="grid grid-cols-2 gap-2.5 lg:gap-3 mt-2 lg:mt-4">
+                                    <div className="glass-panel p-3 lg:p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
                                         <div className="absolute -right-6 -top-6 w-16 h-16 bg-green-300/30 rounded-full blur-xl group-hover:scale-150 transition-all duration-700"></div>
                                         <div className="text-green-700 text-[10px] font-black uppercase mb-1 flex items-center justify-center gap-1 relative z-10">
                                             <TrendingUp size={12}/> {startingBalance > 0 ? 'Tổng Khả Dụng' : 'Thu Nhập'}
                                         </div>
-                                        <div className="font-black text-base sm:text-lg text-slate-800 relative z-10">{formatCurrency(sumIncome)}</div>
+                                        <div className="font-black text-base lg:text-lg text-slate-800 relative z-10">{formatCurrency(sumIncome)}</div>
                                         {startingBalance > 0 && (
                                             <div className="text-[8px] font-bold text-blue-600 relative z-10 mt-0.5 truncate">
                                                 S.Dư đầu: +{formatCurrency(startingBalance)}
                                             </div>
                                         )}
                                     </div>
-                                    <div className="glass-panel p-3 sm:p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
+                                    <div className="glass-panel p-3 lg:p-4 rounded-3xl border border-white/80 relative overflow-hidden group flex flex-col items-center justify-center text-center shadow-sm">
                                         <div className="absolute -right-6 -top-6 w-16 h-16 bg-red-300/30 rounded-full blur-xl group-hover:scale-150 transition-all duration-700"></div>
                                         <div className="text-red-600 text-[10px] font-black uppercase mb-1 flex items-center justify-center gap-1 relative z-10"><TrendingDown size={12}/> Chi Tiêu</div>
-                                        <div className="font-black text-base sm:text-lg text-slate-800 relative z-10">{formatCurrency(sumExpense)}</div>
+                                        <div className="font-black text-base lg:text-lg text-slate-800 relative z-10">{formatCurrency(sumExpense)}</div>
                                         <div className="text-[8px] font-bold text-slate-500 relative z-10 mt-0.5 truncate">
                                             Còn lại: {formatCurrency(balance)}
                                         </div>
@@ -270,7 +270,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                                 </div>
 
                                 {/* Cloud Status */}
-                                <div className="mt-2.5 sm:mt-4 flex justify-center">
+                                <div className="mt-2.5 lg:mt-4 flex justify-center">
                                     {!isConnected ? (
                                         <button onClick={onOpenCloud} className="flex items-center gap-2 bg-white/70 border border-white/80 px-3.5 py-1.5 rounded-full text-[10px] font-bold text-slate-600 transition-all backdrop-blur-md shadow-sm hover:bg-white/90">
                                             <CloudOff size={12} className="text-gray-400"/> <span>Kết nối Cloud</span>
@@ -289,7 +289,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                             </div>
 
                             {/* 2. iOS Segmented Navigation Tabs */}
-                            <div className="px-3 sm:px-6 sticky top-0 z-20 py-1.5 sm:py-2">
+                            <div className="px-3 lg:px-6 sticky top-0 z-20 py-1.5 lg:py-2">
                                 <div className="glass-panel p-1.5 flex border border-white/70 overflow-x-auto no-scrollbar rounded-2xl shadow-sm gap-1">
                                     {([
                                         { key: 'add', label: 'Nhập', icon: <Plus size={13} strokeWidth={2.5}/> },
@@ -317,8 +317,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
 
                             {/* 3. Main Tab Content (Ample bottom clearance so scrolling avoids floating buttons) */}
                             <div
-                                className="px-3.5 sm:px-6 py-2 sm:py-4 flex-1"
-                                style={{ paddingBottom: 'max(4.75rem, calc(env(safe-area-inset-bottom, 0px) + 3.75rem))' }}
+                                className="px-3.5 lg:px-6 py-2 lg:py-4 flex-1"
+                                style={{ paddingBottom: 'max(3.5rem, calc(env(safe-area-inset-bottom, 0px) + 2.5rem))' }}
                             >
                                 {children}
                             </div>
@@ -330,7 +330,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                         <div
                             className="absolute left-4 right-4 z-30 pointer-events-none flex items-center justify-end"
                             style={{
-                                bottom: 'max(0.65rem, calc(env(safe-area-inset-bottom, 0px) + 0.25rem))'
+                                bottom: 'max(0.75rem, calc(env(safe-area-inset-bottom, 0px) + 0.5rem))'
                             }}
                         >
                             {/* Floating Wallet Balance & Quick Reload Pill */}
@@ -354,7 +354,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                         </div>
 
                         {/* 5. iOS Home Indicator Bar (Desktop only) */}
-                        <div className="hidden sm:flex justify-center items-center py-2 shrink-0 z-30 select-none">
+                        <div className="hidden lg:flex justify-center items-center py-2 shrink-0 z-30 select-none">
                             <div className="w-36 h-1 bg-slate-800/45 hover:bg-slate-800/70 transition-colors rounded-full cursor-pointer"></div>
                         </div>
 
